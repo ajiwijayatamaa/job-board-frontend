@@ -1,7 +1,6 @@
 import Navbar from "~/components/layout/navbar";
-import type { Route } from "./+types/home";
 
-export function meta({}: Route.MetaArgs) {
+export function meta({}: any) {
   return [
     { title: "Job Board" },
     { name: "description", content: "Welcome to React Router!" },

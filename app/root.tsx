@@ -10,7 +10,7 @@ import {
 import { Toaster } from "~/components/ui/sonner";
 
 import type { Route } from "./+types/root";
-import "./app.css";
+import "./index.css";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 
