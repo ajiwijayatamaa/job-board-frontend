@@ -17,9 +17,8 @@ export default [
 
   route("/admin", "pages/admin/admin-overview.tsx"),
   route("/admin/jobs", "pages/admin/admin-job-list.tsx"),
-  route("/admin/jobs/new", "pages/admin/admin-job-new.tsx"),
+  route("/admin/jobs/new", "pages/admin/admin-job-form.tsx"),
   route("/admin/jobs/:id", "pages/admin/admin-job-detail.tsx"),
-  route("/admin/jobs/:id/edit", "pages/admin/admin-job-edit.tsx"),
   route("/admin/interviews", "pages/admin/admin-interviews.tsx"),
   route("/admin/analytics", "pages/admin/admin-analytics.tsx"),
 
