@@ -1,14 +1,38 @@
 import { useParams, Link } from "react-router";
-import { MapPin, Clock, Briefcase, ArrowLeft, Building2, DollarSign } from "lucide-react";
+import { MapPin, Clock, Briefcase, ArrowLeft, Building2, DollarSign, Share2, Twitter, Facebook, Linkedin, MessageCircle } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import Navbar from "~/components/layout/navbar";
 import Footer from "~/components/layout/footer";
-import { jobs } from "@/data/dashboard-data";
+import { jobs } from "~/data/mock-data";
 
 const JobDetail = () => {
   const { id } = useParams();
   const job = jobs.find((j) => j.id === Number(id));
+
+  const handleShare = (platform: string) => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const text = `Check out this ${job?.title} position at ${job?.company}!`;
+    const encodedUrl = encodeURIComponent(url);
+    const encodedText = encodeURIComponent(text);
+
+    const links: Record<string, string> = {
+      twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+      whatsapp: `https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`,
+    };
+
+    if (links[platform]) {
+      window.open(links[platform], "_blank", "noopener,noreferrer");
+    }
+  };
 
   if (!job) {
     return (
@@ -39,7 +63,30 @@ const JobDetail = () => {
                 <Link to={`/companies/${job.companyId}`} className="text-primary-foreground/80 hover:underline">{job.company}</Link>
               </div>
             </div>
-            <Button size="lg" className="bg-card text-primary hover:bg-card/90">Apply Now</Button>
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="lg" className="bg-transparent border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
+                    <Share2 className="mr-2 h-4 w-4" /> Share
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleShare("linkedin")} className="gap-2">
+                    <Linkedin className="h-4 w-4 text-[#0A66C2]" /> LinkedIn
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleShare("twitter")} className="gap-2">
+                    <Twitter className="h-4 w-4 text-[#1DA1F2]" /> Twitter
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleShare("facebook")} className="gap-2">
+                    <Facebook className="h-4 w-4 text-[#1877F2]" /> Facebook
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleShare("whatsapp")} className="gap-2">
+                    <MessageCircle className="h-4 w-4 text-[#25D366]" /> WhatsApp
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button size="lg" className="bg-card text-primary hover:bg-card/90">Apply Now</Button>
+            </div>
           </div>
         </div>
       </div>
@@ -86,7 +133,30 @@ const JobDetail = () => {
               </div>
               <Badge>{job.category}</Badge>
             </div>
-            <Button className="w-full" size="lg">Apply Now</Button>
+            <div className="space-y-2">
+              <Button className="w-full" size="lg">Apply Now</Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full" size="lg">
+                    <Share2 className="mr-2 h-4 w-4" /> Share Job
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-[240px]">
+                  <DropdownMenuItem onClick={() => handleShare("linkedin")} className="gap-2">
+                    <Linkedin className="h-4 w-4 text-[#0A66C2]" /> Share on LinkedIn
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleShare("twitter")} className="gap-2">
+                    <Twitter className="h-4 w-4 text-[#1DA1F2]" /> Share on Twitter
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleShare("facebook")} className="gap-2">
+                    <Facebook className="h-4 w-4 text-[#1877F2]" /> Share on Facebook
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleShare("whatsapp")} className="gap-2">
+                    <MessageCircle className="h-4 w-4 text-[#25D366]" /> Share via WhatsApp
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </div>

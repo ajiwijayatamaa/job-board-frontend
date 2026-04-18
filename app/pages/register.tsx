@@ -25,9 +25,9 @@ const Register = () => {
           <p className="mb-6 text-center text-sm text-muted-foreground">Join our community today</p>
 
           <Tabs defaultValue="user" className="w-full">
-            <TabsList className="mb-6 grid w-full grid-cols-2">
-              <TabsTrigger value="user">Job Seeker</TabsTrigger>
-              <TabsTrigger value="company">Company</TabsTrigger>
+            <TabsList className="mx-auto mb-8 flex h-auto w-fit flex-col gap-1 bg-muted/50 p-1">
+              <TabsTrigger value="user" className="px-10 py-2">Job Seeker</TabsTrigger>
+              <TabsTrigger value="company" className="px-10 py-2">Company</TabsTrigger>
             </TabsList>
             <TabsContent value="user">
               <form onSubmit={handleRegister} className="space-y-4">

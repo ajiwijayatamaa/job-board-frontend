@@ -35,6 +35,13 @@ const statusData = Object.entries(
   }, {})
 ).map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
 
+const salaryData = [
+  { month: "Jan", avg: 4500 },
+  { month: "Feb", avg: 4800 },
+  { month: "Mar", avg: 5200 },
+  { month: "Apr", avg: 5100 },
+];
+
 const AnalyticsOverview = () => (
   <Card className="card-shadow">
     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -46,10 +53,10 @@ const AnalyticsOverview = () => (
       </Link>
     </CardHeader>
     <CardContent>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground mb-2">Gender Split</p>
-          <ResponsiveContainer width="100%" height={160}>
+      <div className="grid grid-cols-1 gap-12">
+        <div className="space-y-4">
+          <p className="text-sm font-semibold text-foreground uppercase tracking-wider">Demographics</p>
+          <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
                 data={genderData}
@@ -66,9 +73,22 @@ const AnalyticsOverview = () => (
           </ResponsiveContainer>
         </div>
 
-        <div>
-          <p className="text-sm font-medium text-muted-foreground mb-2">By Category</p>
-          <ResponsiveContainer width="100%" height={160}>
+        <div className="space-y-4 border-t border-border pt-8">
+          <p className="text-sm font-semibold text-foreground uppercase tracking-wider">Salary Trends</p>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={salaryData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 88%)" />
+              <XAxis dataKey="month" fontSize={11} />
+              <YAxis fontSize={11} tickFormatter={(value) => `$${value}`} />
+              <Tooltip formatter={(value) => [`$${value}`, "Average Salary"]} />
+              <Bar dataKey="avg" fill="hsl(213, 80%, 50%)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="space-y-4 border-t border-border pt-8">
+          <p className="text-sm font-semibold text-foreground uppercase tracking-wider">Applications Interest</p>
+          <ResponsiveContainer width="100%" height={300}>
             <BarChart data={categoryData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 88%)" />
               <XAxis dataKey="name" fontSize={11} />
@@ -79,9 +99,9 @@ const AnalyticsOverview = () => (
           </ResponsiveContainer>
         </div>
 
-        <div>
-          <p className="text-sm font-medium text-muted-foreground mb-2">Pipeline Status</p>
-          <div className="space-y-2 pt-1">
+        <div className="space-y-4 border-t border-border pt-8">
+          <p className="text-sm font-semibold text-foreground uppercase tracking-wider">Pipeline</p>
+          <div className="space-y-4 pt-1">
             {statusData.map((s, i) => {
               const pct = Math.round((s.value / adminApplicants.length) * 100);
               return (

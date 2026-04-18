@@ -22,7 +22,7 @@ const popularCategories = [
 const FilterSection = () => (
   <section className="bg-card py-16">
     <div className="container">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.label} className="flex flex-col items-center rounded-xl border border-border bg-background p-6 text-center card-shadow">
             <stat.icon className={`mb-2 h-8 w-8 ${stat.color}`} />
