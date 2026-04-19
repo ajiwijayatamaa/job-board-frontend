@@ -1,7 +1,7 @@
 import { type RouteConfig, index, route } from "@react-router/dev/routes";
 
 export default [
-  index("pages/index.tsx"),
+  index("routes/home.tsx"),
 
   route("/jobs", "pages/jobs.tsx"),
   route("/jobs/:id", "pages/job-detail.tsx"),
@@ -12,9 +12,15 @@ export default [
   route("/dashboard", "pages/dashboard.tsx"),
   route("/profile", "pages/profile.tsx"),
 
+  // ── USER ──────────────────────────────────────────────────────────────────
+  route("/jobs/:jobId/take-test", "pages/user/take-test.tsx"),
+  route("/jobs/:jobId/test-result", "pages/user/test-result.tsx"),
+
+  // ── SHARED ──────────────────────────────────────────────────────────────────
   route("/login", "pages/login.tsx"),
   route("/register", "pages/register.tsx"),
 
+  // ── ADMIN ──────────────────────────────────────────────────────────────────
   route("/admin", "pages/admin/admin-overview.tsx"),
   route("/admin/jobs", "pages/admin/admin-job-list.tsx"),
   route("/admin/jobs/new", "pages/admin/admin-job-new.tsx"),
@@ -22,6 +28,18 @@ export default [
   route("/admin/jobs/:id/edit", "pages/admin/admin-job-edit.tsx"),
   route("/admin/interviews", "pages/admin/admin-interviews.tsx"),
   route("/admin/analytics", "pages/admin/admin-analytics.tsx"),
+  route(
+    "/admin/jobs/:jobId/pre-selection-test/create",
+    "pages/admin/admin-pre-selection-test-create.tsx",
+  ),
+  route(
+    "/admin/jobs/:jobId/pre-selection-test/edit",
+    "pages/admin/admin-pre-selection-test-edit.tsx",
+  ),
+  route(
+    "/admin/pre-selection-tests/:testId/results",
+    "pages/admin/admin-test-results.tsx",
+  ),
 
   route("*", "pages/not-found.tsx"),
 ] satisfies RouteConfig;
