@@ -5,7 +5,7 @@ export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL_API || "http://localhost:8000",
   withCredentials: true,
   headers: {
-    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJwaWJvbGU3MTA1QHRhdGVmYXJtLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzc2NTkzMTA0LCJleHAiOjE3NzY1OTU4MDR9.YcL9xLZheWEBXYx7Y5mX-LAWsw0nEyIKQqTKYZ-_s4Q`,
+    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJhZG1pbjNAbWFpbC5jb20iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NzY1OTY1MjgsImV4cCI6MTc3NjU5OTIyOH0.zg-tGPU_yP873MO0KvAS269V17npfNPaOVDAzDFz-Qo`,
   },
 });
 
