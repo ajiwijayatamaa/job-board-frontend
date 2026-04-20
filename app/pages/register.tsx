@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, Lock, User, Eye, EyeOff, Building2 } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
@@ -7,13 +9,33 @@ import { Label } from "~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import Navbar from "~/components/layout/navbar";
 import { toast } from "sonner";
+import { registerSchema, type RegisterSchema } from "~/schema/auth";
+import { axiosInstance } from "~/lib/axios";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success("Registration successful! (UI only)");
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterSchema>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { role: "USER" },
+  });
+
+  const onSubmit = async (values: RegisterSchema) => {
+    try {
+      // Stripping confirmPassword to match RegisterDTO
+      const { confirmPassword, ...payload } = values;
+      const response = await axiosInstance.post("/auth/register", payload);
+      toast.success(response.data.message || "Registration successful! Please check your email.");
+      navigate("/login");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Registration failed.");
+    }
   };
 
   return (
@@ -24,67 +46,87 @@ const Register = () => {
           <h1 className="mb-2 text-center text-2xl font-bold text-foreground">Create Account</h1>
           <p className="mb-6 text-center text-sm text-muted-foreground">Join our community today</p>
 
-          <Tabs defaultValue="user" className="w-full">
+          <Tabs defaultValue="user" className="w-full" onValueChange={(v) => setValue("role", v === "user" ? "USER" : "ADMIN")}>
             <TabsList className="mx-auto mb-8 flex h-auto w-fit flex-col gap-1 bg-muted/50 p-1">
               <TabsTrigger value="user" className="px-10 py-2">Job Seeker</TabsTrigger>
               <TabsTrigger value="company" className="px-10 py-2">Company</TabsTrigger>
             </TabsList>
             <TabsContent value="user">
-              <form onSubmit={handleRegister} className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
                   <Label>Full Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder="John Doe" className="pl-10" required />
+                    <Input placeholder="John Doe" className="pl-10" {...register("fullName")} />
                   </div>
+                  {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input type="email" placeholder="you@example.com" className="pl-10" required />
+                    <Input type="email" placeholder="you@example.com" className="pl-10" {...register("email")} />
                   </div>
+                  {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input type={showPassword ? "text" : "password"} placeholder="Min 8 characters" className="pl-10 pr-10" required />
+                    <Input type={showPassword ? "text" : "password"} placeholder="Min 8 characters" className="pl-10 pr-10" {...register("password")} />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
+                  {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
                 </div>
-                <Button type="submit" className="w-full">Create Account</Button>
+                <div className="space-y-2">
+                  <Label>Confirm Password</Label>
+                  <Input type="password" placeholder="Repeat password" {...register("confirmPassword")} />
+                  {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
+                </div>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? "Creating Account..." : "Create Account"}
+                </Button>
               </form>
             </TabsContent>
             <TabsContent value="company">
-              <form onSubmit={handleRegister} className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
                   <Label>Company Name</Label>
                   <div className="relative">
                     <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder="Acme Inc." className="pl-10" required />
+                    <Input placeholder="Acme Inc." className="pl-10" {...register("companyName")} />
                   </div>
+                  {errors.companyName && <p className="text-xs text-destructive">{errors.companyName.message}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label>Company Email</Label>
+                  <Label>Admin Name</Label>
+                  <Input placeholder="Admin Name" {...register("fullName")} />
+                  {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label>Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input type="email" placeholder="hr@company.com" className="pl-10" required />
+                    <Input type="email" placeholder="hr@company.com" className="pl-10" {...register("email")} />
                   </div>
+                  {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input type={showPassword ? "text" : "password"} placeholder="Min 8 characters" className="pl-10 pr-10" required />
+                    <Input type={showPassword ? "text" : "password"} placeholder="Min 8 characters" className="pl-10 pr-10" {...register("password")} />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
+                  {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
                 </div>
-                <Button type="submit" className="w-full">Register Company</Button>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? "Registering..." : "Register Company"}
+                </Button>
               </form>
             </TabsContent>
           </Tabs>
