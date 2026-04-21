@@ -9,13 +9,10 @@ export type UserAuth = {
   email: string;
   role: string;
   provider: string;
-  referralCode: string;
-  referredBy: number | null;
   profilePhoto: string | null;
   deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
-  points: number;
 };
 
 type Store = {

@@ -261,7 +261,7 @@ export default function AdminJobListPage() {
               asChild
               className="bg-zinc-900 hover:bg-black text-white rounded-xl h-12 px-6 shadow-xl shadow-zinc-200 font-bold uppercase text-xs tracking-widest"
             >
-              <Link to="/admin/jobs/new">
+              <Link to="/admin/jobs/create">
                 <Plus className="mr-2 h-4 w-4 text-orange-400" /> Buat Lowongan
               </Link>
             </Button>

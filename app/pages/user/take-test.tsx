@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { redirect, useParams } from "react-router";
 import {
@@ -13,9 +13,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 import useTakeTest from "~/hooks/api/useTakeTest";
 import useSubmitTest from "~/hooks/api/useSubmitTest";
+import { useTestSession } from "~/hooks/useTestSession";
 import { useAuth } from "~/stores/useAuth";
-
-const DURATION = 30 * 60; // 30 menit dalam detik
+import { toast } from "sonner";
 
 export const clientLoader = () => {
   const user = useAuth.getState().user;
@@ -31,45 +31,50 @@ export default function TakeTestPage() {
   const { mutate: submitTest, isPending } = useSubmitTest(numericJobId);
 
   const [currentQ, setCurrentQ] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
-  const [timeLeft, setTimeLeft] = useState(DURATION);
   const [showConfirm, setShowConfirm] = useState(false);
-  const hasSubmitted = useRef(false);
 
   const handleSubmit = () => {
-    if (hasSubmitted.current || !test) return;
-    hasSubmitted.current = true;
+    if (!test) return;
+
+    // cek soal mana yang belum dijawab
+    const unanswered = test.questions
+      .map((q, i) => ({ index: i + 1, id: q.id }))
+      .filter((q) => !answers[q.id]);
+
+    if (unanswered.length > 0) {
+      const nomorSoal = unanswered.map((q) => q.index).join(", ");
+      toast.error(`Soal ${nomorSoal} belum dijawab`);
+      setShowConfirm(false);
+      return;
+    }
+
+    clearSession();
     submitTest({
       jobId: numericJobId,
       answers: test.questions.map((q) => ({
         questionId: q.id,
-        selectedAnswer: answers[q.id] ?? "",
+        selectedAnswer: answers[q.id],
       })),
     });
   };
 
-  // Timer countdown
-  useEffect(() => {
-    if (!test || hasSubmitted.current) return;
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          handleSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [test]);
-
-  const minutes = Math.floor(timeLeft / 60)
-    .toString()
-    .padStart(2, "0");
-  const seconds = (timeLeft % 60).toString().padStart(2, "0");
-  const isWarning = timeLeft <= 300; // 5 menit terakhir
-  const answeredCount = Object.keys(answers).length;
+  const {
+    answers,
+    minutes,
+    seconds,
+    isWarning,
+    answeredCount,
+    selectAnswer,
+    clearSession,
+    hasSubmitted,
+  } = useTestSession({
+    jobId: numericJobId,
+    isTestReady: !!test,
+    // saat waktu habis → langsung submit tanpa konfirmasi
+    onTimeUp: () => {
+      if (!hasSubmitted.current) handleSubmit();
+    },
+  });
 
   if (isLoading) {
     return (
@@ -165,11 +170,9 @@ export default function TakeTestPage() {
                     <button
                       key={option.id}
                       type="button"
+                      // pakai selectAnswer dari hook, bukan setAnswers langsung
                       onClick={() =>
-                        setAnswers((prev) => ({
-                          ...prev,
-                          [question.id]: option.optionText,
-                        }))
+                        selectAnswer(question.id, option.optionText)
                       }
                       className={cn(
                         "w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all font-medium text-sm",

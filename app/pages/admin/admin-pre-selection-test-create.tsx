@@ -1,6 +1,8 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+import QuestionCard from "@/components/admin/question-card";
+import QuestionNavigator from "@/components/shared/question-navigator";
 import { motion } from "framer-motion";
 import {
+  AlertCircle,
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
@@ -8,19 +10,15 @@ import {
   Save,
 } from "lucide-react";
 import { useState } from "react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useWatch } from "react-hook-form";
 import { Link, redirect, useParams } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Field, FieldError, FieldLabel } from "~/components/ui/field";
 import { Input } from "~/components/ui/input";
-import QuestionCard from "@/components/admin/question-card";
-import QuestionNavigator from "@/components/shared/question-navigator";
 import useCreateTest from "~/hooks/api/useCreateTest";
-import {
-  createPreSelectionTestSchema,
-  type CreatePreSelectionTestSchema,
-} from "~/schema/pre-selection-test";
+
+import { useTestDraft } from "@/hooks/useTestDraft";
 import { useAuth } from "~/stores/useAuth";
 
 export const clientLoader = () => {
@@ -29,35 +27,15 @@ export const clientLoader = () => {
   if (user.role !== "ADMIN") return redirect("/");
 };
 
-const DEFAULT_OPTIONS = () => [
-  { optionText: "", isCorrect: false },
-  { optionText: "", isCorrect: false },
-  { optionText: "", isCorrect: false },
-  { optionText: "", isCorrect: false },
-];
-
-const buildDefaultQuestions = () =>
-  Array.from({ length: 25 }, () => ({
-    questionText: "",
-    correctAnswer: "",
-    options: DEFAULT_OPTIONS(),
-  }));
-
 export default function PreSelectionTestCreatePage() {
   const { jobId } = useParams<{ jobId: string }>();
   const numericJobId = Number(jobId);
   const [currentQ, setCurrentQ] = useState(0);
 
-  const form = useForm<CreatePreSelectionTestSchema>({
-    resolver: zodResolver(createPreSelectionTestSchema),
-    defaultValues: {
-      jobId: numericJobId,
-      title: "",
-      questions: buildDefaultQuestions(),
-    },
-  });
-
   const { mutateAsync: createTest, isPending } = useCreateTest(numericJobId);
+
+  const { form, parsedDraft, errorQuestions, onSubmit, onError, clearDraft } =
+    useTestDraft({ jobId: numericJobId, createTest });
 
   const questions = useWatch({ control: form.control, name: "questions" });
   const answeredMap =
@@ -65,8 +43,15 @@ export default function PreSelectionTestCreatePage() {
       (q) => q.questionText.length > 0 && q.options.some((o) => o.isCorrect),
     ) ?? [];
 
-  const onSubmit = async (data: CreatePreSelectionTestSchema) => {
-    await createTest(data);
+  // onError dari hook tidak tahu soal currentQ, jadi auto-navigate dihandle di sini
+  const handleError = (errors: any) => {
+    onError(errors);
+    if (errors.questions) {
+      const firstErrorIndex = errors.questions.findIndex(
+        (_: any, i: number) => errors.questions[i],
+      );
+      if (firstErrorIndex !== -1) setCurrentQ(firstErrorIndex);
+    }
   };
 
   return (
@@ -100,8 +85,31 @@ export default function PreSelectionTestCreatePage() {
           Buat 25 soal pilihan ganda untuk seleksi pelamar.
         </p>
 
+        {/* Notifikasi draft tersimpan */}
+        {parsedDraft && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 bg-blue-50 border border-blue-200 rounded-2xl px-5 py-4 flex items-center justify-between"
+          >
+            <p className="text-xs font-bold text-blue-600">
+              Draft tersimpan ditemukan. Melanjutkan dari sesi sebelumnya.
+            </p>
+            <button
+              type="button"
+              onClick={clearDraft}
+              className="text-[10px] font-black uppercase tracking-widest text-blue-400 hover:text-red-500 transition-colors ml-4 flex-shrink-0"
+            >
+              Hapus Draft
+            </button>
+          </motion.div>
+        )}
+
         <FormProvider {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit, handleError)}
+            className="space-y-6"
+          >
             <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
               <CardHeader className="border-b border-zinc-50 bg-zinc-50/30">
                 <CardTitle className="text-sm font-black uppercase italic tracking-tight text-zinc-900">
@@ -145,7 +153,7 @@ export default function PreSelectionTestCreatePage() {
                   onSelect={setCurrentQ}
                 />
                 <div className="border-t border-zinc-100 pt-6">
-                  <QuestionCard questionIndex={currentQ} />
+                  <QuestionCard key={currentQ} questionIndex={currentQ} />
                 </div>
                 <div className="flex justify-between pt-2">
                   <Button
@@ -168,6 +176,40 @@ export default function PreSelectionTestCreatePage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Error summary — muncul jika ada soal yang belum lengkap */}
+            {errorQuestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-red-50 border border-red-200 rounded-2xl p-5"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                  <p className="text-xs font-black uppercase tracking-widest text-red-500">
+                    {errorQuestions.length} soal belum lengkap
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {errorQuestions.map((index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setCurrentQ(index)}
+                      className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-black rounded-lg transition-colors"
+                    >
+                      Soal {index + 1}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-red-400 leading-relaxed">
+                  Klik nomor soal di atas untuk langsung menuju soal yang belum
+                  lengkap. Pastikan setiap soal memiliki teks soal dan satu
+                  jawaban yang benar.
+                </p>
+              </motion.div>
+            )}
 
             <Button
               type="submit"

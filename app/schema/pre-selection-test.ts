@@ -62,3 +62,26 @@ export const submitTestSchema = z.object({
 
 export type SubmitTestSchema = z.infer<typeof submitTestSchema>;
 export type AnswerItemSchema = z.infer<typeof answerItemSchema>;
+
+// bisa dipakai di hook maupun pag tanpa perlu mendefinisikan ulang di masing-masing file
+export const buildDefaultOptions = () => [
+  { optionText: "", isCorrect: false },
+  { optionText: "", isCorrect: false },
+  { optionText: "", isCorrect: false },
+  { optionText: "", isCorrect: false },
+];
+
+export const buildDefaultQuestions = () =>
+  Array.from({ length: 25 }, () => ({
+    questionText: "",
+    correctAnswer: "",
+    options: buildDefaultOptions(),
+  }));
+
+export const buildDefaultTestForm = (
+  jobId: number,
+): CreatePreSelectionTestSchema => ({
+  jobId,
+  title: "",
+  questions: buildDefaultQuestions(),
+});
