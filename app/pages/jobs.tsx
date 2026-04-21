@@ -185,9 +185,12 @@ const Jobs = () => {
           </div>
         )}
         <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={goToPage}
+          meta={{
+            page: currentPage,
+            take: 6,
+            total: filteredJobs.length,
+          }}
+          onChangePage={goToPage}
         />
       </div>
       <Footer />

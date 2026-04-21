@@ -9,7 +9,7 @@ export const createJobSchema = z.object({
   tags: z
     .array(z.string().min(1, "Tag tidak boleh kosong"))
     .min(1, "Minimal 1 tag"),
-  salary: z.coerce.number().min(0, "Salary tidak boleh negatif").optional(),
+  salary: z.number().min(0, "Salary tidak boleh negatif").optional(),
   banner: z
     .instanceof(File)
     .refine((f) => f.size <= 1024 * 1024, "Banner maksimal 1MB")
