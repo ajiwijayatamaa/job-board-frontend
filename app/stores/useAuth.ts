@@ -5,13 +5,13 @@ import { axiosInstance } from "~/lib/axios";
 //apa yang ingin di simpan di global state
 export type UserAuth = {
   id: number;
-  name: string;
+  fullName: string;
   email: string;
   role: string;
   provider: string;
   referralCode: string;
   referredBy: number | null;
-  profilePicture: string | null;
+  profilePhoto: string | null;
   deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -30,9 +30,14 @@ export const useAuth = create<Store>()(
       user: null,
       login: (payload) => set(() => ({ user: payload })),
       logout: async () => {
-        await axiosInstance.post("/auth/logout");
-        set({ user: null });
-        window.location.href = "/";
+        try {
+          await axiosInstance.post("/auth/logout");
+        } catch (error) {
+          console.error("Logout request failed:", error);
+        } finally {
+          set({ user: null });
+          window.location.href = "/";
+        }
       },
     }),
     { name: "user-auth-storage" },

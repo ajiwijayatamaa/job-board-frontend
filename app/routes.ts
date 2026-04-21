@@ -19,6 +19,9 @@ export default [
   // ── SHARED ──────────────────────────────────────────────────────────────────
   route("/login", "pages/login.tsx"),
   route("/register", "pages/register.tsx"),
+  route("/reset-password", "pages/reset-password.tsx"),
+  route("/forgot-password", "pages/forgot-password.tsx"),
+  route("verify-email", "pages/verify-email.tsx"),
 
   // ── ADMIN ──────────────────────────────────────────────────────────────────
   route("/admin", "pages/admin/admin-overview.tsx"),
