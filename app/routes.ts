@@ -25,13 +25,13 @@ export default [
 
   // ── ADMIN ──────────────────────────────────────────────────────────────────
   route("/admin", "pages/admin/admin-overview.tsx"),
-  route("/admin/interviews", "pages/admin/admin-interviews.tsx"),
   route("/admin/analytics", "pages/admin/admin-analytics.tsx"),
 
   route("/admin/jobs", "pages/admin/admin-job-list.tsx"),
   route("/admin/jobs/create", "pages/admin/admin-job-create.tsx"),
   route("/admin/jobs/:id", "pages/admin/admin-job-detail.tsx"),
   route("/admin/jobs/:id/edit", "pages/admin/admin-job-edit.tsx"),
+  route("/admin/jobs/:id/interviews", "pages/admin/admin-interviews.tsx"),
   route(
     "/admin/jobs/:jobId/pre-selection-test/create",
     "pages/admin/admin-pre-selection-test-create.tsx",
