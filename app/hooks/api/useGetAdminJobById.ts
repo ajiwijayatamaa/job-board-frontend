@@ -6,11 +6,10 @@ const useGetAdminJobById = (id: number) => {
   return useQuery({
     queryKey: ["admin-job", id],
     queryFn: async () => {
-      const { data } = await axiosInstance<Job>(`/admin/jobs/${id}`);
+      const { data } = await axiosInstance.get<Job>(`/admin/jobs/${id}`);
       return data;
     },
     enabled: !!id,
   });
 };
-
 export default useGetAdminJobById;
