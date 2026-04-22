@@ -4,6 +4,7 @@ import {
   Award,
   Briefcase,
   Calendar,
+  CalendarClock,
   ClipboardList,
   MapPin,
   Pencil,
@@ -12,7 +13,7 @@ import {
   ToggleRight,
   Trash2,
 } from "lucide-react";
-import { Link, redirect, useNavigate, useParams } from "react-router";
+import { Link, redirect, useParams } from "react-router";
 import AdminSidebar from "~/components/admin/admin-sidebar";
 import ApplicantList from "~/components/admin/applicant-list";
 import {
@@ -52,7 +53,6 @@ const statusConfig = {
 export default function AdminJobDetailPage() {
   const { id } = useParams<{ id: string }>();
   const numericId = Number(id);
-  const navigate = useNavigate();
 
   const { data: job, isLoading } = useGetAdminJobById(numericId);
   const { data: existingTest } = useGetTestByJobId(numericId);
@@ -254,6 +254,16 @@ export default function AdminJobDetailPage() {
                           </Link>
                         </Button>
                       )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        className="rounded-xl h-9 text-[10px] font-black uppercase tracking-widest border-zinc-200 hover:bg-zinc-900 hover:text-white"
+                      >
+                        <Link to={`/admin/jobs/${id}/interviews`}>
+                          <CalendarClock size={12} className="mr-1" /> Interview
+                        </Link>
+                      </Button>
 
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
