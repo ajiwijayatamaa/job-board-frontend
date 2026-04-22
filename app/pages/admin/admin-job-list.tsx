@@ -222,7 +222,11 @@ const JobCard = ({ job }: { job: Job }) => {
 export default function AdminJobListPage() {
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
+  const [category, setCategory] = useQueryState("category", {
+    defaultValue: "",
+  });
   const [debouncedSearch] = useDebounceValue(search, 500);
+  const [debouncedCategory] = useDebounceValue(category, 500);
 
   const {
     data: jobs,
@@ -232,6 +236,7 @@ export default function AdminJobListPage() {
     page,
     take: 10,
     search: debouncedSearch,
+    category: debouncedCategory,
     sortBy: "createdAt",
     sortOrder: "desc",
   });
@@ -267,16 +272,28 @@ export default function AdminJobListPage() {
             </Button>
           </div>
 
-          {/* Search */}
-          <div className="mb-8 relative max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-            <Input
-              className="pl-11 h-12 bg-white border-zinc-200 rounded-2xl shadow-sm focus-visible:ring-orange-500/20 focus-visible:border-orange-500 font-medium text-sm"
-              type="text"
-              placeholder="Cari judul lowongan..."
-              onChange={(e) => setSearch(e.target.value)}
-              value={search}
-            />
+          {/* SEARCH */}
+          <div className="mb-8 flex flex-col sm:flex-row gap-3 max-w-2xl">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+              <Input
+                className="pl-11 h-12 bg-white border-zinc-200 rounded-2xl shadow-sm focus-visible:ring-orange-500/20 focus-visible:border-orange-500 font-medium text-sm"
+                type="text"
+                placeholder="Cari judul lowongan..."
+                onChange={(e) => setSearch(e.target.value)}
+                value={search}
+              />
+            </div>
+            {/* CATEGORY */}
+            <div className="relative flex-1">
+              <Input
+                className="h-12 bg-white border-zinc-200 rounded-2xl shadow-sm focus-visible:ring-orange-500/20 focus-visible:border-orange-500 font-medium text-sm"
+                type="text"
+                placeholder="Filter kategori..."
+                onChange={(e) => setCategory(e.target.value)}
+                value={category}
+              />
+            </div>
           </div>
 
           {/* List */}
