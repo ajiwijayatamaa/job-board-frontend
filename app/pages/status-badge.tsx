@@ -1,5 +1,7 @@
 import { FileText, Clock, CheckCircle2, CalendarDays, XCircle } from "lucide-react";
-import { type ApplicationStatus } from "~/data/dashboard-data";
+
+// Define ApplicationStatus directly, as it's no longer coming from mock data
+type ApplicationStatus = "submitted" | "reviewed" | "shortlisted" | "interview" | "accepted" | "rejected";
 
 const statusConfig: Record<ApplicationStatus, { label: string; color: string; icon: React.ReactNode }> = {
   submitted: { label: "Submitted", color: "bg-muted text-muted-foreground", icon: <FileText className="h-3.5 w-3.5" /> },

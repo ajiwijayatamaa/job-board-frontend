@@ -2,12 +2,27 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Lock, User, Eye, EyeOff, Building2 } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  User,
+  Eye,
+  EyeOff,
+  Building2,
+  Phone,
+} from "lucide-react";
+
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "~/components/ui/tabs";
 import Navbar from "~/components/layout/navbar";
+
 import { toast } from "sonner";
 import { registerSchema, type RegisterSchema } from "~/schema/auth";
 import { axiosInstance } from "~/lib/axios";
@@ -28,111 +43,177 @@ const Register = () => {
 
   const onSubmit = async (values: RegisterSchema) => {
     try {
-      // Stripping confirmPassword to match RegisterDTO
       const { confirmPassword, ...payload } = values;
-      const response = await axiosInstance.post("/auth/register", payload);
-      toast.success(response.data.message || "Registration successful! Please check your email.");
-      navigate("/login");
+
+      const res = await axiosInstance.post("/auth/register", payload);
+
+      toast.success(
+        res.data.message || "Registration successful! Please check your email."
+      );
+
+      navigate("/verify-email", { state: { email: payload.email } });
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Registration failed.");
+      toast.error(
+        error.response?.data?.message || "Registration failed."
+      );
     }
   };
+
+  const renderInput = (
+    label: string,
+    name: keyof RegisterSchema,
+    placeholder: string,
+    Icon: any,
+    type: string = "text"
+  ) => (
+    <div className="space-y-2 w-full text-left">
+      <Label>{label}</Label>
+      <div className="relative w-full">
+        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          type={type}
+          placeholder={placeholder}
+          className="pl-10 w-full h-10 md:h-11"
+          {...register(name)}
+        />
+      </div>
+      {errors[name] && (
+        <p className="text-xs text-destructive">
+          {errors[name]?.message as string}
+        </p>
+      )}
+    </div>
+  );
+
+  const renderPassword = () => (
+    <div className="space-y-2 w-full text-left">
+      <Label>Password</Label>
+      <div className="relative w-full">
+        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          type={showPassword ? "text" : "password"}
+          placeholder="Min 8 characters"
+          className="pl-10 pr-10 w-full h-10 md:h-11"
+          {...register("password")}
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2"
+        >
+          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
+      </div>
+      {errors.password && (
+        <p className="text-xs text-destructive">
+          {errors.password.message}
+        </p>
+      )}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container flex items-center justify-center py-16">
-        <div className="w-full max-w-md rounded-xl border border-border bg-card p-8 card-shadow">
-          <h1 className="mb-2 text-center text-2xl font-bold text-foreground">Create Account</h1>
-          <p className="mb-6 text-center text-sm text-muted-foreground">Join our community today</p>
 
-          <Tabs defaultValue="user" className="w-full" onValueChange={(v) => setValue("role", v === "user" ? "USER" : "ADMIN")}>
-            <TabsList className="mx-auto mb-8 flex h-auto w-fit flex-col gap-1 bg-muted/50 p-1">
-              <TabsTrigger value="user" className="px-10 py-2">Job Seeker</TabsTrigger>
-              <TabsTrigger value="company" className="px-10 py-2">Company</TabsTrigger>
+      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center px-4">
+        <div className="w-full max-w-md rounded-xl border border-border bg-card p-5 md:p-8 shadow-sm">
+
+          {/* HEADER */}
+          <div className="text-center">
+            <h1 className="text-xl md:text-2xl font-bold">
+              Create Account
+            </h1>
+            <p className="mt-1 text-xs md:text-sm text-muted-foreground">
+              Join our community today
+            </p>
+          </div>
+
+          {/* TABS */}
+          <Tabs
+            defaultValue="user"
+            className="w-full mt-6"
+            onValueChange={(v) =>
+              setValue("role", v === "user" ? "USER" : "ADMIN")
+            }
+          >
+            {/* TAB SWITCH */}
+            <TabsList className="grid grid-cols-2 w-full max-w-xs mx-auto mb-6 bg-muted/50 p-1 h-10 md:h-11 rounded-lg">
+              <TabsTrigger value="user">Job Seeker</TabsTrigger>
+              <TabsTrigger value="company">Company</TabsTrigger>
             </TabsList>
-            <TabsContent value="user">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Full Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder="John Doe" className="pl-10" {...register("fullName")} />
-                  </div>
-                  {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input type="email" placeholder="you@example.com" className="pl-10" {...register("email")} />
-                  </div>
-                  {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label>Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input type={showPassword ? "text" : "password"} placeholder="Min 8 characters" className="pl-10 pr-10" {...register("password")} />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label>Confirm Password</Label>
-                  <Input type="password" placeholder="Repeat password" {...register("confirmPassword")} />
-                  {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
-                </div>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
+
+            {/* USER FORM */}
+            <TabsContent value="user" className="mt-0 w-full">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="w-full flex flex-col gap-4"
+              >
+                {renderInput("Full Name", "fullName", "John Doe", User)}
+                {renderInput("Email", "email", "you@example.com", Mail, "email")}
+                {renderInput("Phone Number", "phone", "08123456789", Phone)}
+
+                {renderPassword()}
+
+                {renderInput(
+                  "Confirm Password",
+                  "confirmPassword",
+                  "Repeat password",
+                  Lock,
+                  "password"
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full h-10 md:h-11"
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? "Creating Account..." : "Create Account"}
                 </Button>
               </form>
             </TabsContent>
-            <TabsContent value="company">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Company Name</Label>
-                  <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder="Acme Inc." className="pl-10" {...register("companyName")} />
-                  </div>
-                  {errors.companyName && <p className="text-xs text-destructive">{errors.companyName.message}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label>Admin Name</Label>
-                  <Input placeholder="Admin Name" {...register("fullName")} />
-                  {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input type="email" placeholder="hr@company.com" className="pl-10" {...register("email")} />
-                  </div>
-                  {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label>Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input type={showPassword ? "text" : "password"} placeholder="Min 8 characters" className="pl-10 pr-10" {...register("password")} />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
-                </div>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
+
+            {/* COMPANY FORM */}
+            <TabsContent value="company" className="mt-0 w-full">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="w-full flex flex-col gap-4"
+              >
+                {renderInput("Company Name", "companyName", "Acme Inc.", Building2)}
+                {renderInput("Admin Name", "fullName", "Admin Name", User)}
+                {renderInput("Email", "email", "hr@company.com", Mail, "email")}
+                {renderInput("Company Phone", "phone", "08123456789", Phone)}
+
+                {renderPassword()}
+
+                {renderInput(
+                  "Confirm Password",
+                  "confirmPassword",
+                  "Repeat password",
+                  Lock,
+                  "password"
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full h-10 md:h-11"
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? "Registering..." : "Register Company"}
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account? <Link to="/login" className="font-medium text-primary hover:underline">Sign In</Link>
+          {/* FOOTER */}
+          <p className="mt-6 text-center text-xs md:text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="font-medium text-primary hover:underline"
+            >
+              Sign In
+            </Link>
           </p>
         </div>
       </div>

@@ -1,9 +1,37 @@
-import { adminApplicants, adminJobPostings } from "@/data/admin-data";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
 import { BarChart3 } from "lucide-react";
+
+// Define interfaces for the data received via props
+interface AdminJob {
+  id: number;
+  title: string;
+  status: "PUBLISHED" | "DRAFT" | "CLOSED";
+  category: string;
+  _count: {
+    applications: number;
+  };
+}
+
+interface AdminApplication {
+  id: number;
+  status: "PENDING" | "PROCESSED" | "INTERVIEW" | "ACCEPTED" | "REJECTED";
+  user: {
+    gender: string;
+    education: string;
+    address: string;
+    dateOfBirth: string; // Assuming ISO string
+  };
+  jobId: number;
+  expectedSalary: string; // e.g., "Rp 5.000.000"
+}
+
+interface AnalyticsOverviewProps {
+  jobs: AdminJob[];
+  applicants: AdminApplication[];
+}
 
 const COLORS = [
   "hsl(213, 80%, 50%)",
@@ -13,36 +41,52 @@ const COLORS = [
   "hsl(280, 60%, 55%)",
 ];
 
-const genderData = Object.entries(
-  adminApplicants.reduce<Record<string, number>>((acc, a) => {
-    acc[a.gender] = (acc[a.gender] || 0) + 1;
-    return acc;
-  }, {})
-).map(([name, value]) => ({ name, value }));
+const getAge = (dateOfBirth: string): number => {
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+};
 
-const categoryData = Object.entries(
-  adminApplicants.reduce<Record<string, number>>((acc, a) => {
-    const job = adminJobPostings.find((j) => j.id === a.jobId);
-    if (job) acc[job.category] = (acc[job.category] || 0) + 1;
-    return acc;
-  }, {})
-).map(([name, value]) => ({ name, value }));
+export const AnalyticsOverview = ({ jobs, applicants }: AnalyticsOverviewProps) => {
+  const genderData = Object.entries(
+    applicants.reduce<Record<string, number>>((acc, a) => {
+      acc[a.user.gender] = (acc[a.user.gender] || 0) + 1;
+      return acc;
+    }, {})
+  ).map(([name, value]) => ({ name, value }));
 
-const statusData = Object.entries(
-  adminApplicants.reduce<Record<string, number>>((acc, a) => {
-    acc[a.status] = (acc[a.status] || 0) + 1;
-    return acc;
-  }, {})
-).map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
+  const categoryData = Object.entries(
+    applicants.reduce<Record<string, number>>((acc, a) => {
+      const job = jobs.find((j) => j.id === a.jobId);
+      if (job) acc[job.category] = (acc[job.category] || 0) + 1;
+      return acc;
+    }, {})
+  ).map(([name, value]) => ({ name, value }));
 
-const salaryData = [
-  { month: "Jan", avg: 4500 },
-  { month: "Feb", avg: 4800 },
-  { month: "Mar", avg: 5200 },
-  { month: "Apr", avg: 5100 },
-];
+  const statusData = Object.entries(
+    applicants.reduce<Record<string, number>>((acc, a) => {
+      acc[a.status] = (acc[a.status] || 0) + 1;
+      return acc;
+    }, {})
+  ).map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
 
-const AnalyticsOverview = () => (
+  // Placeholder for salary data, as the mock data was static.
+  // In a real scenario, this would involve more complex aggregation from applications.
+  const salaryData = [ 
+    { month: "Jan", avg: 0 }, // Replace with actual aggregated data if available
+    { month: "Feb", avg: 0 },
+    { month: "Mar", avg: 0 },
+    { month: "Apr", avg: 0 },
+  ];
+  // Example of how to calculate average salary if expectedSalary is a number:
+  // const avgSalary = applicants.reduce((sum, a) => sum + parseFloat(a.expectedSalary.replace(/[^\d]/g, '')), 0) / applicants.length;
+
+  return (
   <Card className="card-shadow">
     <CardHeader className="flex flex-row items-center justify-between pb-2">
       <CardTitle>Analytics Overview</CardTitle>
@@ -103,7 +147,7 @@ const AnalyticsOverview = () => (
           <p className="text-sm font-semibold text-foreground uppercase tracking-wider">Pipeline</p>
           <div className="space-y-4 pt-1">
             {statusData.map((s, i) => {
-              const pct = Math.round((s.value / adminApplicants.length) * 100);
+              const pct = Math.round((s.value / applicants.length) * 100);
               return (
                 <div key={s.name}>
                   <div className="flex justify-between text-xs mb-0.5">
@@ -122,5 +166,6 @@ const AnalyticsOverview = () => (
     </CardContent>
   </Card>
 );
+}
 
 export default AnalyticsOverview;

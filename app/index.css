@@ -126,3 +126,9 @@
     box-shadow: var(--card-shadow-hover);
   }
 }
+
+@layer components {
+  .container {
+    @apply mx-auto px-4;
+  }
+}

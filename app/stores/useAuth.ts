@@ -9,6 +9,7 @@ export type UserAuth = {
   email: string;
   role: string;
   provider: string;
+  token?: string;
   profilePhoto: string | null;
   deletedAt: Date | null;
   createdAt: Date;

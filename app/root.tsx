@@ -48,14 +48,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 const queryClient = new QueryClient();
 export default function App() {
   // Ambil dari environment variable
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const googleClientId = import.meta.env.GOOGLE_CLIENT_ID;
 
   // Proteksi agar tidak bingung kalau lupa pasang env
   if (!googleClientId) {
     console.warn("Google Client ID is missing! Check your .env file.");
   }
   return (
-    <GoogleOAuthProvider clientId={googleClientId || ""}>
+    <GoogleOAuthProvider clientId={ import.meta.env.VITE_GOOGLE_CLIENT_ID }>
       <QueryClientProvider client={queryClient}>
         <NuqsAdapter>
           <Outlet />
