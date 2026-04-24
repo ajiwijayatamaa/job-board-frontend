@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router";
 import Navbar from "~/components/layout/navbar";
 import Footer from "~/components/layout/footer";
@@ -6,25 +6,75 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
-  Briefcase, CheckCircle2, XCircle, CalendarDays, ArrowLeft, BellRing, X,
+  Briefcase, CheckCircle2, XCircle, CalendarDays, ArrowLeft, BellRing, X, Loader2
 } from "lucide-react";
-import { applications } from "~/data/dashboard-data";
 import { ApplicationCard } from "./application-card";
+import { useQuery } from "@tanstack/react-query";
+import { axiosInstance } from "~/lib/axios";
+
+interface Application {
+  id: number;
+  status: string;
+  createdAt: string;
+  job: {
+    title: string;
+    company: {
+      companyName: string;
+    };
+  };
+  interview?: {
+    id: number;
+    interviewDate: string;
+    status: string;
+    type?: string;
+    location?: string;
+    notes?: string;
+    // Properti tambahan untuk kompatibilitas UI lama
+    date?: string;
+    time?: string;
+  };
+  jobTitle?: string; // Untuk kompatibilitas
+}
 
 const Dashboard = () => {
   const [dismissedReminders, setDismissedReminders] = useState<number[]>([]);
   const [tab, setTab] = useState("all");
 
-  const upcomingInterviews = applications.filter(
-    (a) => a.interview?.reminderSent && (a.status === "interview" || a.status === "accepted") && !dismissedReminders.includes(a.id)
-  );
+  const { data: applications = [], isLoading } = useQuery({
+    queryKey: ["applications"],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/applications");
+      return (response.data.data as Application[]).map((a) => ({
+        ...a,
+        jobTitle: a.job?.title, // Mapping untuk compatibility
+        interview: a.interview
+          ? {
+              ...a.interview,
+              date: new Date(a.interview.interviewDate).toLocaleDateString(),
+              time: new Date(a.interview.interviewDate).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            }
+          : undefined,
+      }));
+    },
+  });
 
-  const stats = {
+  const upcomingInterviews = useMemo(() => {
+    return applications.filter(
+      (a) => a.interview && 
+             (a.status === "interview" || a.status === "accepted") && 
+             !dismissedReminders.includes(a.id)
+    );
+  }, [applications, dismissedReminders]);
+
+  const stats = useMemo(() => ({
     total: applications.length,
     interview: applications.filter((a) => a.status === "interview").length,
     accepted: applications.filter((a) => a.status === "accepted").length,
     rejected: applications.filter((a) => a.status === "rejected").length,
-  };
+  }), [applications]);
 
   const filterByTab = (tab: string) => {
     switch(tab) {
@@ -61,7 +111,7 @@ const Dashboard = () => {
                       Interview Reminder: {app.jobTitle}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {app.interview!.date} at {app.interview!.time} · {app.interview!.type} · {app.interview!.location}
+                      {app.interview!.date} at {app.interview!.time} · {app.interview!.type || "General"} · {app.interview!.location || "TBA"}
                     </p>
                   </div>
                   <Button
@@ -108,7 +158,9 @@ const Dashboard = () => {
 
           {["all", "interviews", "rejected"].map((t) => (
             <TabsContent key={t} value={t} className="space-y-4">
-              {filterByTab(t).length === 0 ? (
+              {isLoading ? (
+                <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+              ) : filterByTab(t).length === 0 ? (
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                     <Briefcase className="mb-2 h-10 w-10" />

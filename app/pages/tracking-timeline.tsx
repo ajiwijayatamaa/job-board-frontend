@@ -1,6 +1,10 @@
-import { type Application } from "~/data/dashboard-data";
+interface TrackingStep {
+  label: string;
+  completed: boolean;
+  date?: string;
+}
 
-export const TrackingTimeline = ({ tracking }: { tracking: Application["tracking"] }) => (
+export const TrackingTimeline = ({ tracking }: { tracking: TrackingStep[] }) => (
   <div className="flex flex-col gap-0">
     {tracking.map((step, i) => (
       <div key={i} className="flex items-start gap-3">

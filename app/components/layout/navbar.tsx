@@ -73,10 +73,14 @@ const Navbar = () => {
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link to="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard</Link>
+                  <Link to={user.role === "ADMIN" ? "/admin" : "/dashboard"}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link to="/profile"><Settings className="mr-2 h-4 w-4" /> Profile</Link>
+                  <Link to={user.role === "ADMIN" ? "/admin/profile" : "/profile"}>
+                    <Settings className="mr-2 h-4 w-4" /> Profile
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => logout()} className="text-destructive focus:text-destructive cursor-pointer focus:bg-destructive/10">

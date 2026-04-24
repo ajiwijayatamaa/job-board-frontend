@@ -1,4 +1,12 @@
-import { LayoutDashboard, FileText, Plus, Building2, CalendarDays, BarChart3 } from "lucide-react";
+import {
+  LayoutDashboard,
+  FileText,
+  Plus,
+  Building2,
+  CalendarDays,
+  BarChart3,
+  Settings,
+} from "lucide-react";
 import { NavLink } from "~/components/nav-link";
 import { useLocation } from "react-router";
 import {
@@ -16,9 +24,10 @@ import {
 const menuItems = [
   { title: "Overview", url: "/admin", icon: LayoutDashboard },
   { title: "Job Postings", url: "/admin/jobs", icon: FileText },
-  { title: "Create Posting", url: "/admin/jobs/new", icon: Plus },
+  { title: "Create Posting", url: "/admin/jobs/create", icon: Plus },
   { title: "Interviews", url: "/admin/interviews", icon: CalendarDays },
   { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
+  { title: "Profile", url: "/admin/profile", icon: Settings },
 ];
 
 const AdminSidebar = () => {

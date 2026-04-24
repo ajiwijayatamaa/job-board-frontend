@@ -15,51 +15,74 @@ import Footer from "~/components/layout/footer";
 import Pagination from "@/components/pagination-section";
 import { useDebounce } from "~/hooks/use-debounce";
 import { usePagination } from "~/hooks/use-pagination";
-import { companies } from "~/data/mock-data";
+import { useQuery } from "@tanstack/react-query";
+import { axiosInstance } from "~/lib/axios";
+import { Loader2, Building2 } from "lucide-react";
 
-const industries = [...new Set(companies.map((c) => c.industry))];
-const sizes = [
-  "20-50",
-  "50-100",
-  "50-200",
-  "100-300",
-  "100-500",
-  "200-500",
-  "500-1000",
-  "1000-3000",
-  "1000-5000",
-  "2000-5000",
-  "5000+",
-];
+// Interface for API data
+interface Company {
+  id: number;
+  companyName: string;
+  industry: string;
+  location: string;
+  size: string; // e.g., "100-300", "5000+"
+  logo?: string;
+  _count?: {
+    jobs: number;
+  };
+}
 
 const Companies = () => {
   const [keyword, setKeyword] = useState("");
   const [industry, setIndustry] = useState("all");
   const [location, setLocation] = useState("");
+  const [companySize, setCompanySize] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
+
+  const { data: allCompanies, isLoading: isCompaniesLoading } = useQuery({
+    queryKey: ["all-companies"],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/companies");
+      return response.data.data as Company[];
+    },
+  });
+
+  const industries = useMemo(() => {
+    if (!allCompanies) return [];
+    return [...new Set(allCompanies.map((c) => c.industry))];
+  }, [allCompanies]);
+
+  const sizes = useMemo(() => {
+    if (!allCompanies) return [];
+    return [...new Set(allCompanies.map((c) => c.size))].sort();
+  }, [allCompanies]);
 
   const debouncedKeyword = useDebounce(keyword);
   const debouncedLocation = useDebounce(location);
 
   const filtered = useMemo(() => {
-    return companies.filter((c) => {
+    let result = allCompanies || [];
+
+    result = result.filter((c) => {
       const matchName =
         !debouncedKeyword ||
-        c.name.toLowerCase().includes(debouncedKeyword.toLowerCase());
+        c.companyName.toLowerCase().includes(debouncedKeyword.toLowerCase());
       const matchIndustry = industry === "all" || c.industry === industry;
       const matchLoc =
         !debouncedLocation ||
         c.location.toLowerCase().includes(debouncedLocation.toLowerCase());
-      return matchName && matchIndustry && matchLoc;
+      const matchSize = companySize === "all" || c.size === companySize;
+      return matchName && matchIndustry && matchLoc && matchSize;
     });
-  }, [debouncedKeyword, industry, debouncedLocation]);
+    return result;
+  }, [allCompanies, debouncedKeyword, industry, debouncedLocation, companySize]);
 
   const { paginatedItems, currentPage, totalPages, goToPage, resetPage } =
     usePagination(filtered, 8);
 
   useEffect(() => {
-    resetPage();
-  }, [debouncedKeyword, industry, debouncedLocation]);
+    resetPage(); // Reset page when filters change
+  }, [debouncedKeyword, industry, debouncedLocation, companySize, resetPage]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -111,6 +134,19 @@ const Companies = () => {
                   ))}
                 </SelectContent>
               </Select>
+              <Select value={companySize} onValueChange={setCompanySize}>
+                <SelectTrigger className="w-[180px] bg-card">
+                  <SelectValue placeholder="Company Size" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sizes</SelectItem>
+                  {sizes.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
         </div>
@@ -120,41 +156,56 @@ const Companies = () => {
         <p className="mb-6 text-sm text-muted-foreground">
           {filtered.length} companies found
         </p>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {paginatedItems.map((company) => (
-            <Link
-              key={company.id}
-              to={`/companies/${company.id}`}
-              className="group rounded-xl border border-border bg-card p-5 text-center transition-all hover:border-primary/30 card-shadow hover:card-shadow-hover"
-            >
-              <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-xl bg-secondary text-3xl">
-                {company.logo}
-              </div>
-              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                {company.name}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {company.industry}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {company.location} · {company.size} employees
-              </p>
-              <p className="mt-2 text-sm font-medium text-primary">
-                {company.openPositions} open positions
-              </p>
-            </Link>
-          ))}
-        </div>
-        {paginatedItems.length === 0 && (
+        {isCompaniesLoading ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {paginatedItems.map((company) => (
+              <Link
+                key={company.id}
+                to={`/companies/${company.id}`}
+                className="group rounded-xl border border-border bg-card p-5 text-center transition-all hover:border-primary/30 card-shadow hover:card-shadow-hover"
+              >
+                <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-xl bg-secondary text-3xl">
+                  {company.logo ? (
+                    <img src={company.logo} alt={company.companyName} className="h-12 w-12 rounded-lg object-cover" />
+                  ) : (
+                    <Building2 className="h-8 w-8 text-primary" />
+                  )}
+                </div>
+                <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                  {company.companyName}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {company.industry}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {company.location} · {company.size} employees
+                </p>
+                <p className="mt-2 text-sm font-medium text-primary">
+                  {company._count?.jobs || 0} open positions
+                </p>
+              </Link>
+            ))}
+          </div>
+        )}
+        {isCompaniesLoading === false && paginatedItems.length === 0 && (
           <div className="py-20 text-center text-muted-foreground">
             No companies found.
           </div>
         )}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={goToPage}
-        />
+        {isCompaniesLoading === false && paginatedItems.length > 0 && (
+          <Pagination
+            meta={{
+              page: currentPage,
+              take: 8, // 8 items per page for companies
+              total: filtered.length,
+            }}
+            onChangePage={goToPage}
+          />
+        )}
       </div>
       <Footer />
     </div>

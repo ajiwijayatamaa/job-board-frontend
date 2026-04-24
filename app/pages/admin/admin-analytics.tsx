@@ -1,7 +1,38 @@
 import AdminLayout from "~/components/admin/admin-layout";
-import { adminApplicants, adminJobPostings } from "~/data/admin-data";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import {
+  useQuery,
+} from "@tanstack/react-query";
+import { axiosInstance } from "~/lib/axios";
+import { useMemo } from "react";
+import { Loader2 } from "lucide-react";
+
+// Define interfaces for the data fetched from API
+interface AdminJob {
+  id: number;
+  title: string;
+  status: "PUBLISHED" | "DRAFT" | "CLOSED";
+  category: string;
+  _count: {
+    applications: number;
+  };
+}
+
+interface AdminApplication {
+  id: number;
+  status: "PENDING" | "PROCESSED" | "INTERVIEW" | "ACCEPTED" | "REJECTED";
+  user: {
+    gender: string;
+    education: string;
+    address: string;
+    dateOfBirth: string; // Assuming ISO string
+  };
+  jobId: number;
+  expectedSalary: string; // e.g., "Rp 5.000.000"
+}
+
+
 import {
   BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -16,77 +47,12 @@ const COLORS = [
   "hsl(190, 70%, 50%)",
 ];
 
-const parsesalary = (s: string) => {
-  const match = s.match(/(\d+)/);
-  return match ? parseInt(match[1]) : 0;
-};
-
 const getAgeGroup = (age: number) => {
   if (age < 25) return "< 25";
   if (age <= 28) return "25-28";
   if (age <= 31) return "29-31";
   return "32+";
 };
-
-// Demographics
-const genderData = Object.entries(
-  adminApplicants.reduce<Record<string, number>>((acc, a) => {
-    acc[a.gender] = (acc[a.gender] || 0) + 1;
-    return acc;
-  }, {})
-).map(([name, value]) => ({ name, value }));
-
-const ageData = Object.entries(
-  adminApplicants.reduce<Record<string, number>>((acc, a) => {
-    const g = getAgeGroup(a.age);
-    acc[g] = (acc[g] || 0) + 1;
-    return acc;
-  }, {})
-).map(([name, value]) => ({ name, value }));
-
-const locationData = Object.entries(
-  adminApplicants.reduce<Record<string, number>>((acc, a) => {
-    acc[a.address] = (acc[a.address] || 0) + 1;
-    return acc;
-  }, {})
-)
-  .sort((a, b) => b[1] - a[1])
-  .map(([name, value]) => ({ name, value }));
-
-const educationData = Object.entries(
-  adminApplicants.reduce<Record<string, number>>((acc, a) => {
-    const level = a.education.startsWith("S2") ? "S2 (Master)" : "S1 (Bachelor)";
-    acc[level] = (acc[level] || 0) + 1;
-    return acc;
-  }, {})
-).map(([name, value]) => ({ name, value }));
-
-// Salary trends per job
-const salaryByJob = adminJobPostings
-  .filter((j) => j.status === "published")
-  .map((job) => {
-    const applicants = adminApplicants.filter((a) => a.jobId === job.id);
-    const salaries = applicants.map((a) => parseFloat(a.salaryExpectation.replace(/[^\d]/g, "")));
-    const avg = salaries.length ? Math.round(salaries.reduce((s, v) => s + v, 0) / salaries.length) : 0;
-    return { name: job.title.split(" ").slice(0, 2).join(" "), avg: avg / 1_000_000, min: salaries.length ? Math.min(...salaries) / 1_000_000 : 0, max: salaries.length ? Math.max(...salaries) / 1_000_000 : 0 };
-  });
-
-// Application interests by category
-const categoryInterest = Object.entries(
-  adminApplicants.reduce<Record<string, number>>((acc, a) => {
-    const job = adminJobPostings.find((j) => j.id === a.jobId);
-    if (job) acc[job.category] = (acc[job.category] || 0) + 1;
-    return acc;
-  }, {})
-).map(([name, value]) => ({ name, value }));
-
-// Status distribution
-const statusData = Object.entries(
-  adminApplicants.reduce<Record<string, number>>((acc, a) => {
-    acc[a.status] = (acc[a.status] || 0) + 1;
-    return acc;
-  }, {})
-).map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
 
 const ChartCard = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <Card className="card-shadow">
@@ -97,8 +63,127 @@ const ChartCard = ({ title, children }: { title: string; children: React.ReactNo
   </Card>
 );
 
-const AdminAnalytics = () => (
-  <AdminLayout>
+const AdminAnalytics = () => {
+  // Fetch job postings
+  const { data: adminJobPostings, isLoading: isLoadingJobs } = useQuery({
+    queryKey: ["adminJobs"],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/admin/jobs?take=1000"); // Fetch all or a large number for overview
+      return response.data.data as AdminJob[];
+    },
+  });
+
+  // Fetch applicants
+  const { data: adminApplicants, isLoading: isLoadingApplicants } = useQuery({
+    queryKey: ["adminApplications"],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/admin/applications?take=1000"); // Fetch all or a large number for overview
+      return response.data.data as AdminApplication[];
+    },
+  });
+
+  const getAge = (dateOfBirth: string): number => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  // Memoized data for charts
+  const genderData = useMemo(() => {
+    if (!adminApplicants) return [];
+    return Object.entries(
+      adminApplicants.reduce<Record<string, number>>((acc, a) => {
+        acc[a.user.gender] = (acc[a.user.gender] || 0) + 1;
+        return acc;
+      }, {})
+    ).map(([name, value]) => ({ name, value }));
+  }, [adminApplicants]);
+
+  const ageData = useMemo(() => {
+    if (!adminApplicants) return [];
+    return Object.entries(
+      adminApplicants.reduce<Record<string, number>>((acc, a) => {
+        const age = getAge(a.user.dateOfBirth);
+        const g = getAgeGroup(age);
+        acc[g] = (acc[g] || 0) + 1;
+        return acc;
+      }, {})
+    ).map(([name, value]) => ({ name, value }));
+  }, [adminApplicants]);
+
+  const locationData = useMemo(() => {
+    if (!adminApplicants) return [];
+    return Object.entries(
+      adminApplicants.reduce<Record<string, number>>((acc, a) => {
+        acc[a.user.address] = (acc[a.user.address] || 0) + 1;
+        return acc;
+      }, {})
+    )
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, value]) => ({ name, value }));
+  }, [adminApplicants]);
+
+  const educationData = useMemo(() => {
+    if (!adminApplicants) return [];
+    return Object.entries(
+      adminApplicants.reduce<Record<string, number>>((acc, a) => {
+        const level = a.user.education?.startsWith("master") ? "Master" : a.user.education?.startsWith("bachelor") ? "Bachelor" : a.user.education;
+        if (level) acc[level] = (acc[level] || 0) + 1;
+        return acc;
+      }, {})
+    ).map(([name, value]) => ({ name, value }));
+  }, [adminApplicants]);
+
+  const salaryByJob = useMemo(() => {
+    if (!adminJobPostings || !adminApplicants) return [];
+    return adminJobPostings
+      .filter((j) => j.status === "PUBLISHED")
+      .map((job) => {
+        const applicantsForJob = adminApplicants.filter((a) => a.jobId === job.id);
+        const salaries = applicantsForJob.map((a) => parseFloat(a.expectedSalary.replace(/[^\d]/g, "")));
+        const avg = salaries.length ? Math.round(salaries.reduce((s, v) => s + v, 0) / salaries.length) : 0;
+        return { name: job.title.split(" ").slice(0, 2).join(" "), avg: avg / 1_000_000, min: salaries.length ? Math.min(...salaries) / 1_000_000 : 0, max: salaries.length ? Math.max(...salaries) / 1_000_000 : 0 };
+      });
+  }, [adminJobPostings, adminApplicants]);
+
+  const categoryInterest = useMemo(() => {
+    if (!adminJobPostings || !adminApplicants) return [];
+    return Object.entries(
+      adminApplicants.reduce<Record<string, number>>((acc, a) => {
+        const job = adminJobPostings.find((j) => j.id === a.jobId);
+        if (job) acc[job.category] = (acc[job.category] || 0) + 1;
+        return acc;
+      }, {})
+    ).map(([name, value]) => ({ name, value }));
+  }, [adminJobPostings, adminApplicants]);
+
+  const statusData = useMemo(() => {
+    if (!adminApplicants) return [];
+    return Object.entries(
+      adminApplicants.reduce<Record<string, number>>((acc, a) => {
+        acc[a.status] = (acc[a.status] || 0) + 1;
+        return acc;
+      }, {})
+    ).map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
+  }, [adminApplicants]);
+
+  if (isLoadingJobs || isLoadingApplicants) {
+    return (
+      <AdminLayout>
+        <div className="flex justify-center items-center h-full min-h-[calc(100vh-100px)]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  return (
+    <AdminLayout>
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
@@ -209,7 +294,7 @@ const AdminAnalytics = () => (
 
             <ChartCard title="Applicants per Job Posting">
               <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={adminJobPostings.map((j) => ({ name: j.title.split(" ").slice(0, 2).join(" "), applicants: adminApplicants.filter((a) => a.jobId === j.id).length }))}>
+                <BarChart data={(adminJobPostings || []).map((j) => ({ name: j.title.split(" ").slice(0, 2).join(" "), applicants: (adminApplicants || []).filter((a) => a.jobId === j.id).length }))}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 88%)" />
                   <XAxis dataKey="name" fontSize={12} />
                   <YAxis allowDecimals={false} fontSize={12} />
@@ -224,7 +309,7 @@ const AdminAnalytics = () => (
         <TabsContent value="pipeline" className="space-y-4 mt-4">
           <div className="grid md:grid-cols-2 gap-4">
             <ChartCard title="Application Status Distribution">
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={250}> 
                 <PieChart>
                   <Pie data={statusData} cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({ name, value }) => `${name} (${value})`}>
                     {statusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
@@ -236,9 +321,11 @@ const AdminAnalytics = () => (
 
             <ChartCard title="Conversion Funnel">
               <div className="space-y-3 pt-2">
-                {["submitted", "processed", "interviewed", "accepted"].map((status, i) => {
-                  const count = adminApplicants.filter((a) => a.status === status).length;
-                  const pct = Math.round((count / adminApplicants.length) * 100);
+                {["PENDING", "PROCESSED", "INTERVIEW", "ACCEPTED"].map((status, i) => {
+                  const count = adminApplicants?.filter((a) => a.status === status).length || 0;
+                  // Ensure total is not zero to avoid division by zero
+                  const totalApplicants = adminApplicants?.length || 1; 
+                  const pct = Math.round((count / totalApplicants) * 100);
                   return (
                     <div key={status}>
                       <div className="flex justify-between text-sm mb-1">
@@ -248,7 +335,7 @@ const AdminAnalytics = () => (
                       <div className="h-3 rounded-full bg-muted overflow-hidden">
                         <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: COLORS[i] }} />
                       </div>
-                    </div>
+                    </div> 
                   );
                 })}
               </div>
@@ -256,8 +343,9 @@ const AdminAnalytics = () => (
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+    </div> 
   </AdminLayout>
-);
+  );
+};
 
 export default AdminAnalytics;
