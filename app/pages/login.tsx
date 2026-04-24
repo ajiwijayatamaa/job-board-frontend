@@ -30,7 +30,7 @@ const Login = () => {
   });
 
   useEffect(() => {
-    if (user) navigate(user.role === "ADMIN" ? "/admin" : "/dashboard");
+    if (user) navigate(user.role === "ADMIN" ? "/admin" : "/");
   }, [user]);
 
   const handleLogin = async (data: LoginSchema) => {
@@ -42,7 +42,7 @@ const Login = () => {
 
       setAuth(res.data.data);
       toast.success("Login successful!");
-      navigate(res.data.data.role === "ADMIN" ? "/admin" : "/dashboard");
+      navigate(res.data.data.role === "ADMIN" ? "/admin" : "/");
     } catch (error: any) {
       toast.error(
         error.response?.data?.message ||
@@ -60,7 +60,7 @@ const Login = () => {
 
       setAuth(res.data.data);
       toast.success("Google login successful!");
-      navigate(res.data.data.role === "ADMIN" ? "/admin" : "/dashboard");
+      navigate(res.data.data.role === "ADMIN" ? "/admin" : "/");
     } catch (error: any) {
       toast.error(
         error.response?.data?.message || "Google login failed."
