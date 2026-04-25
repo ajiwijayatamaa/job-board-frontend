@@ -15,7 +15,7 @@ interface Job {
   company: {
     companyName: string;
     logo?: string;
-  };
+  } | string;
 }
 
 interface Company {
@@ -32,7 +32,8 @@ const DiscoverySection = () => {
   const { data: jobs, isLoading: isJobsLoading } = useQuery({
     queryKey: ["featured-jobs"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/jobs");
+      // Gunakan endpoint publik agar USER bisa akses dan hanya melihat yang PUBLISHED
+      const response = await axiosInstance.get("/public/jobs");
       return response.data.data as Job[];
     },
   });
@@ -76,8 +77,8 @@ const DiscoverySection = () => {
                 className="group rounded-xl border border-border bg-card p-5 transition-all hover:border-primary/30 card-shadow hover:card-shadow-hover"
               >
                 <div className="mb-3 flex items-start justify-between">
-                  {job.company.logo ? (
-                    <img src={job.company.logo} alt={job.company.companyName} className="h-10 w-10 rounded-lg object-cover" />
+                  {typeof job.company === "object" && job.company?.logo ? (
+                    <img src={job.company.logo} alt={job.company.companyName || "Company Logo"} className="h-10 w-10 rounded-lg object-cover" />
                   ) : (
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       <Building2 className="h-6 w-6" />
@@ -88,7 +89,11 @@ const DiscoverySection = () => {
                 <h3 className="mb-1 font-semibold text-foreground group-hover:text-primary transition-colors">
                   {job.title}
                 </h3>
-                <p className="mb-3 text-sm text-muted-foreground">{job.company.companyName}</p>
+                <p className="mb-3 text-sm text-muted-foreground">
+                  {(job.company && typeof job.company === "object")
+                    ? job.company.companyName
+                    : (job.company || "Perusahaan tidak diketahui")}
+                </p>
                 <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" /> {job.location}

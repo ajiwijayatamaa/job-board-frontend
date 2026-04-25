@@ -6,8 +6,10 @@ import {
   Clock, 
   SlidersHorizontal, 
   ArrowUpDown, 
-  Calendar, 
-  Loader2
+  Calendar,
+  Navigation, 
+  Loader2,
+  Building2
 } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
@@ -26,7 +28,8 @@ import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "~/lib/axios";
 import { useDebounce } from "~/hooks/use-debounce";
 import { usePagination } from "~/hooks/use-pagination";
-import { Building2 } from "lucide-react";
+import { cn } from "~/lib/utils";
+import { toast } from "sonner";
 
 export const clientLoader = () => {
   return null;
@@ -41,11 +44,12 @@ interface Job {
   salary: string;
   createdAt: string;
   category: string; // Assuming category name is directly on job object
+  distance?: number;
   experience: string; // Assuming experience level name is directly on job object
   company: {
     companyName: string;
     logo?: string;
-  };
+  } | string;
 }
 
 interface Category {
@@ -76,11 +80,41 @@ const Jobs = () => {
   const [sortOrder, setSortOrder] = useState("newest");
   const [showFilters, setShowFilters] = useState(false);
 
+  // Nearest location states
+  const [latitude, setLatitude] = useState<number | undefined>();
+  const [longitude, setLongitude] = useState<number | undefined>();
+  const [radius, setRadius] = useState(50);
+  const [isLocating, setIsLocating] = useState(false);
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation tidak didukung oleh browser Anda");
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(position.coords.latitude);
+        setLongitude(position.coords.longitude);
+        setIsLocating(false);
+        setSortOrder("nearest");
+        toast.success("Lokasi berhasil diperbarui!");
+      },
+      (error) => {
+        setIsLocating(false);
+        toast.error("Gagal mendapatkan lokasi: " + error.message);
+      }
+    );
+  };
+
   // Fetch all jobs
   const { data: allJobs, isLoading: isJobsLoading } = useQuery({
-    queryKey: ["all-jobs"],
+    queryKey: ["all-jobs", latitude, longitude, radius],
     queryFn: async () => {
-      const response = await axiosInstance.get("/jobs");
+      const response = await axiosInstance.get("/public/jobs", {
+        params: { latitude, longitude, radius, take: 100 }
+      });
       return response.data.data as Job[];
     },
   });
@@ -122,7 +156,10 @@ const Jobs = () => {
       const matchKeyword =
         !debouncedKeyword ||
         job.title?.toLowerCase().includes(debouncedKeyword.toLowerCase()) || 
-        job.company?.companyName?.toLowerCase().includes(debouncedKeyword.toLowerCase());
+        (job.company && typeof job.company === "object" 
+          ? job.company?.companyName?.toLowerCase().includes(debouncedKeyword.toLowerCase())
+          : job.company?.toLowerCase().includes(debouncedKeyword.toLowerCase()));
+
       const matchLocation =
         !debouncedLocation ||
         job.location?.toLowerCase().includes(debouncedLocation.toLowerCase());
@@ -148,14 +185,17 @@ const Jobs = () => {
     });
 
     // Sorting Logic
-    if (sortOrder === "oldest") {
+    if (sortOrder === "nearest" && latitude && longitude) {
+      // Backend sudah mengurutkan berdasarkan distance jika koordinat dikirim
+      result.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+    } else if (sortOrder === "oldest") {
       result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     } else { // "newest" is default
       result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
 
     return result;
-  }, [allJobs, debouncedKeyword, debouncedLocation, category, jobType, experience, postedWithin, sortOrder]);
+  }, [allJobs, debouncedKeyword, debouncedLocation, category, jobType, experience, postedWithin, sortOrder, latitude, longitude]);
 
   const { paginatedItems, currentPage, totalPages, goToPage, resetPage } =
     usePagination(filteredJobs, 6);
@@ -193,19 +233,31 @@ const Jobs = () => {
             </div>
             <Button
               variant="outline"
+              className={cn("gap-2 bg-card", (latitude && longitude) && "border-primary text-primary")}
+              onClick={handleGetLocation}
+              disabled={isLocating}
+            >
+              {isLocating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Navigation className="h-4 w-4" />}
+              {latitude && longitude ? "Near Me Active" : "Near Me"}
+            </Button>
+            <Button
+              variant="outline"
               className="gap-2 bg-card"
               onClick={() => setShowFilters(!showFilters)}
             >
               <SlidersHorizontal className="h-4 w-4" /> Filters
             </Button>
             <Select value={sortOrder} onValueChange={setSortOrder}>
-              <SelectTrigger className="w-35 bg-card">
+              <SelectTrigger className="w-40 bg-card">
                 <ArrowUpDown className="mr-2 h-4 w-4 text-muted-foreground" />
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="newest">Terbaru</SelectItem>
                 <SelectItem value="oldest">Terlama</SelectItem>
+                <SelectItem value="nearest" disabled={!latitude || !longitude}>
+                  Terdekat
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -222,6 +274,18 @@ const Jobs = () => {
                   <SelectItem value="30d">1 Bulan Terakhir</SelectItem>
                 </SelectContent>
               </Select>
+              {(latitude && longitude) && (
+                <div className="flex items-center gap-2 bg-card rounded-lg border border-input px-3 h-8 shadow-sm">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">Radius: {radius}km</span>
+                  <input 
+                    type="range" 
+                    min="10" max="200" step="10" 
+                    value={radius} 
+                    onChange={(e) => setRadius(parseInt(e.target.value))} 
+                    className="w-24 accent-primary cursor-pointer"
+                  />
+                </div>
+              )}
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="w-40 bg-card">
                   <SelectValue placeholder="Category" />
@@ -283,8 +347,8 @@ const Jobs = () => {
                 className="group rounded-xl border border-border bg-card p-5 transition-all hover:border-primary/30 card-shadow hover:card-shadow-hover"
               >
                 <div className="mb-3 flex items-start justify-between">
-                  {job.company?.logo ? (
-                    <img src={job.company.logo} alt={job.company.companyName} className="h-10 w-10 rounded-lg object-cover" />
+                  {typeof job.company === "object" && job.company?.logo ? (
+                    <img src={job.company.logo} alt={job.company.companyName || "Company Logo"} className="h-10 w-10 rounded-lg object-cover" />
                   ) : (
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                       <Building2 className="h-6 w-6" />
@@ -296,7 +360,9 @@ const Jobs = () => {
                   {job.title}
                 </h3>
                 <p className="mb-3 text-sm text-muted-foreground">
-                  {job.company?.companyName || "Unknown Company"}
+                  {job.company && typeof job.company === "object"
+                    ? job.company?.companyName
+                    : (job.company || "Unknown Company")}
                 </p>
                 <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
@@ -306,6 +372,11 @@ const Jobs = () => {
                     <Clock className="h-3 w-3" /> {new Date(job.createdAt).toLocaleDateString()}
                   </span>
                 </div>
+                {job.distance !== undefined && (
+                  <div className="mt-2 text-[10px] font-bold text-blue-600 bg-blue-50 w-fit px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Navigation className="h-2.5 w-2.5 fill-blue-600" /> {job.distance.toFixed(1)} km dari lokasi Anda
+                  </div>
+                )}
                 <div className="mt-3 text-sm font-medium text-primary">
                   {job.salary}
                 </div>

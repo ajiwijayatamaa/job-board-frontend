@@ -14,7 +14,9 @@ export const updateProfileSchema = z.object({
   // companyName hanya relevan untuk role ADMIN.
   // Keberadaan field ini akan ditangani di form logic dan validasi DTO backend.
   companyName: z.string().optional(),
-  // Field lain seperti description, companyAddress, latitude, longitude tidak ada di form saat ini.
+  description: z.string().optional(),
+  website: z.string().url("URL tidak valid").or(z.literal("")).optional(),
+  industry: z.string().optional(),
 });
 
 export type UpdateProfileSchema = z.infer<typeof updateProfileSchema>;

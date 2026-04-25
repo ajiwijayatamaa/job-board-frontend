@@ -19,7 +19,7 @@ const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   if (allowedRoles && !allowedRoles.includes(user.role as any)) {
     // Jika role tidak sesuai, arahkan ke dashboard masing-masing
     // PENTING: Pastikan link di Sidebar/Navbar sudah mengarah ke rute yang benar (/admin/profile)
-    return <Navigate to={user.role === "ADMIN" ? "/admin" : "/dashboard"} replace />;
+    return <Navigate to={user.role === "ADMIN" ? "/admin" : "/"} replace />;
   }
 
   // 3. Jika semua valid, render anak rute (Outlet)

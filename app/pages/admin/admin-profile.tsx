@@ -14,11 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "~/com
 import AdminLayout from "~/components/admin/admin-layout";
 import { updateProfileSchema, type UpdateProfileSchema } from "~/schema/user";
 
-type AdminProfileValues = UpdateProfileSchema & {
-  description: string;
-  website: string;
-  industry: string;
-};
+type AdminProfileValues = UpdateProfileSchema;
 
 const AdminProfile = () => {
   const { user: authUser, login: updateAuthStore } = useAuth();
@@ -34,6 +30,7 @@ const AdminProfile = () => {
   } = useForm<AdminProfileValues>({
     resolver: zodResolver(updateProfileSchema) as any,
     defaultValues: {
+      fullName: "",
       companyName: "",
       phone: "",
       city: "",
@@ -53,8 +50,10 @@ const AdminProfile = () => {
   });
 
   useEffect(() => {
-    if (profileData?.company) {
+    if (profileData) {
       const c = profileData.company;
+      setValue("fullName", profileData.fullName || "");
+      if (c) {
       setValue("companyName", c.companyName || "");
       setValue("phone", c.phone || "");
       setValue("city", profileData.city || "");
@@ -62,6 +61,7 @@ const AdminProfile = () => {
       setValue("description", c.description || "");
       setValue("website", c.website || "");
       setValue("industry", c.industry || "");
+      }
     }
   }, [profileData, setValue]);
 
@@ -151,11 +151,16 @@ const AdminProfile = () => {
                   <CardDescription>Update your company's essential contact and location details</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-5">
+                  <div className="space-y-2">
+                    <Label>Admin Full Name</Label>
+                    <Input {...register("fullName")} placeholder="Your name" className="rounded-xl" />
+                    {errors.fullName && <p className="text-xs text-destructive">{(errors.fullName as any).message}</p>}
+                  </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label>Company Name</Label>
                       <Input {...register("companyName")} placeholder="Acme Inc." className="rounded-xl" />
-                      {errors.companyName && <p className="text-xs text-destructive">{(errors.companyName as any).message}</p>}
+                      {errors.companyName && <p className="text-xs text-destructive">{errors.companyName.message}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label>Industry</Label>
