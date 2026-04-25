@@ -19,7 +19,11 @@ const useSubmitTest = (jobId: number) => {
     },
     onSuccess: (result) => {
       navigate(`/jobs/${jobId}/test-result`, {
-        state: { score: result.score, passed: result.passed },
+        state: {
+          score: result.score,
+          isPassed: result.isPassed,
+          passingScore: result.passingScore,
+        },
       });
     },
     onError: (error: AxiosError<{ message: string }>) => {

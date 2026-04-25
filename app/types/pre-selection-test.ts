@@ -17,6 +17,7 @@ export interface PreSelectionTest {
   id: number;
   jobId: number;
   title: string;
+  passingScore: number;
   questions: TestQuestion[];
 }
 
@@ -53,12 +54,17 @@ export interface TestResult {
   userId: number;
   preSelectionTestId: number;
   score: number;
+  isPassed: boolean;
   createdAt: string;
   user: TestResultUser;
 }
 
 export interface SubmitTestResponse {
+  id: number;
+  userId: number;
+  preSelectionTestId: number;
   score: number;
-  passed: boolean;
-  testResultId: number;
+  isPassed: boolean;
+  createdAt: string;
+  passingScore: number;
 }

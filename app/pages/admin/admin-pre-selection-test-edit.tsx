@@ -42,6 +42,7 @@ export default function PreSelectionTestEditPage() {
     defaultValues: {
       jobId: numericJobId,
       title: "",
+      passingScore: 75,
       questions: [],
     },
   });
@@ -51,6 +52,7 @@ export default function PreSelectionTestEditPage() {
     form.reset({
       jobId: numericJobId,
       title: existingTest.title,
+      passingScore: existingTest.passingScore,
       questions: existingTest.questions.map((q) => ({
         questionText: q.questionText,
         correctAnswer: q.correctAnswer,
@@ -74,7 +76,11 @@ export default function PreSelectionTestEditPage() {
     ) ?? [];
 
   const onSubmit = async (data: CreatePreSelectionTestSchema) => {
-    await updateTest({ title: data.title, questions: data.questions });
+    await updateTest({
+      title: data.title,
+      passingScore: data.passingScore, // ← kirim ke BE
+      questions: data.questions,
+    });
   };
 
   if (isLoading) {
@@ -129,7 +135,7 @@ export default function PreSelectionTestEditPage() {
                   Informasi Test
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-6 space-y-4">
                 <Field data-invalid={!!form.formState.errors.title}>
                   <FieldLabel className="text-xs font-black uppercase tracking-widest text-zinc-400">
                     Judul Test *
@@ -141,6 +147,25 @@ export default function PreSelectionTestEditPage() {
                   />
                   {form.formState.errors.title && (
                     <FieldError errors={[form.formState.errors.title]} />
+                  )}
+                </Field>
+
+                {/* ── Nilai Minimum Kelulusan ── */}
+                <Field data-invalid={!!form.formState.errors.passingScore}>
+                  <FieldLabel className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                    Nilai Minimum Kelulusan (0–100) *
+                  </FieldLabel>
+                  <Input
+                    {...(form.register("passingScore"),
+                    { valueAsNumber: true })}
+                    type="number"
+                    min={0}
+                    max={100}
+                    className="h-12 rounded-xl border-zinc-200 focus-visible:border-orange-500 font-bold"
+                    placeholder="Contoh: 75"
+                  />
+                  {form.formState.errors.passingScore && (
+                    <FieldError errors={[form.formState.errors.passingScore]} />
                   )}
                 </Field>
               </CardContent>
