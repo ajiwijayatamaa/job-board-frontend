@@ -62,18 +62,22 @@ const JobCard = ({ job }: { job: Job }) => {
     updateStatus(job.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED");
   };
 
+  const isExpiringSoon =
+    new Date(job.deadline).getTime() - Date.now() < 3 * 24 * 60 * 60 * 1000;
+
   return (
     <Card
       onClick={() => navigate(`/admin/jobs/${job.id}`)}
       className="group overflow-hidden border-none shadow-sm hover:shadow-xl hover:shadow-zinc-200 transition-all duration-300 rounded-[2rem] bg-white cursor-pointer relative"
     >
+      {/* punch holes */}
       <div className="absolute top-1/2 -left-3 w-6 h-6 bg-zinc-50 rounded-full border border-zinc-100 -translate-y-1/2 hidden md:block" />
       <div className="absolute top-1/2 -right-3 w-6 h-6 bg-zinc-50 rounded-full border border-zinc-100 -translate-y-1/2 hidden md:block" />
 
       <CardContent className="p-0">
         <div className="flex flex-col md:flex-row">
-          {/* Banner */}
-          <div className="w-full md:w-56 h-40 md:h-auto shrink-0 relative overflow-hidden bg-zinc-100">
+          {/* ── Banner ── */}
+          <div className="w-full md:w-48 h-40 md:h-auto shrink-0 relative overflow-hidden bg-zinc-100">
             {job.banner ? (
               <img
                 src={job.banner}
@@ -85,9 +89,10 @@ const JobCard = ({ job }: { job: Job }) => {
                 <Briefcase className="w-10 h-10 text-zinc-300" />
               </div>
             )}
+            {/* status pill */}
             <div
               className={cn(
-                "absolute top-4 left-4 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest",
+                "absolute top-3 left-3 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest",
                 statusConfig[job.status].class,
               )}
             >
@@ -95,47 +100,89 @@ const JobCard = ({ job }: { job: Job }) => {
             </div>
           </div>
 
-          {/* Content */}
-          <div className="p-6 md:p-8 flex-1 flex flex-col justify-between border-r border-dashed border-zinc-100">
-            <div>
-              <h3 className="text-xl font-black tracking-tighter text-zinc-900 group-hover:text-orange-600 transition-colors uppercase italic mb-1">
+          {/* ── Main Content ── */}
+          <div className="p-6 md:p-7 flex-1 flex flex-col justify-between border-r border-dashed border-zinc-100 min-w-0">
+            {/* title + category */}
+            <div className="mb-4">
+              <h3 className="text-xl font-black tracking-tighter text-zinc-900 group-hover:text-orange-600 transition-colors uppercase italic mb-0.5 truncate">
                 {job.title}
               </h3>
-              <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest mb-4">
+              <p className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.25em]">
                 {job.category}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6">
-                <div className="flex items-center gap-2 text-zinc-500">
-                  <MapPin size={13} className="text-orange-500" />
-                  <span className="text-xs font-bold uppercase tracking-tight">
-                    {job.city}
+            </div>
+
+            {/* info pills — lokasi, deadline, salary */}
+            <div className="flex flex-wrap gap-2 mb-5">
+              {/* Lokasi */}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-50 border border-zinc-100 rounded-xl">
+                <MapPin size={11} className="text-orange-500 shrink-0" />
+                <span className="text-[10px] font-black uppercase tracking-wide text-zinc-600">
+                  {job.city}
+                </span>
+              </div>
+
+              {/* Deadline */}
+              <div
+                className={cn(
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border",
+                  isExpiringSoon
+                    ? "bg-red-50 border-red-100"
+                    : "bg-zinc-50 border-zinc-100",
+                )}
+              >
+                <Calendar
+                  size={11}
+                  className={cn(
+                    "shrink-0",
+                    isExpiringSoon ? "text-red-500" : "text-orange-500",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-[10px] font-black uppercase tracking-wide",
+                    isExpiringSoon ? "text-red-600" : "text-zinc-600",
+                  )}
+                >
+                  Deadline:{" "}
+                  {new Date(job.deadline).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </span>
+                {isExpiringSoon && (
+                  <span className="text-[8px] font-black uppercase text-red-400 ml-0.5">
+                    · Segera!
                   </span>
-                </div>
-                <div className="flex items-center gap-2 text-zinc-500">
-                  <Calendar size={13} className="text-orange-500" />
-                  <span className="text-xs font-bold uppercase tracking-tight">
-                    {new Date(job.deadline).toLocaleDateString("id-ID")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-zinc-500">
-                  <Users size={13} className="text-orange-500" />
-                  <span className="text-xs font-bold uppercase tracking-tight">
-                    {job._count.applications} Pelamar
-                  </span>
-                </div>
-                {job.salary && (
-                  <div className="flex items-center gap-2 text-zinc-900">
-                    <span className="text-sm font-black italic">
-                      Rp {Number(job.salary).toLocaleString("id-ID")}
-                    </span>
-                  </div>
                 )}
               </div>
+
+              {/* Salary — hanya tampil kalau ada */}
+              {job.salary && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-xl">
+                  <span className="text-[10px] font-black text-emerald-700">
+                    Rp {Number(job.salary).toLocaleString("id-ID")}
+                  </span>
+                  <span className="text-[9px] text-emerald-500 font-bold">
+                    /bln
+                  </span>
+                </div>
+              )}
+
+              {/* Pre-test badge */}
+              {job.preTest && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 border border-orange-100 rounded-xl">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-orange-500">
+                    Pre-Test
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Actions */}
             <div
-              className="flex flex-wrap gap-2 mt-6"
+              className="flex flex-wrap gap-2"
               onClick={(e) => e.stopPropagation()}
             >
               <Button
@@ -144,7 +191,7 @@ const JobCard = ({ job }: { job: Job }) => {
                 onClick={toggleStatus}
                 disabled={isUpdating}
                 className={cn(
-                  "rounded-xl h-9 text-[10px] font-black uppercase tracking-widest transition-all",
+                  "rounded-xl h-8 text-[10px] font-black uppercase tracking-widest transition-all",
                   job.status === "PUBLISHED"
                     ? "border-emerald-200 text-emerald-600 hover:bg-emerald-50"
                     : "border-zinc-200 hover:bg-zinc-900 hover:text-white",
@@ -167,7 +214,7 @@ const JobCard = ({ job }: { job: Job }) => {
                     variant="outline"
                     size="sm"
                     disabled={isDeleting}
-                    className="rounded-xl h-9 text-[10px] font-black uppercase tracking-widest border-zinc-200 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
+                    className="rounded-xl h-8 text-[10px] font-black uppercase tracking-widest border-zinc-200 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
                   >
                     <Trash2 size={12} className="mr-1" /> Hapus
                   </Button>
@@ -198,20 +245,20 @@ const JobCard = ({ job }: { job: Job }) => {
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="md:w-48 bg-zinc-50/50 p-6 flex flex-col justify-center items-center border-t md:border-t-0 md:border-l md:border-dashed border-zinc-200">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-1">
-              Pelamar
-            </p>
-            <p className="text-3xl font-black italic tracking-tighter text-zinc-900">
-              {job._count.applications}
-            </p>
-            {job.preTest && (
-              <span className="mt-3 px-2 py-1 bg-orange-50 text-orange-500 text-[9px] font-black uppercase tracking-widest rounded-full">
-                Ada Pre-Test
-              </span>
-            )}
-            <ChevronRight className="mt-4 h-5 w-5 text-zinc-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />
+          {/* ── Stats Panel ── */}
+          <div className="md:w-44 bg-zinc-50/50 p-6 flex flex-col justify-center items-center gap-4 border-t md:border-t-0 md:border-l md:border-dashed border-zinc-200">
+            <div className="text-center">
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-0.5">
+                Total Pelamar
+              </p>
+              <div className="flex items-end justify-center gap-1">
+                <p className="text-3xl font-black italic tracking-tighter text-zinc-900">
+                  {job._count.applications}
+                </p>
+                <Users size={13} className="text-zinc-300 mb-1.5" />
+              </div>
+            </div>
+            <ChevronRight className="h-5 w-5 text-zinc-300 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />
           </div>
         </div>
       </CardContent>

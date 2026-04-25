@@ -11,14 +11,13 @@ export const clientLoader = () => {
   if (user.role !== "USER") return redirect("/");
 };
 
-const PASS_SCORE = 75;
-
 export default function TestResultPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
 
   const score: number = state?.score ?? 0;
-  const passed: boolean = state?.passed ?? score >= PASS_SCORE;
+  const passingScore: number = state?.passingScore ?? 75;
+  const passed: boolean = state?.isPassed ?? false; // baca dari BE, bukan hitung sendiri
   const displayScore = Math.round(score);
 
   // Kalau masuk langsung tanpa state, redirect ke jobs
@@ -127,7 +126,7 @@ export default function TestResultPage() {
             >
               {passed
                 ? "Kamu memenuhi syarat minimum. Lamaranmu akan segera diproses oleh perusahaan."
-                : `Skor minimum untuk lulus adalah ${PASS_SCORE}. Sayang sekali, kamu belum memenuhi syarat kali ini.`}
+                : `Skor minimum untuk lulus adalah ${passingScore}. Sayang sekali, kamu belum memenuhi syarat kali ini.`}
             </motion.p>
           </div>
 
@@ -135,7 +134,7 @@ export default function TestResultPage() {
           <div className="border-t border-white/10 px-10 py-5 flex justify-around">
             {[
               { label: "Skor Kamu", value: `${displayScore}` },
-              { label: "Minimum Lulus", value: `${PASS_SCORE}` },
+              { label: "Minimum Lulus", value: `${passingScore}` },
               { label: "Status", value: passed ? "Lulus" : "Gagal" },
             ].map(({ label, value }) => (
               <div key={label} className="text-center">

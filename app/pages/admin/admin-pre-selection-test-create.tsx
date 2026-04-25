@@ -43,7 +43,6 @@ export default function PreSelectionTestCreatePage() {
       (q) => q.questionText.length > 0 && q.options.some((o) => o.isCorrect),
     ) ?? [];
 
-  // onError dari hook tidak tahu soal currentQ, jadi auto-navigate dihandle di sini
   const handleError = (errors: any) => {
     onError(errors);
     if (errors.questions) {
@@ -85,7 +84,6 @@ export default function PreSelectionTestCreatePage() {
           Buat 25 soal pilihan ganda untuk seleksi pelamar.
         </p>
 
-        {/* Notifikasi draft tersimpan */}
         {parsedDraft && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
@@ -116,7 +114,7 @@ export default function PreSelectionTestCreatePage() {
                   Informasi Test
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-6 space-y-4">
                 <Field data-invalid={!!form.formState.errors.title}>
                   <FieldLabel className="text-xs font-black uppercase tracking-widest text-zinc-400">
                     Judul Test *
@@ -128,6 +126,24 @@ export default function PreSelectionTestCreatePage() {
                   />
                   {form.formState.errors.title && (
                     <FieldError errors={[form.formState.errors.title]} />
+                  )}
+                </Field>
+
+                {/* ── Nilai Minimum Kelulusan ── */}
+                <Field data-invalid={!!form.formState.errors.passingScore}>
+                  <FieldLabel className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                    Nilai Minimum Kelulusan (0–100) *
+                  </FieldLabel>
+                  <Input
+                    {...form.register("passingScore", { valueAsNumber: true })}
+                    type="number"
+                    min={0}
+                    max={100}
+                    className="h-12 rounded-xl border-zinc-200 focus-visible:border-orange-500 font-bold"
+                    placeholder="Contoh: 75"
+                  />
+                  {form.formState.errors.passingScore && (
+                    <FieldError errors={[form.formState.errors.passingScore]} />
                   )}
                 </Field>
               </CardContent>
@@ -177,7 +193,6 @@ export default function PreSelectionTestCreatePage() {
               </CardContent>
             </Card>
 
-            {/* Error summary — muncul jika ada soal yang belum lengkap */}
             {errorQuestions.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: -8 }}

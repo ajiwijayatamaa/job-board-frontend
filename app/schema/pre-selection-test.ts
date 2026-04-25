@@ -27,6 +27,10 @@ export const testQuestionSchema = z
 export const createPreSelectionTestSchema = z.object({
   jobId: z.number(),
   title: z.string().min(1, "Judul tidak boleh kosong"),
+  passingScore: z
+    .number()
+    .min(0, "Passing score tidak boleh negatif")
+    .max(100, "Passing score maksimal 100"),
   questions: z
     .array(testQuestionSchema)
     .length(25, "Soal harus berjumlah tepat 25"),
@@ -39,6 +43,11 @@ export type CreatePreSelectionTestSchema = z.infer<
 // ── UPDATE ────────────────────────────────────────────────
 export const updatePreSelectionTestSchema = z.object({
   title: z.string().min(1, "Judul tidak boleh kosong").optional(),
+  passingScore: z
+    .number()
+    .min(0, "Passing score tidak boleh negatif")
+    .max(100, "Passing score maksimal 100")
+    .optional(),
   questions: z
     .array(testQuestionSchema)
     .length(25, "Soal harus berjumlah tepat 25")
@@ -83,5 +92,6 @@ export const buildDefaultTestForm = (
 ): CreatePreSelectionTestSchema => ({
   jobId,
   title: "",
+  passingScore: 75,
   questions: buildDefaultQuestions(),
 });
