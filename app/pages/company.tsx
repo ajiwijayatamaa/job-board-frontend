@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+﻿import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router";
 import { Search, MapPin, SlidersHorizontal } from "lucide-react";
 import { Input } from "~/components/ui/input";
@@ -23,9 +23,10 @@ import { Loader2, Building2 } from "lucide-react";
 interface Company {
   id: number;
   companyName: string;
-  industry: string;
-  location: string;
-  size: string; // e.g., "100-300", "5000+"
+  industry?: string;
+  location?: string;
+  address?: string;
+  size?: string; // e.g., "100-300", "5000+"
   logo?: string;
   _count?: {
     jobs: number;
@@ -39,22 +40,38 @@ const Companies = () => {
   const [companySize, setCompanySize] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
 
-  const { data: allCompanies, isLoading: isCompaniesLoading } = useQuery({
+  const { data: allCompanies, isLoading: isCompaniesLoading, isError: isCompaniesError } = useQuery({
     queryKey: ["all-companies"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/companies");
+      const response = await axiosInstance.get("/public/companies");
       return response.data.data as Company[];
     },
   });
 
   const industries = useMemo(() => {
     if (!allCompanies) return [];
-    return [...new Set(allCompanies.map((c) => c.industry))];
+    return [
+      ...new Set(
+        allCompanies
+          .map((c) => c.industry)
+          .filter(
+            (v): v is string => typeof v === "string" && v.trim().length > 0,
+          ),
+      ),
+    ];
   }, [allCompanies]);
 
   const sizes = useMemo(() => {
     if (!allCompanies) return [];
-    return [...new Set(allCompanies.map((c) => c.size))].sort();
+    return [
+      ...new Set(
+        allCompanies
+          .map((c) => c.size)
+          .filter(
+            (v): v is string => typeof v === "string" && v.trim().length > 0,
+          ),
+      ),
+    ].sort();
   }, [allCompanies]);
 
   const debouncedKeyword = useDebounce(keyword);
@@ -64,13 +81,14 @@ const Companies = () => {
     let result = allCompanies || [];
 
     result = result.filter((c) => {
+      const loc = (c.location || c.address || "").toLowerCase();
       const matchName =
         !debouncedKeyword ||
         c.companyName.toLowerCase().includes(debouncedKeyword.toLowerCase());
       const matchIndustry = industry === "all" || c.industry === industry;
       const matchLoc =
         !debouncedLocation ||
-        c.location.toLowerCase().includes(debouncedLocation.toLowerCase());
+        loc.includes(debouncedLocation.toLowerCase());
       const matchSize = companySize === "all" || c.size === companySize;
       return matchName && matchIndustry && matchLoc && matchSize;
     });
@@ -160,6 +178,10 @@ const Companies = () => {
           <div className="flex justify-center py-10">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
+        ) : isCompaniesError ? (
+          <div className="py-20 text-center text-muted-foreground">
+            Failed to load companies.
+          </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {paginatedItems.map((company) => (
@@ -179,10 +201,10 @@ const Companies = () => {
                   {company.companyName}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {company.industry}
+                  {company.industry || "-"}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {company.location} · {company.size} employees
+                  {(company.location || company.address || '-')} · {(company.size || '-')} employees
                 </p>
                 <p className="mt-2 text-sm font-medium text-primary">
                   {company._count?.jobs || 0} open positions
@@ -213,3 +235,4 @@ const Companies = () => {
 };
 
 export default Companies;
+
