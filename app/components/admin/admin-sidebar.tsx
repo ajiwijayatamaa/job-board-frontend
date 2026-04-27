@@ -7,6 +7,7 @@ import {
   Settings,
   User,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import {
@@ -48,96 +49,92 @@ const AdminSidebar = () => {
     <Sidebar
       collapsible="icon"
       className="border-r-0"
-      style={{ background: "#0f172a" }}
+      style={{ background: "#0F2342" }} // Navy Base
     >
-      <SidebarContent style={{ background: "#0f172a" }}>
-        {/* Brand */}
+      <SidebarContent
+        style={{ background: "#0F2342" }}
+        className="overflow-x-hidden"
+      >
+        {/* Brand Section */}
         <div
           className={cn(
-            "flex items-center gap-3 px-5 py-5",
+            "flex items-center gap-3 px-6 py-8",
             collapsed && "justify-center px-3",
           )}
         >
           <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "#f97316" }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-900/20"
+            style={{ background: "#1D5FAD" }} // Professional Blue
           >
             <Building2 className="w-5 h-5 text-white" />
           </div>
           {!collapsed && (
-            <div>
-              <p className="text-white font-bold text-sm tracking-tight leading-none">
-                HireSpace
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>
-                Employer Portal
-              </p>
+            <div className="flex flex-col">
+              <span className="text-white font-black text-lg tracking-tighter leading-none italic uppercase">
+                HIRE<span className="text-[#1D5FAD]">SPACE</span>
+              </span>
+              <div className="flex items-center gap-1.5 mt-1">
+                <div className="w-1 h-1 rounded-full bg-teal-400 animate-pulse" />
+                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                  Employer Portal
+                </p>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Divider */}
-        <div
-          className="mx-4 mb-4"
-          style={{ height: "1px", background: "#1e293b" }}
-        />
-
-        {/* User Card */}
+        {/* User Profile Card - Elevated Style */}
         {!collapsed && (
-          <div
-            className="mx-3 mb-4 p-3 rounded-xl"
-            style={{ background: "#1e293b" }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="relative shrink-0">
-                <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center overflow-hidden"
-                  style={{ background: "#334155" }}
-                >
-                  {user?.profilePhoto ? (
-                    <img
-                      src={user.profilePhoto}
-                      alt={user.fullName ?? "Admin"}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <User className="w-4 h-4" style={{ color: "#94a3b8" }} />
-                  )}
+          <div className="px-4 mb-8">
+            <div
+              className="p-4 rounded-[1.5rem] border border-white/5 transition-all hover:bg-white/5"
+              style={{ background: "rgba(255,255,255,0.03)" }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="relative shrink-0">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden border-2 border-[#1D5FAD]/30"
+                    style={{ background: "#162E51" }}
+                  >
+                    {user?.profilePhoto ? (
+                      <img
+                        src={user.profilePhoto}
+                        alt={user.fullName ?? "Admin"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-5 h-5 text-slate-400" />
+                    )}
+                  </div>
+                  <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-teal-500 border-2 border-[#0F2342] rounded-full" />
                 </div>
-                <div
-                  className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2"
-                  style={{ background: "#22c55e", borderColor: "#1e293b" }}
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-white truncate leading-none">
-                  {user?.fullName ?? "Admin"}
-                </p>
-                <p
-                  className="text-xs mt-0.5 truncate"
-                  style={{ color: "#64748b" }}
-                >
-                  {user?.email}
-                </p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-black text-white truncate uppercase tracking-tight">
+                    {user?.fullName ?? "Administrator"}
+                  </p>
+                  <p className="text-[10px] font-medium text-slate-500 truncate mt-0.5">
+                    {user?.email}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Nav Label */}
+        {/* Navigation Label */}
         {!collapsed && (
-          <p
-            className="px-5 mb-2 text-[10px] font-semibold uppercase tracking-widest"
-            style={{ color: "#475569" }}
-          >
-            Navigation
-          </p>
+          <div className="px-7 mb-4 flex items-center gap-2">
+            <Sparkles className="w-3 h-3 text-[#1D5FAD]" />
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">
+              Main Menu
+            </p>
+          </div>
         )}
 
-        {/* Menu */}
-        <SidebarGroup className="px-3">
+        {/* Menu Items */}
+        <SidebarGroup className="px-4">
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-2">
               {menuItems.map((item) => {
                 const active = isActive(item.url, item.exact);
                 return (
@@ -146,40 +143,39 @@ const AdminSidebar = () => {
                       <Link
                         to={item.url}
                         className={cn(
-                          "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 group",
-                          collapsed && "justify-center px-2.5",
+                          "flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden",
+                          collapsed && "justify-center px-0",
                         )}
                         style={{
-                          background: active ? "#1d4ed8" : "transparent",
-                          color: active ? "#ffffff" : "#94a3b8",
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!active) {
-                            e.currentTarget.style.background = "#1e293b";
-                            e.currentTarget.style.color = "#e2e8f0";
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!active) {
-                            e.currentTarget.style.background = "transparent";
-                            e.currentTarget.style.color = "#94a3b8";
-                          }
+                          background: active ? "#1D5FAD" : "transparent",
                         }}
                       >
+                        {/* Glow effect for active item */}
+                        {active && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent pointer-events-none" />
+                        )}
+
                         <item.icon
-                          className="w-[18px] h-[18px] shrink-0"
-                          style={{ color: active ? "#93c5fd" : "#475569" }}
+                          className={cn(
+                            "w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110",
+                          )}
+                          style={{ color: active ? "#FFFFFF" : "#5C7596" }}
                         />
+
                         {!collapsed && (
                           <>
-                            <span className="flex-1 text-sm font-medium">
+                            <span
+                              className={cn(
+                                "flex-1 text-xs font-bold tracking-wide transition-colors",
+                                active
+                                  ? "text-white"
+                                  : "text-slate-400 group-hover:text-white",
+                              )}
+                            >
                               {item.title}
                             </span>
                             {active && (
-                              <ChevronRight
-                                className="w-3.5 h-3.5"
-                                style={{ color: "#93c5fd" }}
-                              />
+                              <ChevronRight className="w-4 h-4 text-white/50" />
                             )}
                           </>
                         )}
@@ -193,29 +189,28 @@ const AdminSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer */}
+      {/* Footer Section */}
       <SidebarFooter
-        className="px-3 py-3"
-        style={{ background: "#0f172a", borderTop: "1px solid #1e293b" }}
+        className="p-4"
+        style={{
+          background: "#0F2342",
+          borderTop: "1px solid rgba(255,255,255,0.05)",
+        }}
       >
         <button
           onClick={logout}
           className={cn(
-            "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all duration-150",
-            collapsed && "justify-center",
+            "flex items-center gap-4 w-full px-4 py-3 rounded-xl transition-all duration-300 group hover:bg-rose-500/10",
+            collapsed && "justify-center px-0",
           )}
-          style={{ color: "#475569" }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "#450a0a";
-            e.currentTarget.style.color = "#f87171";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.color = "#475569";
-          }}
+          style={{ color: "#5C7596" }}
         >
-          <LogOut className="w-[18px] h-[18px] shrink-0" />
-          {!collapsed && <span className="text-sm font-medium">Sign Out</span>}
+          <LogOut className="w-5 h-5 shrink-0 group-hover:text-rose-400 group-hover:rotate-12 transition-all" />
+          {!collapsed && (
+            <span className="text-xs font-bold tracking-widest uppercase group-hover:text-rose-400">
+              Logout System
+            </span>
+          )}
         </button>
       </SidebarFooter>
     </Sidebar>

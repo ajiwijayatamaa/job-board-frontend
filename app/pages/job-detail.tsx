@@ -16,9 +16,12 @@ import {
   CheckCircle2,
   AlertTriangle,
   Timer,
+  Sparkles,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Badge } from "~/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +50,7 @@ import { toast } from "sonner";
 import { useState, useMemo } from "react";
 import type { ApplicationCV } from "~/types/application";
 import useGetMyTestResult from "~/hooks/api/useGetMyTestResult";
+import { cn } from "~/lib/utils";
 
 // ─── Helpers ───────────────────────────────────────────────
 const formatSalary = (val: any) =>
@@ -162,13 +166,11 @@ const JobDetail = () => {
       return;
     }
     if (user.role === "ADMIN") return;
-
     const parsedExpectedSalary = Number(expectedSalary);
     if (!Number.isFinite(parsedExpectedSalary) || parsedExpectedSalary < 0) {
       toast.error("Ekspektasi gaji harus berupa angka valid.");
       return;
     }
-
     setIsApplying(true);
     try {
       let cvIdToUse: number | undefined;
@@ -193,13 +195,11 @@ const JobDetail = () => {
         const parsed = Number(cvOption);
         if (Number.isFinite(parsed) && parsed > 0) cvIdToUse = parsed;
       }
-
       await axiosInstance.post(`/applications/job/${job?.id}`, {
         ...(cvIdToUse ? { cvId: cvIdToUse } : {}),
         expectedSalary: parsedExpectedSalary,
         ...(resolvedTestResultId ? { testResultId: resolvedTestResultId } : {}),
       });
-
       toast.success("Lamaran berhasil dikirim!");
       queryClient.invalidateQueries({ queryKey: ["my-applications"] });
       queryClient.invalidateQueries({ queryKey: ["applications"] });
@@ -222,30 +222,13 @@ const JobDetail = () => {
     }
   };
 
-  // ─── Loading / Error ─────────────────────────────────────
+  // ─── Loading ─────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div
-        style={{
-          background: "#F0EDE8",
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      <div className="min-h-screen bg-zinc-50/50 flex flex-col">
         <Navbar />
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Loader2
-            className="animate-spin"
-            style={{ width: 32, height: 32, color: "#4A6FA5" }}
-          />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-zinc-200 border-t-orange-500 rounded-full animate-spin" />
         </div>
       </div>
     );
@@ -253,41 +236,21 @@ const JobDetail = () => {
 
   if (isError || !job) {
     return (
-      <div
-        style={{
-          background: "#F0EDE8",
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      <div className="min-h-screen bg-zinc-50/50 flex flex-col">
         <Navbar />
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            textAlign: "center",
-            padding: 24,
-          }}
-        >
+        <div className="flex-1 flex items-center justify-center text-center p-6">
           <div>
-            <p style={{ fontSize: 48, fontWeight: 700, color: "#2C3E50" }}>
-              404
-            </p>
-            <h1
-              style={{
-                fontSize: 20,
-                fontWeight: 600,
-                color: "#2C3E50",
-                marginBottom: 20,
-              }}
-            >
+            <p className="text-6xl font-black text-zinc-200 mb-2">404</p>
+            <h1 className="text-xl font-black text-zinc-900 uppercase italic mb-4">
               Lowongan tidak ditemukan
             </h1>
             <Link to="/jobs">
-              <Button variant="outline">← Kembali ke semua lowongan</Button>
+              <Button
+                variant="outline"
+                className="rounded-xl font-bold uppercase text-xs tracking-widest"
+              >
+                ← Kembali ke semua lowongan
+              </Button>
             </Link>
           </div>
         </div>
@@ -299,794 +262,562 @@ const JobDetail = () => {
 
   // ─── Render ──────────────────────────────────────────────
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+    <div className="min-h-screen bg-zinc-50/50">
+      <Navbar />
 
-        /*
-         * Palette (mid-tone warm):
-         *  Page bg   : #F0EDE8  warm sand — not white, not dark
-         *  Surface   : #FAFAF8  near-white card surface
-         *  Surface2  : #EAE6DF  muted pebble for sidebar
-         *  Border    : #D8D3CB
-         *  Text      : #2C3E50  deep slate
-         *  Muted     : #7A7469
-         *  Accent    : #4A6FA5  dusty blue
-         *  CTA       : #E8835A  terracotta
-        */
-
-        .jd-page { font-family: 'Plus Jakarta Sans', sans-serif; background: #F0EDE8; min-height: 100vh; color: #2C3E50; }
-
-        .jd-hero {
-          background: #FAFAF8;
-          border-bottom: 1px solid #D8D3CB;
-          padding: 36px 0 40px;
-          position: relative;
-          overflow: hidden;
-        }
-        .jd-hero::before {
-          content: '';
-          position: absolute; top: -80px; right: -60px;
-          width: 340px; height: 340px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(74,111,165,0.09) 0%, transparent 70%);
-          pointer-events: none;
-        }
-        .jd-hero::after {
-          content: '';
-          position: absolute; bottom: -60px; left: 25%;
-          width: 260px; height: 260px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(232,131,90,0.07) 0%, transparent 70%);
-          pointer-events: none;
-        }
-
-        .jd-back { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #7A7469; text-decoration: none; margin-bottom: 28px; transition: color 0.2s; }
-        .jd-back:hover { color: #4A6FA5; }
-
-        .jd-category-badge { display: inline-block; background: rgba(74,111,165,0.1); border: 1px solid rgba(74,111,165,0.22); color: #4A6FA5; font-size: 11px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; border-radius: 6px; padding: 4px 10px; margin-bottom: 14px; }
-
-        .jd-company-pill { display: inline-flex; align-items: center; gap: 8px; background: #EAE6DF; border: 1px solid #D8D3CB; border-radius: 999px; padding: 6px 14px 6px 8px; font-size: 13px; font-weight: 500; color: #5A5450; text-decoration: none; margin-bottom: 16px; transition: background 0.2s; }
-        .jd-company-pill:hover { background: #DDD8D0; }
-        .jd-company-logo { width: 28px; height: 28px; border-radius: 8px; border: 1px solid #D8D3CB; background: #F0EDE8; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
-
-        .jd-title { font-family: 'Lora', serif; font-size: clamp(26px, 4vw, 42px); font-weight: 600; line-height: 1.2; color: #1A2530; margin-bottom: 20px; }
-
-        .jd-chip { display: inline-flex; align-items: center; gap: 5px; background: #EAE6DF; border: 1px solid #D0CBC3; border-radius: 8px; padding: 5px 11px; font-size: 12px; font-weight: 500; color: #5A5450; }
-
-        .jd-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #E8835A; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; border: none; border-radius: 12px; padding: 13px 24px; cursor: pointer; transition: background 0.2s, transform 0.15s, box-shadow 0.2s; box-shadow: 0 2px 10px rgba(232,131,90,0.22); width: 100%; }
-        .jd-btn-primary:hover:not(:disabled) { background: #D4714A; transform: translateY(-1px); box-shadow: 0 4px 18px rgba(232,131,90,0.28); }
-        .jd-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-        .jd-btn-pretest { background: #4A6FA5 !important; box-shadow: 0 2px 10px rgba(74,111,165,0.22) !important; }
-        .jd-btn-pretest:hover:not(:disabled) { background: #3A5A8A !important; box-shadow: 0 4px 18px rgba(74,111,165,0.28) !important; }
-        .jd-btn-applied { background: #EAE6DF !important; color: #7A7469 !important; box-shadow: none !important; cursor: default !important; }
-        .jd-btn-applied:hover { transform: none !important; }
-
-        .jd-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: transparent; border: 1.5px solid #D8D3CB; color: #5A5450; font-size: 13px; font-weight: 500; border-radius: 10px; padding: 10px 18px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
-        .jd-btn-outline:hover { background: #EAE6DF; border-color: #C5BFB7; }
-
-        .jd-card { background: #FAFAF8; border: 1px solid #D8D3CB; border-radius: 16px; padding: 24px; }
-        .jd-sidebar-card { background: #EAE6DF; border: 1px solid #D0CBC3; border-radius: 16px; padding: 20px; }
-
-        .jd-section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #7A7469; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
-        .jd-section-label::after { content: ''; flex: 1; height: 1px; background: #D8D3CB; }
-
-        .jd-stat { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid #DDD8D0; font-size: 13px; }
-        .jd-stat:last-child { border-bottom: none; }
-        .jd-stat-label { flex: 1; color: #7A7469; }
-        .jd-stat-value { font-weight: 600; color: #2C3E50; }
-
-        .jd-deadline-track { height: 4px; background: #D8D3CB; border-radius: 999px; overflow: hidden; margin-top: 6px; }
-        .jd-deadline-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #4A6FA5, #E8835A); transition: width 0.6s ease; }
-
-        .jd-tag { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 6px; background: #EAE6DF; border: 1px solid #D0CBC3; font-size: 12px; font-weight: 500; color: #5A5450; }
-
-        .jd-notice-blue { display: flex; gap: 12px; padding: 16px; border-radius: 12px; background: rgba(74,111,165,0.07); border: 1px solid rgba(74,111,165,0.18); }
-        .jd-notice-green { display: flex; gap: 12px; padding: 14px 16px; border-radius: 12px; background: rgba(34,197,94,0.07); border: 1px solid rgba(34,197,94,0.18); }
-        .jd-notice-red { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.18); font-size: 12px; font-weight: 500; color: #DC4444; }
-
-        .jd-social-btn { display: flex; align-items: center; justify-content: center; padding: 12px; border-radius: 10px; border: 1.5px solid #D8D3CB; background: #FAFAF8; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
-        .jd-social-btn:hover { background: #EAE6DF; border-color: #C5BFB7; }
-
-        [data-radix-dialog-content] { background: #FAFAF8 !important; border: 1px solid #D8D3CB !important; color: #2C3E50 !important; }
-        .jd-dialog-label { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #7A7469; margin-bottom: 8px; }
-        .jd-dialog-input { background: #F0EDE8 !important; border: 1.5px solid #D8D3CB !important; border-radius: 10px !important; color: #2C3E50 !important; }
-        .jd-dialog-input:focus { border-color: #4A6FA5 !important; box-shadow: 0 0 0 3px rgba(74,111,165,0.1) !important; }
-
-        .jd-test-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #E5E0D8; font-size: 13px; }
-        .jd-test-row:last-child { border-bottom: none; }
-
-        .jd-fade { animation: jdFadeUp 0.4s ease both; }
-        .jd-d1 { animation-delay: 0.05s; }
-        .jd-d2 { animation-delay: 0.12s; }
-        .jd-d3 { animation-delay: 0.2s; }
-        @keyframes jdFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-      `}</style>
-
-      <div className="jd-page">
-        <Navbar />
-
-        {/* ── HERO ── */}
-        <div className="jd-hero">
-          <div className="container mx-auto max-w-6xl px-4">
-            <Link to="/jobs" className="jd-back">
-              <ArrowLeft style={{ width: 13, height: 13 }} /> Semua Lowongan
+      {/* HERO */}
+      <div className="bg-white border-b border-zinc-100">
+        <div className="max-w-6xl mx-auto px-4 py-10">
+          <Button
+            variant="ghost"
+            asChild
+            className="mb-6 -ml-2 text-zinc-500 hover:text-zinc-900 font-bold uppercase text-[10px] tracking-widest"
+          >
+            <Link to="/jobs">
+              <ArrowLeft className="mr-2 h-3 w-3" /> Semua Lowongan
             </Link>
+          </Button>
 
-            <div
-              className="jd-fade"
-              style={{
-                display: "grid",
-                gap: 24,
-                gridTemplateColumns: "1fr auto",
-                alignItems: "flex-end",
-              }}
-            >
-              {/* Left */}
-              <div>
-                <div className="jd-category-badge">{job.category}</div>
-
-                <Link
-                  to={`/companies/${job.companyId}`}
-                  className="jd-company-pill"
-                >
-                  <div className="jd-company-logo">
-                    {job.banner || job.company?.logo ? (
-                      <img
-                        src={job.banner || job.company?.logo}
-                        alt=""
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    ) : (
-                      <Building2
-                        style={{ width: 13, height: 13, color: "#7A7469" }}
-                      />
-                    )}
-                  </div>
-                  {job.company?.companyName || job.company}
-                </Link>
-
-                <h1 className="jd-title">{job.title}</h1>
-
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  <span className="jd-chip">
-                    <MapPin
-                      style={{ width: 13, height: 13, color: "#4A6FA5" }}
-                    />
-                    {job.city || job.location || "—"}
-                  </span>
-                  <span className="jd-chip">
-                    <DollarSign
-                      style={{ width: 13, height: 13, color: "#4A6FA5" }}
-                    />
-                    {formatSalary(job.salary)}
-                  </span>
-                  <span className="jd-chip">
-                    <Clock
-                      style={{ width: 13, height: 13, color: "#4A6FA5" }}
-                    />
-                    Deadline:{" "}
-                    {new Date(job.deadline).toLocaleDateString("id-ID", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </span>
-                  {job.preTest && (
-                    <span
-                      className="jd-chip"
-                      style={{
-                        background: "rgba(74,111,165,0.08)",
-                        border: "1px solid rgba(74,111,165,0.2)",
-                        color: "#4A6FA5",
-                      }}
-                    >
-                      <ClipboardList style={{ width: 13, height: 13 }} />
-                      Ada Pre-Selection Test
-                    </span>
-                  )}
-                </div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="flex flex-col md:flex-row md:items-end justify-between gap-6"
+          >
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-4 h-4 text-orange-500" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
+                  {job.category}
+                </span>
               </div>
 
-              {/* Right */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  gap: 10,
-                  minWidth: 190,
-                }}
+              <Link
+                to={`/companies/${job.companyId}`}
+                className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors"
               >
+                <div className="w-6 h-6 rounded-lg bg-white border border-zinc-200 flex items-center justify-center overflow-hidden">
+                  {job.banner ? (
+                    <img
+                      src={job.banner}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Building2 className="w-3 h-3 text-zinc-400" />
+                  )}
+                </div>
+                <span className="text-xs font-bold text-zinc-600">
+                  {job.company?.companyName || job.company}
+                </span>
+              </Link>
+
+              <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-zinc-900 uppercase italic mb-4">
+                {job.title}
+              </h1>
+
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary" className="gap-1 font-bold text-xs">
+                  <MapPin className="w-3 h-3 text-orange-500" />
+                  {job.city || job.location || "—"}
+                </Badge>
+                <Badge variant="secondary" className="gap-1 font-bold text-xs">
+                  <DollarSign className="w-3 h-3 text-orange-500" />
+                  {formatSalary(job.salary)}
+                </Badge>
+                <Badge variant="secondary" className="gap-1 font-bold text-xs">
+                  <Clock className="w-3 h-3 text-orange-500" />
+                  Deadline:{" "}
+                  {new Date(job.deadline).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </Badge>
+                {job.preTest && (
+                  <Badge className="gap-1 font-bold text-xs bg-orange-50 text-orange-600 border border-orange-200">
+                    <ClipboardList className="w-3 h-3" />
+                    Ada Pre-Selection Test
+                  </Badge>
+                )}
                 {deadline <= 7 && (
-                  <span className="jd-notice-red">
-                    <AlertTriangle style={{ width: 13, height: 13 }} />
+                  <Badge className="gap-1 font-bold text-xs bg-red-50 text-red-500 border border-red-200">
+                    <AlertTriangle className="w-3 h-3" />
                     {deadline === 0
                       ? "Hari ini deadline!"
                       : `${deadline} hari lagi`}
-                  </span>
-                )}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="jd-btn-outline">
-                      <Share2 style={{ width: 14, height: 14 }} />
-                      Bagikan
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    style={{
-                      background: "#FAFAF8",
-                      border: "1px solid #D8D3CB",
-                    }}
-                  >
-                    {[
-                      {
-                        key: "linkedin",
-                        label: "LinkedIn",
-                        color: "#0A66C2",
-                        Icon: Linkedin,
-                      },
-                      {
-                        key: "twitter",
-                        label: "Twitter / X",
-                        color: "#1DA1F2",
-                        Icon: Twitter,
-                      },
-                      {
-                        key: "facebook",
-                        label: "Facebook",
-                        color: "#1877F2",
-                        Icon: Facebook,
-                      },
-                      {
-                        key: "whatsapp",
-                        label: "WhatsApp",
-                        color: "#25D366",
-                        Icon: MessageCircle,
-                      },
-                    ].map(({ key, label, color, Icon }) => (
-                      <DropdownMenuItem
-                        key={key}
-                        onClick={() => handleShare(key)}
-                        style={{ color: "#2C3E50", gap: 8 }}
-                      >
-                        <Icon style={{ width: 15, height: 15, color }} />
-                        {label}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                {user?.role !== "ADMIN" && (
-                  <button
-                    className={`jd-btn-primary ${isApplied ? "jd-btn-applied" : needsPreTest ? "jd-btn-pretest" : ""}`}
-                    onClick={handleOpenApply}
-                    disabled={isApplying || isApplied}
-                    style={{ minWidth: 190 }}
-                  >
-                    {isApplying && (
-                      <Loader2
-                        style={{ width: 15, height: 15 }}
-                        className="animate-spin"
-                      />
-                    )}
-                    {isApplied
-                      ? "✓ Sudah Dilamar"
-                      : needsPreTest
-                        ? "Ikuti Pre-Selection Test"
-                        : "Apply Sekarang →"}
-                  </button>
+                  </Badge>
                 )}
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* ── BODY ── */}
-        <div className="container mx-auto max-w-6xl px-4 py-10">
-          <div
-            style={{
-              display: "grid",
-              gap: 28,
-              gridTemplateColumns: "1fr 320px",
-            }}
-          >
-            {/* LEFT */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-              {job.preTest && !resolvedTestResultId && (
-                <div className="jd-notice-blue jd-fade jd-d1">
-                  <ClipboardList
-                    style={{
-                      width: 18,
-                      height: 18,
-                      color: "#4A6FA5",
-                      flexShrink: 0,
-                      marginTop: 2,
-                    }}
-                  />
-                  <div>
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        color: "#3A5A8A",
-                        marginBottom: 4,
-                      }}
-                    >
-                      Lowongan ini mensyaratkan Pre-Selection Test
-                    </p>
-                    <p
-                      style={{
-                        fontSize: 13,
-                        color: "#5A6E8A",
-                        lineHeight: 1.65,
-                      }}
-                    >
-                      Selesaikan tes 25 soal (30 menit) sebelum bisa melamar.
-                      Klik tombol "Ikuti Pre-Selection Test" untuk memulai.
-                    </p>
-                  </div>
-                </div>
-              )}
-              {job.preTest && resolvedTestResultId && (
-                <div className="jd-notice-green jd-fade jd-d1">
-                  <CheckCircle2
-                    style={{
-                      width: 18,
-                      height: 18,
-                      color: "#22c55e",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <p
-                    style={{ fontSize: 13, color: "#166534", fontWeight: 500 }}
+            {/* Actions */}
+            <div className="flex flex-col items-end gap-3 min-w-[190px]">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="rounded-xl font-bold uppercase text-[10px] tracking-widest gap-2"
                   >
-                    Pre-selection test sudah diselesaikan — kamu siap untuk
-                    melamar!
-                  </p>
-                </div>
-              )}
-
-              <div className="jd-card jd-fade jd-d2">
-                <div className="jd-section-label">Deskripsi Pekerjaan</div>
-                <p
-                  style={{
-                    fontSize: 14,
-                    lineHeight: 1.9,
-                    color: "#4A4540",
-                    whiteSpace: "pre-line",
-                  }}
-                >
-                  {job.description}
-                </p>
-              </div>
-
-              {job.tags && job.tags.length > 0 && (
-                <div className="jd-card jd-fade jd-d3">
-                  <div className="jd-section-label">Skills & Tags</div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {job.tags.map((tag: string, i: number) => (
-                      <span key={i} className="jd-tag">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* RIGHT SIDEBAR */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <div className="jd-sidebar-card jd-fade jd-d1">
-                <div className="jd-section-label">Ringkasan Pekerjaan</div>
-                <div style={{ marginBottom: 16 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: 12,
-                      marginBottom: 5,
-                    }}
-                  >
-                    <span style={{ color: "#7A7469" }}>Sisa pendaftaran</span>
-                    <span
-                      style={{
-                        fontWeight: 600,
-                        color: deadline <= 3 ? "#DC4444" : "#4A6FA5",
-                      }}
-                    >
-                      {deadline} hari
-                    </span>
-                  </div>
-                  <div className="jd-deadline-track">
-                    <div
-                      className="jd-deadline-fill"
-                      style={{
-                        width: `${Math.min(100, (deadline / 30) * 100)}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-                <div style={{ borderTop: "1px solid #D0CBC3", paddingTop: 4 }}>
+                    <Share2 className="w-4 h-4" /> Bagikan
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
                   {[
                     {
-                      Icon: MapPin,
-                      label: "Lokasi",
-                      value: job.city || job.location || "—",
+                      key: "linkedin",
+                      label: "LinkedIn",
+                      color: "#0A66C2",
+                      Icon: Linkedin,
                     },
                     {
-                      Icon: Briefcase,
-                      label: "Tipe",
-                      value: job.type || job.category,
+                      key: "twitter",
+                      label: "Twitter / X",
+                      color: "#1DA1F2",
+                      Icon: Twitter,
                     },
                     {
-                      Icon: DollarSign,
-                      label: "Gaji",
-                      value: formatSalary(job.salary),
+                      key: "facebook",
+                      label: "Facebook",
+                      color: "#1877F2",
+                      Icon: Facebook,
                     },
                     {
-                      Icon: Clock,
-                      label: "Deadline",
-                      value: new Date(job.deadline).toLocaleDateString("id-ID"),
+                      key: "whatsapp",
+                      label: "WhatsApp",
+                      color: "#25D366",
+                      Icon: MessageCircle,
                     },
-                    { Icon: Building2, label: "Kategori", value: job.category },
-                  ].map(({ Icon, label, value }) => (
-                    <div key={label} className="jd-stat">
-                      <Icon
-                        style={{
-                          width: 14,
-                          height: 14,
-                          color: "#4A6FA5",
-                          flexShrink: 0,
-                        }}
-                      />
-                      <span className="jd-stat-label">{label}</span>
-                      <span className="jd-stat-value">{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {user?.role !== "ADMIN" && (
-                <div
-                  className="jd-card jd-fade jd-d2"
-                  style={{ textAlign: "center", padding: 20 }}
-                >
-                  {isApplied ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: 10,
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: "50%",
-                          background: "rgba(34,197,94,0.1)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <CheckCircle2
-                          style={{ width: 22, height: 22, color: "#22c55e" }}
-                        />
-                      </div>
-                      <p
-                        style={{
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: "#7A7469",
-                        }}
-                      >
-                        Lamaran sudah dikirim
-                      </p>
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 8,
-                      }}
-                    >
-                      <button
-                        className={`jd-btn-primary ${needsPreTest ? "jd-btn-pretest" : ""}`}
-                        onClick={handleOpenApply}
-                        disabled={isApplying}
-                      >
-                        {isApplying && (
-                          <Loader2
-                            style={{ width: 15, height: 15 }}
-                            className="animate-spin"
-                          />
-                        )}
-                        {needsPreTest
-                          ? "Ikuti Pre-Selection Test"
-                          : "Apply Sekarang →"}
-                      </button>
-                      <p style={{ fontSize: 11, color: "#7A7469" }}>
-                        {needsPreTest
-                          ? "Selesaikan tes terlebih dahulu"
-                          : "Proses cepat, kurang dari 2 menit"}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="jd-sidebar-card jd-fade jd-d3">
-                <p
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    letterSpacing: "0.15em",
-                    textTransform: "uppercase",
-                    color: "#7A7469",
-                    marginBottom: 12,
-                  }}
-                >
-                  Bagikan Lowongan
-                </p>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(4,1fr)",
-                    gap: 8,
-                  }}
-                >
-                  {[
-                    { key: "linkedin", Icon: Linkedin, color: "#0A66C2" },
-                    { key: "twitter", Icon: Twitter, color: "#1DA1F2" },
-                    { key: "facebook", Icon: Facebook, color: "#1877F2" },
-                    { key: "whatsapp", Icon: MessageCircle, color: "#25D366" },
-                  ].map(({ key, Icon, color }) => (
-                    <button
+                  ].map(({ key, label, color, Icon }) => (
+                    <DropdownMenuItem
                       key={key}
                       onClick={() => handleShare(key)}
-                      className="jd-social-btn"
+                      className="gap-2"
                     >
-                      <Icon style={{ width: 16, height: 16, color }} />
-                    </button>
+                      <Icon style={{ width: 15, height: 15, color }} /> {label}
+                    </DropdownMenuItem>
                   ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-        {/* ── Apply Dialog ── */}
-        <Dialog open={applyOpen} onOpenChange={setApplyOpen}>
-          <DialogContent className="max-w-lg rounded-2xl">
-            <DialogHeader>
-              <DialogTitle
-                style={{
-                  fontFamily: "'Plus Jakarta Sans',sans-serif",
-                  fontWeight: 700,
-                  color: "#1A2530",
-                }}
-              >
-                Kirim Lamaran
-              </DialogTitle>
-              <p style={{ fontSize: 12, color: "#7A7469", marginTop: 2 }}>
-                {job.title} · {job.company?.companyName}
-              </p>
-            </DialogHeader>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 18,
-                paddingTop: 8,
-              }}
-            >
-              <div>
-                <label className="jd-dialog-label">Ekspektasi Gaji (IDR)</label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={expectedSalary}
-                  onChange={(e) => setExpectedSalary(e.target.value)}
-                  placeholder="Contoh: 8.000.000"
-                  className="jd-dialog-input"
-                />
-              </div>
-              <div>
-                <label className="jd-dialog-label">CV yang Digunakan</label>
-                <Select value={cvOption} onValueChange={setCvOption}>
-                  <SelectTrigger className="jd-dialog-input">
-                    <SelectValue placeholder="Pilih CV" />
-                  </SelectTrigger>
-                  <SelectContent
-                    style={{
-                      background: "#FAFAF8",
-                      border: "1px solid #D8D3CB",
-                    }}
-                  >
-                    <SelectItem value="primary">Gunakan CV Primary</SelectItem>
-                    <SelectItem value="upload">Upload CV Baru</SelectItem>
-                    {isCvsLoading ? (
-                      <SelectItem value="loading" disabled>
-                        Loading…
-                      </SelectItem>
-                    ) : (
-                      (cvs || []).map((cv) => (
-                        <SelectItem key={cv.id} value={String(cv.id)}>
-                          {cv.cvName}
-                          {cv.isPrimary ? " (Primary)" : ""}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-              {cvOption === "upload" && (
-                <div
-                  style={{
-                    background: "#F0EDE8",
-                    border: "1px solid #D8D3CB",
-                    borderRadius: 12,
-                    padding: 16,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 14,
-                  }}
-                >
-                  <div>
-                    <label className="jd-dialog-label">Nama CV</label>
-                    <Input
-                      value={cvName}
-                      onChange={(e) => setCvName(e.target.value)}
-                      placeholder="e.g. CV - Backend Engineer"
-                      className="jd-dialog-input"
-                    />
-                  </div>
-                  <div>
-                    <label className="jd-dialog-label">File CV (PDF)</label>
-                    <Input
-                      type="file"
-                      accept="application/pdf"
-                      onChange={(e) => setCvFile(e.target.files?.[0] ?? null)}
-                      className="jd-dialog-input"
-                    />
-                  </div>
-                </div>
-              )}
-              <div style={{ display: "flex", gap: 10, paddingTop: 4 }}>
-                <button
-                  className="jd-btn-outline"
-                  style={{ flex: 1 }}
-                  onClick={() => setApplyOpen(false)}
-                  disabled={isApplying}
-                >
-                  Batal
-                </button>
-                <button
-                  className="jd-btn-primary"
-                  style={{ flex: 1, borderRadius: 12 }}
-                  onClick={handleSubmitApply}
+              {user?.role !== "ADMIN" && (
+                <Button
+                  onClick={handleOpenApply}
                   disabled={isApplying || isApplied}
+                  className={cn(
+                    "w-full rounded-2xl h-12 font-black uppercase text-xs tracking-[0.2em] shadow-xl",
+                    isApplied
+                      ? "bg-zinc-100 text-zinc-400 shadow-none cursor-default hover:bg-zinc-100"
+                      : needsPreTest
+                        ? "bg-orange-500 hover:bg-orange-600 shadow-orange-200 text-white"
+                        : "bg-zinc-900 hover:bg-black text-white shadow-zinc-200",
+                  )}
                 >
                   {isApplying && (
-                    <Loader2
-                      style={{ width: 15, height: 15 }}
-                      className="animate-spin"
-                    />
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   )}
-                  Kirim Lamaran
-                </button>
-              </div>
+                  {isApplied
+                    ? "✓ Sudah Dilamar"
+                    : needsPreTest
+                      ? "Ikuti Pre-Selection Test"
+                      : "Apply Sekarang →"}
+                </Button>
+              )}
             </div>
-          </DialogContent>
-        </Dialog>
+          </motion.div>
+        </div>
+      </div>
 
-        {/* ── Pre-Test Confirm Dialog ── */}
-        <Dialog open={preTestConfirmOpen} onOpenChange={setPreTestConfirmOpen}>
-          <DialogContent className="max-w-md rounded-2xl">
-            <DialogHeader>
-              <DialogTitle
-                style={{
-                  fontFamily: "'Plus Jakarta Sans',sans-serif",
-                  fontWeight: 700,
-                  color: "#1A2530",
-                }}
+      {/* BODY */}
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+          {/* LEFT */}
+          <div className="space-y-6">
+            {job.preTest && !resolvedTestResultId && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="flex gap-3 p-4 rounded-2xl bg-orange-50 border border-orange-200"
               >
-                Pre-Selection Test
-              </DialogTitle>
-            </DialogHeader>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 18,
-                paddingTop: 8,
-              }}
+                <ClipboardList className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-black text-orange-700 mb-1">
+                    Lowongan ini mensyaratkan Pre-Selection Test
+                  </p>
+                  <p className="text-xs text-orange-600 leading-relaxed">
+                    Selesaikan tes 25 soal (30 menit) sebelum bisa melamar.
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
+            {job.preTest && resolvedTestResultId && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="flex gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200"
+              >
+                <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                <p className="text-sm font-bold text-emerald-700">
+                  Pre-selection test sudah diselesaikan — kamu siap untuk
+                  melamar!
+                </p>
+              </motion.div>
+            )}
+
+            {/* Description */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white rounded-[2rem] shadow-sm border-none p-8"
             >
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <div
-                  style={{
-                    width: 60,
-                    height: 60,
-                    borderRadius: 16,
-                    background: "rgba(74,111,165,0.1)",
-                    border: "1px solid rgba(74,111,165,0.18)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Timer style={{ width: 28, height: 28, color: "#4A6FA5" }} />
+              <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-4">
+                Deskripsi Pekerjaan
+              </h2>
+              <p className="text-sm leading-relaxed text-zinc-600 whitespace-pre-line">
+                {job.description}
+              </p>
+            </motion.div>
+
+            {/* Tags */}
+            {job.tags && job.tags.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="bg-white rounded-[2rem] shadow-sm p-8"
+              >
+                <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-4">
+                  Skills & Tags
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {job.tags.map((tag: string, i: number) => (
+                    <Badge
+                      key={i}
+                      variant="secondary"
+                      className="text-xs font-bold px-3 py-1.5"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </div>
+
+          {/* RIGHT SIDEBAR */}
+          <div className="space-y-4">
+            {/* Summary Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white rounded-[2rem] shadow-sm p-6"
+            >
+              <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-4">
+                Ringkasan Pekerjaan
+              </h2>
+              <div className="mb-4">
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className="text-zinc-400 font-bold">
+                    Sisa pendaftaran
+                  </span>
+                  <span
+                    className={cn(
+                      "font-black",
+                      deadline <= 3 ? "text-red-500" : "text-orange-500",
+                    )}
+                  >
+                    {deadline} hari
+                  </span>
+                </div>
+                <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full transition-all"
+                    style={{
+                      width: `${Math.min(100, (deadline / 30) * 100)}%`,
+                    }}
+                  />
                 </div>
               </div>
-              <div
-                style={{
-                  background: "#F0EDE8",
-                  border: "1px solid #D8D3CB",
-                  borderRadius: 12,
-                  padding: "4px 16px",
-                }}
-              >
+              <div className="divide-y divide-zinc-50">
                 {[
-                  { label: "Jumlah soal", value: "25 pilihan ganda" },
-                  { label: "Durasi", value: "30 menit" },
                   {
-                    label: "Timer",
-                    value: "Tetap berjalan walau browser ditutup",
+                    Icon: MapPin,
+                    label: "Lokasi",
+                    value: job.city || job.location || "—",
                   },
-                  { label: "Pengerjaan", value: "Hanya bisa 1 kali" },
-                  { label: "Nilai minimum lulus", value: "75 / 100" },
-                ].map(({ label, value }) => (
-                  <div key={label} className="jd-test-row">
-                    <span style={{ color: "#7A7469" }}>{label}</span>
-                    <span style={{ fontWeight: 600, color: "#2C3E50" }}>
+                  { Icon: Briefcase, label: "Kategori", value: job.category },
+                  {
+                    Icon: DollarSign,
+                    label: "Gaji",
+                    value: formatSalary(job.salary),
+                  },
+                  {
+                    Icon: Clock,
+                    label: "Deadline",
+                    value: new Date(job.deadline).toLocaleDateString("id-ID"),
+                  },
+                ].map(({ Icon, label, value }) => (
+                  <div
+                    key={label}
+                    className="flex items-center gap-3 py-3 text-sm"
+                  >
+                    <Icon className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                    <span className="flex-1 text-zinc-400 font-bold text-xs uppercase tracking-wide">
+                      {label}
+                    </span>
+                    <span className="font-black text-zinc-900 text-xs">
                       {value}
                     </span>
                   </div>
                 ))}
               </div>
-              <p
-                style={{
-                  textAlign: "center",
-                  fontSize: 12,
-                  color: "#7A7469",
-                  lineHeight: 1.7,
-                }}
+            </motion.div>
+
+            {/* Apply Card */}
+            {user?.role !== "ADMIN" && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="bg-white rounded-[2rem] shadow-sm p-6 text-center"
               >
-                Pastikan koneksi internet stabil dan kamu punya cukup waktu
-                sebelum memulai.
+                {isApplied ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
+                      <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                    </div>
+                    <p className="text-sm font-black text-zinc-400 uppercase tracking-widest">
+                      Lamaran sudah dikirim
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <Button
+                      onClick={handleOpenApply}
+                      disabled={isApplying}
+                      className={cn(
+                        "w-full rounded-2xl h-12 font-black uppercase text-xs tracking-[0.2em] shadow-xl",
+                        needsPreTest
+                          ? "bg-orange-500 hover:bg-orange-600 shadow-orange-200 text-white"
+                          : "bg-zinc-900 hover:bg-black text-white shadow-zinc-200",
+                      )}
+                    >
+                      {isApplying && (
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      )}
+                      {needsPreTest
+                        ? "Ikuti Pre-Selection Test"
+                        : "Apply Sekarang →"}
+                    </Button>
+                    <p className="text-[10px] text-zinc-400 font-bold">
+                      {needsPreTest
+                        ? "Selesaikan tes terlebih dahulu"
+                        : "Proses cepat, kurang dari 2 menit"}
+                    </p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* Share Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-[2rem] shadow-sm p-6"
+            >
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-4">
+                Bagikan Lowongan
               </p>
-              <div style={{ display: "flex", gap: 10 }}>
-                <button
-                  className="jd-btn-outline"
-                  style={{ flex: 1 }}
-                  onClick={() => setPreTestConfirmOpen(false)}
-                >
-                  Belum Siap
-                </button>
-                <button
-                  className="jd-btn-primary jd-btn-pretest"
-                  style={{ flex: 1, borderRadius: 12 }}
-                  onClick={() => {
-                    setPreTestConfirmOpen(false);
-                    navigate(`/jobs/${job?.id}/take-test`);
-                  }}
-                >
-                  Mulai Tes →
-                </button>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { key: "linkedin", Icon: Linkedin, color: "#0A66C2" },
+                  { key: "twitter", Icon: Twitter, color: "#1DA1F2" },
+                  { key: "facebook", Icon: Facebook, color: "#1877F2" },
+                  { key: "whatsapp", Icon: MessageCircle, color: "#25D366" },
+                ].map(({ key, Icon, color }) => (
+                  <button
+                    key={key}
+                    onClick={() => handleShare(key)}
+                    className="flex items-center justify-center p-3 rounded-xl border border-zinc-200 hover:bg-zinc-50 transition-colors"
+                  >
+                    <Icon style={{ width: 16, height: 16, color }} />
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* Apply Dialog */}
+      <Dialog open={applyOpen} onOpenChange={setApplyOpen}>
+        <DialogContent className="max-w-lg rounded-[2rem]">
+          <DialogHeader>
+            <DialogTitle className="font-black uppercase italic text-zinc-900">
+              Kirim Lamaran
+            </DialogTitle>
+            <p className="text-xs text-zinc-400 font-bold">
+              {job.title} · {job.company?.companyName}
+            </p>
+          </DialogHeader>
+          <div className="space-y-5 pt-2">
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">
+                Ekspektasi Gaji (IDR)
+              </label>
+              <Input
+                type="number"
+                min={0}
+                value={expectedSalary}
+                onChange={(e) => setExpectedSalary(e.target.value)}
+                placeholder="Contoh: 8.000.000"
+                className="h-11 rounded-xl border-zinc-200 focus-visible:border-orange-500"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">
+                CV yang Digunakan
+              </label>
+              <Select value={cvOption} onValueChange={setCvOption}>
+                <SelectTrigger className="h-11 rounded-xl border-zinc-200">
+                  <SelectValue placeholder="Pilih CV" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="primary">Gunakan CV Primary</SelectItem>
+                  <SelectItem value="upload">Upload CV Baru</SelectItem>
+                  {isCvsLoading ? (
+                    <SelectItem value="loading" disabled>
+                      Loading…
+                    </SelectItem>
+                  ) : (
+                    (cvs || []).map((cv) => (
+                      <SelectItem key={cv.id} value={String(cv.id)}>
+                        {cv.cvName}
+                        {cv.isPrimary ? " (Primary)" : ""}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+            {cvOption === "upload" && (
+              <div className="bg-zinc-50 rounded-2xl p-4 space-y-4">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">
+                    Nama CV
+                  </label>
+                  <Input
+                    value={cvName}
+                    onChange={(e) => setCvName(e.target.value)}
+                    placeholder="e.g. CV - Backend Engineer"
+                    className="h-11 rounded-xl border-zinc-200 focus-visible:border-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">
+                    File CV (PDF)
+                  </label>
+                  <Input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={(e) => setCvFile(e.target.files?.[0] ?? null)}
+                    className="h-11 rounded-xl border-zinc-200"
+                  />
+                </div>
+              </div>
+            )}
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="ghost"
+                className="flex-1 rounded-2xl font-black uppercase text-[10px]"
+                onClick={() => setApplyOpen(false)}
+                disabled={isApplying}
+              >
+                Batal
+              </Button>
+              <Button
+                onClick={handleSubmitApply}
+                disabled={isApplying || isApplied}
+                className="flex-1 bg-zinc-900 hover:bg-black text-white rounded-2xl font-black uppercase text-[10px] shadow-xl shadow-zinc-200"
+              >
+                {isApplying && (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                )}
+                Kirim Lamaran
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pre-Test Confirm Dialog */}
+      <Dialog open={preTestConfirmOpen} onOpenChange={setPreTestConfirmOpen}>
+        <DialogContent className="max-w-md rounded-[2rem]">
+          <DialogHeader>
+            <DialogTitle className="font-black uppercase italic text-zinc-900">
+              Pre-Selection Test
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5 pt-2">
+            <div className="flex justify-center">
+              <div className="w-16 h-16 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-center">
+                <Timer className="w-8 h-8 text-orange-500" />
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
+            <div className="bg-zinc-50 rounded-2xl divide-y divide-zinc-100">
+              {[
+                { label: "Jumlah soal", value: "25 pilihan ganda" },
+                { label: "Durasi", value: "30 menit" },
+                {
+                  label: "Timer",
+                  value: "Tetap berjalan walau browser ditutup",
+                },
+                { label: "Pengerjaan", value: "Hanya bisa 1 kali" },
+                { label: "Nilai minimum lulus", value: "75 / 100" },
+              ].map(({ label, value }) => (
+                <div
+                  key={label}
+                  className="flex justify-between items-center px-4 py-3 text-sm"
+                >
+                  <span className="text-zinc-400 font-bold">{label}</span>
+                  <span className="font-black text-zinc-900">{value}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-xs text-zinc-400 font-medium leading-relaxed">
+              Pastikan koneksi internet stabil dan kamu punya cukup waktu
+              sebelum memulai.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                className="flex-1 rounded-2xl font-black uppercase text-[10px]"
+                onClick={() => setPreTestConfirmOpen(false)}
+              >
+                Belum Siap
+              </Button>
+              <Button
+                onClick={() => {
+                  setPreTestConfirmOpen(false);
+                  navigate(`/jobs/${job?.id}/take-test`);
+                }}
+                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black uppercase text-[10px] shadow-xl shadow-orange-200"
+              >
+                Mulai Tes →
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-        <Footer />
-      </div>
-    </>
+      <Footer />
+    </div>
   );
 };
 

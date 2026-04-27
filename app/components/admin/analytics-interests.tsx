@@ -8,8 +8,9 @@ import {
 import type { AnalyticsApplicantInterests } from "~/types/analytics";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
+// ── chart config — warna disesuaikan ──
 const categoryChartConfig = {
-  count: { label: "Pelamar", color: "#f97316" },
+  count: { label: "Pelamar", color: "#1D5FAD" },
 };
 
 interface Props {
@@ -18,28 +19,44 @@ interface Props {
 }
 
 export default function AnalyticsInterests({ data, isPending }: Props) {
+  // ── shared states ──
   const spinner = (
     <div className="h-48 flex items-center justify-center">
-      <div className="w-6 h-6 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-[#1D5FAD] border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   const empty = (
-    <div className="h-48 flex items-center justify-center text-zinc-400 font-bold uppercase text-[10px] tracking-widest">
-      Belum ada data
+    <div className="h-48 flex items-center justify-center">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-300">
+        Belum ada data
+      </p>
     </div>
+  );
+
+  // ── shared card head ──
+  const CardHead = ({
+    icon: Icon,
+    title,
+  }: {
+    icon: React.ElementType;
+    title: string;
+  }) => (
+    <CardHeader className="border-b border-[#E2EAF4] bg-[#F4F8FF]">
+      <CardTitle className="flex items-center gap-3 text-[#0F2342] font-bold text-base">
+        <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center">
+          <Icon className="h-4 w-4 text-[#1D5FAD]" />
+        </div>
+        {title}
+      </CardTitle>
+    </CardHeader>
   );
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      {/* By Category */}
-      <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
-        <CardHeader className="border-b border-zinc-50 bg-zinc-50/30">
-          <CardTitle className="flex items-center gap-3 text-zinc-900 font-black uppercase italic text-lg tracking-tight">
-            <BarChart3 className="h-5 w-5 text-orange-500" />
-            Minat per Kategori
-          </CardTitle>
-        </CardHeader>
+      {/* ── By Category ── */}
+      <Card className="border border-[#E2EAF4] shadow-none rounded-2xl bg-white overflow-hidden">
+        <CardHead icon={BarChart3} title="Minat per Kategori" />
         <CardContent className="p-6">
           {isPending ? (
             spinner
@@ -58,28 +75,28 @@ export default function AnalyticsInterests({ data, isPending }: Props) {
                 <CartesianGrid
                   strokeDasharray="3 3"
                   horizontal={false}
-                  stroke="#f4f4f5"
+                  stroke="#E2EAF4"
                 />
                 <XAxis
                   type="number"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 9, fontWeight: 700, fill: "#a1a1aa" }}
+                  tick={{ fontSize: 10, fontWeight: 600, fill: "#94A3B8" }}
                 />
                 <YAxis
                   type="category"
                   dataKey="category"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 9, fontWeight: 700, fill: "#a1a1aa" }}
+                  tick={{ fontSize: 10, fontWeight: 600, fill: "#94A3B8" }}
                 />
                 <ChartTooltip
-                  cursor={{ fill: "#fafafa" }}
+                  cursor={{ fill: "#F4F8FF" }}
                   content={<ChartTooltipContent />}
                 />
                 <Bar
                   dataKey="count"
-                  fill="#f97316"
+                  fill="#1D5FAD"
                   radius={[0, 6, 6, 0]}
                   barSize={20}
                 />
@@ -89,32 +106,44 @@ export default function AnalyticsInterests({ data, isPending }: Props) {
         </CardContent>
       </Card>
 
-      {/* Top Jobs */}
-      <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
-        <CardHeader className="border-b border-zinc-50 bg-zinc-50/30">
-          <CardTitle className="flex items-center gap-3 text-zinc-900 font-black uppercase italic text-lg tracking-tight">
-            <Briefcase className="h-5 w-5 text-orange-500" />
-            Top 10 Lowongan
-          </CardTitle>
-        </CardHeader>
+      {/* ── Top Jobs ── */}
+      <Card className="border border-[#E2EAF4] shadow-none rounded-2xl bg-white overflow-hidden">
+        <CardHead icon={Briefcase} title="Top 10 Lowongan" />
         <CardContent className="p-6">
           {isPending ? (
             spinner
           ) : !data?.topJobs.length ? (
             empty
           ) : (
-            <div className="space-y-3 overflow-y-auto max-h-48">
+            <div className="space-y-2 overflow-y-auto max-h-48">
               {data.topJobs.map((job, i) => (
-                <div key={job.jobId} className="flex items-center gap-3">
-                  <span className="text-[10px] font-black text-zinc-400 w-4 shrink-0">
+                <div
+                  key={job.jobId}
+                  className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-[#F4F8FF] transition-colors group"
+                >
+                  {/* Rank badge */}
+                  <span
+                    className={[
+                      "text-[10px] font-bold w-5 h-5 rounded-md flex items-center justify-center shrink-0",
+                      i === 0
+                        ? "bg-[#1D5FAD] text-white"
+                        : i === 1
+                          ? "bg-[#A5C0E4] text-white"
+                          : i === 2
+                            ? "bg-[#D1DFF0] text-[#1D5FAD]"
+                            : "text-slate-300 bg-transparent",
+                    ].join(" ")}
+                  >
                     {i + 1}
                   </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-zinc-900 truncate">
-                      {job.title}
-                    </p>
-                  </div>
-                  <span className="text-xs font-black text-orange-600 shrink-0">
+
+                  {/* Title */}
+                  <p className="flex-1 min-w-0 text-sm font-semibold text-[#0F2342] truncate group-hover:text-[#1D5FAD] transition-colors">
+                    {job.title}
+                  </p>
+
+                  {/* Count */}
+                  <span className="text-xs font-bold text-[#1D5FAD] shrink-0">
                     {job.count} pelamar
                   </span>
                 </div>

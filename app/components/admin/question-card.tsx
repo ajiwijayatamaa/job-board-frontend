@@ -45,26 +45,28 @@ export default function QuestionCard({ questionIndex }: Props) {
   const qErrors = errors.questions?.[questionIndex];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
+      {/* --- Section: Question Text --- */}
       <Field data-invalid={!!qErrors?.questionText}>
-        <FieldLabel className="text-xs font-black uppercase tracking-widest text-zinc-400">
-          Teks Soal *
+        <FieldLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 block">
+          Pertanyaan Strategis *
         </FieldLabel>
         <textarea
           {...register(`questions.${questionIndex}.questionText`)}
-          rows={3}
-          className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-900 placeholder:text-zinc-400 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 resize-none"
-          placeholder="Tulis pertanyaan di sini..."
+          rows={4}
+          className="w-full rounded-2xl border border-[#D1DFF0] bg-white px-5 py-4 text-sm font-semibold text-[#0F2342] placeholder:text-slate-300 focus:border-[#1D5FAD] focus:outline-none focus:ring-4 focus:ring-[#1D5FAD]/5 transition-all resize-none shadow-sm"
+          placeholder="Masukkan narasi atau teks pertanyaan di sini..."
         />
         {qErrors?.questionText && (
           <FieldError errors={[qErrors.questionText]} />
         )}
       </Field>
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-black uppercase tracking-widest text-zinc-400">
-            Opsi Jawaban *
+      {/* --- Section: Options --- */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            Opsi Jawaban & Kunci *
           </span>
           {fields.length < 5 && (
             <Button
@@ -72,61 +74,74 @@ export default function QuestionCard({ questionIndex }: Props) {
               variant="ghost"
               size="sm"
               onClick={() => append({ optionText: "", isCorrect: false })}
-              className="text-[10px] font-black uppercase text-orange-500 hover:text-orange-600 h-auto py-1"
+              className="text-[10px] font-black uppercase text-[#1D5FAD] hover:bg-[#1D5FAD]/5 h-auto py-2 px-3 rounded-lg transition-all"
             >
-              <Plus className="w-3 h-3 mr-1" /> Tambah Opsi
+              <Plus className="w-3.5 h-3.5 mr-1.5" /> Tambah Opsi
             </Button>
           )}
         </div>
 
-        {fields.map((field, optionIndex) => {
-          const isCorrect = options?.[optionIndex]?.isCorrect ?? false;
-          return (
-            <div key={field.id} className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => handleSelectCorrect(optionIndex)}
-                className={cn(
-                  "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black transition-all",
-                  isCorrect
-                    ? "bg-orange-500 text-white shadow-md shadow-orange-200"
-                    : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200",
-                )}
-              >
-                {isCorrect ? (
-                  <CheckCircle2 className="w-4 h-4" />
-                ) : (
-                  <span>{OPTION_LABELS[optionIndex]}</span>
-                )}
-              </button>
-              <Input
-                {...register(
-                  `questions.${questionIndex}.options.${optionIndex}.optionText`,
-                )}
-                placeholder={`Opsi ${OPTION_LABELS[optionIndex]}`}
-                className={cn(
-                  "flex-1 h-10 rounded-xl text-sm font-medium border-zinc-200",
-                  isCorrect &&
-                    "border-orange-400 bg-orange-50/50 focus-visible:border-orange-500",
-                )}
-              />
-              {fields.length > 2 && (
+        <div className="grid gap-3">
+          {fields.map((field, optionIndex) => {
+            const isCorrect = options?.[optionIndex]?.isCorrect ?? false;
+            return (
+              <div key={field.id} className="flex items-center gap-4 group">
+                {/* Checkbox/Circle Button */}
                 <button
                   type="button"
-                  onClick={() => remove(optionIndex)}
-                  className="flex-shrink-0 text-zinc-300 hover:text-red-400 transition-colors"
+                  onClick={() => handleSelectCorrect(optionIndex)}
+                  className={cn(
+                    "flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-[11px] font-black transition-all border-2",
+                    isCorrect
+                      ? "bg-[#1D5FAD] border-[#1D5FAD] text-white shadow-lg shadow-[#1D5FAD]/20 scale-105"
+                      : "bg-white border-[#E2EAF4] text-slate-400 hover:border-[#1D5FAD] hover:text-[#1D5FAD]",
+                  )}
                 >
-                  <Trash2 className="w-4 h-4" />
+                  {isCorrect ? (
+                    <CheckCircle2 className="w-5 h-5" />
+                  ) : (
+                    <span>{OPTION_LABELS[optionIndex]}</span>
+                  )}
                 </button>
-              )}
-            </div>
-          );
-        })}
+
+                {/* Input Text */}
+                <div className="flex-1 relative">
+                  <Input
+                    {...register(
+                      `questions.${questionIndex}.options.${optionIndex}.optionText`,
+                    )}
+                    placeholder={`Ketik opsi ${OPTION_LABELS[optionIndex]}...`}
+                    className={cn(
+                      "h-12 rounded-xl text-sm font-bold border-[#D1DFF0] transition-all pr-12",
+                      isCorrect
+                        ? "border-[#1D5FAD] bg-[#F4F8FF] text-[#0F2342] ring-2 ring-[#1D5FAD]/5"
+                        : "focus-visible:border-[#1D5FAD] focus-visible:ring-[#1D5FAD]/5",
+                    )}
+                  />
+
+                  {/* Delete Button inside Input for cleanliness */}
+                  {fields.length > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => remove(optionIndex)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-rose-500 transition-colors p-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
         {qErrors?.correctAnswer && (
-          <p className="text-xs text-red-500 font-medium mt-1">
-            {qErrors.correctAnswer.message as string}
-          </p>
+          <div className="flex items-center gap-2 mt-2 px-1">
+            <div className="w-1 h-1 bg-rose-500 rounded-full" />
+            <p className="text-[11px] text-rose-500 font-bold uppercase tracking-tight">
+              {qErrors.correctAnswer.message as string}
+            </p>
+          </div>
         )}
       </div>
     </div>

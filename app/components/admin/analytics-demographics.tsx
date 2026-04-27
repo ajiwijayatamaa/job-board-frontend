@@ -17,17 +17,18 @@ import {
   YAxis,
 } from "recharts";
 
+// ── chart config — warna disesuaikan ke blue corporate ──
 const genderChartConfig = {
-  MALE: { label: "Laki-laki", color: "#18181b" },
-  FEMALE: { label: "Perempuan", color: "#f97316" },
-  unknown: { label: "Tidak Diketahui", color: "#d4d4d8" },
+  MALE: { label: "Laki-laki", color: "#1D5FAD" },
+  FEMALE: { label: "Perempuan", color: "#7DD3FC" },
+  unknown: { label: "Tidak Diketahui", color: "#CBD5E1" },
 };
 
 const ageChartConfig = {
-  count: { label: "Pelamar", color: "#f97316" },
+  count: { label: "Pelamar", color: "#1D5FAD" },
 };
 
-const GENDER_COLORS = ["#18181b", "#f97316", "#d4d4d8"];
+const GENDER_COLORS = ["#1D5FAD", "#7DD3FC", "#CBD5E1"];
 
 interface Props {
   data: AnalyticsDemographics | undefined;
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export default function AnalyticsDemographics({ data, isPending }: Props) {
+  // ── data transform — identik ──
   const genderData = data
     ? Object.entries(data.gender).map(([key, value]) => ({
         name: key,
@@ -55,29 +57,45 @@ export default function AnalyticsDemographics({ data, isPending }: Props) {
       }))
     : [];
 
+  // ── shared states ──
   const spinner = (
     <div className="h-48 flex items-center justify-center">
-      <div className="w-6 h-6 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-[#1D5FAD] border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   const empty = (
-    <div className="h-48 flex items-center justify-center text-zinc-400 font-bold uppercase text-[10px] tracking-widest">
-      Belum ada data
+    <div className="h-48 flex items-center justify-center">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-300">
+        Belum ada data
+      </p>
     </div>
+  );
+
+  // ── shared card header renderer ──
+  const CardHead = ({
+    icon: Icon,
+    title,
+  }: {
+    icon: React.ElementType;
+    title: string;
+  }) => (
+    <CardHeader className="border-b border-[#E2EAF4] bg-[#F4F8FF]">
+      <CardTitle className="flex items-center gap-3 text-[#0F2342] font-bold text-base">
+        <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center">
+          <Icon className="h-4 w-4 text-[#1D5FAD]" />
+        </div>
+        {title}
+      </CardTitle>
+    </CardHeader>
   );
 
   return (
     <div className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Gender */}
-        <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
-          <CardHeader className="border-b border-zinc-50 bg-zinc-50/30">
-            <CardTitle className="flex items-center gap-3 text-zinc-900 font-black uppercase italic text-lg tracking-tight">
-              <Users className="h-5 w-5 text-orange-500" />
-              Gender Pelamar
-            </CardTitle>
-          </CardHeader>
+        {/* ── Gender ── */}
+        <Card className="border border-[#E2EAF4] shadow-none rounded-2xl bg-white overflow-hidden">
+          <CardHead icon={Users} title="Gender Pelamar" />
           <CardContent className="p-6">
             {isPending ? (
               spinner
@@ -109,21 +127,22 @@ export default function AnalyticsDemographics({ data, isPending }: Props) {
                     <ChartTooltip content={<ChartTooltipContent />} />
                   </PieChart>
                 </ChartContainer>
+
                 <div className="space-y-3">
                   {genderData.map((item, i) => (
                     <div key={item.name} className="flex items-center gap-3">
                       <div
-                        className="w-3 h-3 rounded-full shrink-0"
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{
                           backgroundColor:
                             GENDER_COLORS[i % GENDER_COLORS.length],
                         }}
                       />
                       <div>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                           {item.label}
                         </p>
-                        <p className="text-lg font-black italic text-zinc-900">
+                        <p className="text-xl font-bold text-[#0F2342]">
                           {item.value}
                         </p>
                       </div>
@@ -135,14 +154,9 @@ export default function AnalyticsDemographics({ data, isPending }: Props) {
           </CardContent>
         </Card>
 
-        {/* Age Groups */}
-        <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
-          <CardHeader className="border-b border-zinc-50 bg-zinc-50/30">
-            <CardTitle className="flex items-center gap-3 text-zinc-900 font-black uppercase italic text-lg tracking-tight">
-              <Users className="h-5 w-5 text-orange-500" />
-              Kelompok Usia
-            </CardTitle>
-          </CardHeader>
+        {/* ── Age Groups ── */}
+        <Card className="border border-[#E2EAF4] shadow-none rounded-2xl bg-white overflow-hidden">
+          <CardHead icon={Users} title="Kelompok Usia" />
           <CardContent className="p-6">
             {isPending ? (
               spinner
@@ -157,26 +171,26 @@ export default function AnalyticsDemographics({ data, isPending }: Props) {
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
-                    stroke="#f4f4f5"
+                    stroke="#E2EAF4"
                   />
                   <XAxis
                     dataKey="label"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 9, fontWeight: 700, fill: "#a1a1aa" }}
+                    tick={{ fontSize: 10, fontWeight: 600, fill: "#94A3B8" }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 9, fontWeight: 700, fill: "#a1a1aa" }}
+                    tick={{ fontSize: 10, fontWeight: 600, fill: "#94A3B8" }}
                   />
                   <ChartTooltip
-                    cursor={{ fill: "#fafafa" }}
+                    cursor={{ fill: "#F4F8FF" }}
                     content={<ChartTooltipContent />}
                   />
                   <Bar
                     dataKey="count"
-                    fill="#f97316"
+                    fill="#1D5FAD"
                     radius={[6, 6, 0, 0]}
                     barSize={28}
                   />
@@ -187,42 +201,42 @@ export default function AnalyticsDemographics({ data, isPending }: Props) {
         </Card>
       </div>
 
-      {/* Locations */}
-      <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
-        <CardHeader className="border-b border-zinc-50 bg-zinc-50/30">
-          <CardTitle className="flex items-center gap-3 text-zinc-900 font-black uppercase italic text-lg tracking-tight">
-            <MapPin className="h-5 w-5 text-orange-500" />
-            Lokasi Pelamar
-          </CardTitle>
-        </CardHeader>
+      {/* ── Locations ── */}
+      <Card className="border border-[#E2EAF4] shadow-none rounded-2xl bg-white overflow-hidden">
+        <CardHead icon={MapPin} title="Lokasi Pelamar" />
         <CardContent className="p-6">
           {isPending ? (
             <div className="h-12 flex items-center justify-center">
-              <div className="w-6 h-6 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-[#1D5FAD] border-t-transparent rounded-full animate-spin" />
             </div>
           ) : !data?.locations.length ? (
-            <div className="py-8 text-center text-zinc-400 font-bold uppercase text-[10px] tracking-widest">
-              Belum ada data
+            <div className="py-8 text-center">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-300">
+                Belum ada data
+              </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {data.locations.slice(0, 8).map((loc, i) => (
                 <div key={loc.city} className="flex items-center gap-4">
-                  <span className="text-[10px] font-black text-zinc-400 w-4">
+                  {/* Rank */}
+                  <span className="text-[10px] font-bold text-slate-300 w-4 text-right shrink-0">
                     {i + 1}
                   </span>
+
                   <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-black text-zinc-900 capitalize">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <p className="text-sm font-semibold text-[#0F2342] capitalize">
                         {loc.city}
                       </p>
-                      <p className="text-xs font-black text-orange-600">
+                      <p className="text-xs font-bold text-[#1D5FAD]">
                         {loc.count}
                       </p>
                     </div>
-                    <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+                    {/* Progress bar */}
+                    <div className="h-1.5 bg-[#E2EAF4] rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-orange-500 rounded-full transition-all"
+                        className="h-full bg-[#1D5FAD] rounded-full transition-all duration-500"
                         style={{
                           width: `${(loc.count / (data.locations[0]?.count ?? 1)) * 100}%`,
                         }}

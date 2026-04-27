@@ -9,7 +9,6 @@ import {
   MapPin,
   Plus,
   Save,
-  Sparkles,
   Tag,
   Trash2,
   X,
@@ -104,19 +103,19 @@ export default function AdminJobEditPage() {
   if (isLoading) {
     return (
       <SidebarProvider>
-        <div className="flex min-h-screen bg-zinc-50/50 w-full">
+        <div className="flex min-h-screen bg-[#F0F5FB] w-full">
           <AdminSidebar />
           <main className="flex-1 p-6 lg:p-10 max-w-6xl mx-auto space-y-6">
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-12 w-72" />
             <div className="grid gap-8 lg:grid-cols-3">
               <div className="lg:col-span-2 space-y-8">
-                <Skeleton className="h-64 w-full rounded-[2rem]" />
-                <Skeleton className="h-40 w-full rounded-[2rem]" />
+                <Skeleton className="h-64 w-full rounded-2xl" />
+                <Skeleton className="h-40 w-full rounded-2xl" />
               </div>
               <div className="space-y-8">
-                <Skeleton className="h-48 w-full rounded-[2rem]" />
-                <Skeleton className="h-40 w-full rounded-[2rem]" />
+                <Skeleton className="h-48 w-full rounded-2xl" />
+                <Skeleton className="h-40 w-full rounded-2xl" />
               </div>
             </div>
           </main>
@@ -127,7 +126,7 @@ export default function AdminJobEditPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-zinc-50/50 w-full">
+      <div className="flex min-h-screen bg-[#F0F5FB] w-full">
         <AdminSidebar />
 
         <main className="flex-1 overflow-y-auto">
@@ -142,7 +141,7 @@ export default function AdminJobEditPage() {
                 <Button
                   variant="ghost"
                   asChild
-                  className="mb-6 -ml-2 text-zinc-500 hover:text-zinc-900 font-bold uppercase text-[10px] tracking-widest"
+                  className="mb-6 -ml-2 text-slate-400 hover:text-[#0F2342] font-semibold uppercase text-[10px] tracking-widest"
                 >
                   <Link to={`/admin/jobs/${jobId}`}>
                     <ArrowLeft className="mr-2 h-3 w-3" /> Kembali ke Detail
@@ -150,15 +149,36 @@ export default function AdminJobEditPage() {
                   </Link>
                 </Button>
                 <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-orange-500" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
+                  <svg viewBox="0 0 20 20" className="w-5 h-5" fill="none">
+                    <rect width="20" height="20" rx="5" fill="#1D5FAD" />
+                    <circle
+                      cx="8"
+                      cy="8"
+                      r="3"
+                      stroke="white"
+                      strokeWidth="1.5"
+                    />
+                    <path
+                      d="M8 11v4M5 15h6"
+                      stroke="white"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M13 7h4M13 10h3M13 13h3.5"
+                      stroke="#7DD3FC"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span className="text-xs font-semibold text-slate-400 tracking-widest uppercase">
                     Job Publisher
                   </span>
                 </div>
-                <h1 className="text-4xl font-black tracking-tighter text-zinc-900 uppercase italic">
-                  Edit <span className="text-orange-500">Lowongan</span>
+                <h1 className="text-3xl font-bold text-[#0F2342]">
+                  Edit Lowongan
                 </h1>
-                <p className="text-zinc-500 text-sm font-medium mt-1">
+                <p className="text-slate-500 text-sm mt-1">
                   Perbarui detail lowongan pekerjaan di bawah ini.
                 </p>
               </div>
@@ -173,10 +193,10 @@ export default function AdminJobEditPage() {
                   {/* Main Content (Left) */}
                   <div className="lg:col-span-2 space-y-8">
                     {/* Informasi Dasar */}
-                    <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
-                      <CardHeader className="border-b border-zinc-50 bg-zinc-50/30">
-                        <CardTitle className="flex items-center gap-3 text-zinc-900 font-black uppercase italic text-lg tracking-tight">
-                          <FileText className="h-5 w-5 text-orange-500" />
+                    <Card className="border border-[#E2EAF4] shadow-none rounded-2xl bg-white overflow-hidden">
+                      <CardHeader className="border-b border-[#E2EAF4] bg-[#F4F8FF]">
+                        <CardTitle className="flex items-center gap-3 text-[#0F2342] font-bold text-base">
+                          <FileText className="h-4 w-4 text-[#1D5FAD]" />
                           Informasi Dasar
                         </CardTitle>
                       </CardHeader>
@@ -186,12 +206,12 @@ export default function AdminJobEditPage() {
                           control={form.control}
                           render={({ field, fieldState }) => (
                             <Field data-invalid={fieldState.invalid}>
-                              <FieldLabel className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                              <FieldLabel className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                                 Judul Lowongan *
                               </FieldLabel>
                               <Input
                                 {...field}
-                                className="h-12 rounded-xl border-zinc-200 focus-visible:ring-orange-500/20 focus-visible:border-orange-500 font-bold tracking-tight"
+                                className="h-12 rounded-xl border-[#D1DFF0] focus-visible:ring-[#1D5FAD]/20 focus-visible:border-[#1D5FAD] font-medium"
                                 placeholder="Contoh: Senior Frontend Engineer"
                               />
                               {fieldState.invalid && (
@@ -206,12 +226,12 @@ export default function AdminJobEditPage() {
                           control={form.control}
                           render={({ field, fieldState }) => (
                             <Field data-invalid={fieldState.invalid}>
-                              <FieldLabel className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                              <FieldLabel className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                                 Deskripsi Pekerjaan *
                               </FieldLabel>
                               <Textarea
                                 {...field}
-                                className="rounded-xl border-zinc-200 focus-visible:ring-orange-500/20 focus-visible:border-orange-500 font-medium min-h-[200px]"
+                                className="rounded-xl border-[#D1DFF0] focus-visible:ring-[#1D5FAD]/20 focus-visible:border-[#1D5FAD] font-medium min-h-[200px]"
                                 placeholder="Jelaskan tanggung jawab, kualifikasi, dan benefit pekerjaan ini..."
                               />
                               {fieldState.invalid && (
@@ -227,14 +247,14 @@ export default function AdminJobEditPage() {
                             control={form.control}
                             render={({ field, fieldState }) => (
                               <Field data-invalid={fieldState.invalid}>
-                                <FieldLabel className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                                <FieldLabel className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                                   Kategori *
                                 </FieldLabel>
                                 <div className="relative">
-                                  <Briefcase className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-500" />
+                                  <Briefcase className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#1D5FAD]" />
                                   <Input
                                     {...field}
-                                    className="pl-12 h-12 rounded-xl border-zinc-200 focus-visible:ring-orange-500/20 focus-visible:border-orange-500 font-bold"
+                                    className="pl-12 h-12 rounded-xl border-[#D1DFF0] focus-visible:ring-[#1D5FAD]/20 focus-visible:border-[#1D5FAD] font-medium"
                                     placeholder="Contoh: Technology"
                                   />
                                 </div>
@@ -250,14 +270,14 @@ export default function AdminJobEditPage() {
                             control={form.control}
                             render={({ field, fieldState }) => (
                               <Field data-invalid={fieldState.invalid}>
-                                <FieldLabel className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                                <FieldLabel className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                                   Kota *
                                 </FieldLabel>
                                 <div className="relative">
-                                  <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-500" />
+                                  <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#1D5FAD]" />
                                   <Input
                                     {...field}
-                                    className="pl-12 h-12 rounded-xl border-zinc-200 focus-visible:ring-orange-500/20 focus-visible:border-orange-500 font-bold"
+                                    className="pl-12 h-12 rounded-xl border-[#D1DFF0] focus-visible:ring-[#1D5FAD]/20 focus-visible:border-[#1D5FAD] font-medium"
                                     placeholder="Contoh: Jakarta"
                                   />
                                 </div>
@@ -272,10 +292,10 @@ export default function AdminJobEditPage() {
                     </Card>
 
                     {/* Tags */}
-                    <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
-                      <CardHeader className="border-b border-zinc-50 bg-zinc-50/30">
-                        <CardTitle className="flex items-center gap-3 text-zinc-900 font-black uppercase italic text-lg tracking-tight">
-                          <Tag className="h-5 w-5 text-orange-500" />
+                    <Card className="border border-[#E2EAF4] shadow-none rounded-2xl bg-white overflow-hidden">
+                      <CardHeader className="border-b border-[#E2EAF4] bg-[#F4F8FF]">
+                        <CardTitle className="flex items-center gap-3 text-[#0F2342] font-bold text-base">
+                          <Tag className="h-4 w-4 text-[#1D5FAD]" />
                           Tags
                         </CardTitle>
                       </CardHeader>
@@ -285,7 +305,7 @@ export default function AdminJobEditPage() {
                           control={form.control}
                           render={({ field, fieldState }) => (
                             <Field data-invalid={fieldState.invalid}>
-                              <FieldLabel className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                              <FieldLabel className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                                 Tag Keahlian *
                               </FieldLabel>
                               <div className="flex gap-2">
@@ -298,13 +318,13 @@ export default function AdminJobEditPage() {
                                       addTag();
                                     }
                                   }}
-                                  className="h-12 rounded-xl border-zinc-200 focus-visible:ring-orange-500/20 focus-visible:border-orange-500 font-bold"
+                                  className="h-12 rounded-xl border-[#D1DFF0] focus-visible:ring-[#1D5FAD]/20 focus-visible:border-[#1D5FAD] font-medium"
                                   placeholder="Contoh: React, TypeScript..."
                                 />
                                 <Button
                                   type="button"
                                   onClick={addTag}
-                                  className="h-12 px-4 rounded-xl bg-zinc-900 hover:bg-black text-white font-black uppercase text-[10px] tracking-widest shrink-0"
+                                  className="h-12 px-4 rounded-xl bg-[#1D5FAD] hover:bg-[#174E8F] text-white font-semibold text-xs shrink-0"
                                 >
                                   <Plus className="h-4 w-4" />
                                 </Button>
@@ -314,13 +334,13 @@ export default function AdminJobEditPage() {
                                   {field.value?.map((tag) => (
                                     <span
                                       key={tag}
-                                      className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-full text-[10px] font-black uppercase tracking-widest"
+                                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#EEF4FF] text-[#1D5FAD] border border-[#C8D9EE] rounded-full text-[11px] font-semibold"
                                     >
                                       {tag}
                                       <button
                                         type="button"
                                         onClick={() => removeTag(tag)}
-                                        className="hover:text-red-500 transition-colors"
+                                        className="hover:text-rose-500 transition-colors"
                                       >
                                         <X className="h-3 w-3" />
                                       </button>
@@ -341,11 +361,10 @@ export default function AdminJobEditPage() {
                   {/* Sidebar (Right) */}
                   <div className="space-y-8">
                     {/* Deadline & Salary */}
-                    <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden relative">
-                      <div className="absolute top-1/2 -left-3 w-6 h-6 bg-zinc-50 rounded-full border border-zinc-100 -translate-y-1/2" />
-                      <CardHeader className="bg-zinc-900 text-white">
-                        <CardTitle className="text-sm font-black uppercase tracking-widest italic flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-orange-500" />
+                    <Card className="border border-[#E2EAF4] shadow-none rounded-2xl bg-white overflow-hidden">
+                      <CardHeader className="bg-[#0F2342] text-white">
+                        <CardTitle className="text-sm font-bold tracking-wide flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-[#7DD3FC]" />
                           Detail Lowongan
                         </CardTitle>
                       </CardHeader>
@@ -355,13 +374,13 @@ export default function AdminJobEditPage() {
                           control={form.control}
                           render={({ field, fieldState }) => (
                             <Field data-invalid={fieldState.invalid}>
-                              <FieldLabel className="text-[10px] font-black uppercase text-zinc-400">
+                              <FieldLabel className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                                 Deadline *
                               </FieldLabel>
                               <Input
                                 {...field}
                                 type="date"
-                                className="h-12 rounded-xl border-zinc-200 focus-visible:ring-orange-500/20 focus-visible:border-orange-500 font-bold uppercase text-[11px]"
+                                className="h-12 rounded-xl border-[#D1DFF0] focus-visible:ring-[#1D5FAD]/20 focus-visible:border-[#1D5FAD] font-medium text-[11px]"
                               />
                               {fieldState.invalid && (
                                 <FieldError errors={[fieldState.error]} />
@@ -375,16 +394,16 @@ export default function AdminJobEditPage() {
                           control={form.control}
                           render={({ field, fieldState }) => (
                             <Field data-invalid={fieldState.invalid}>
-                              <FieldLabel className="text-[10px] font-black uppercase text-zinc-400">
+                              <FieldLabel className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                                 Gaji (Opsional)
                               </FieldLabel>
                               <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-orange-600 italic">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[#1D5FAD]">
                                   Rp
                                 </span>
                                 <Input
                                   type="number"
-                                  className="pl-12 h-12 rounded-xl border-zinc-200 bg-zinc-50/50 font-black italic text-lg"
+                                  className="pl-12 h-12 rounded-xl border-[#D1DFF0] bg-[#F4F8FF] font-semibold text-base"
                                   placeholder="0"
                                   value={field.value ?? ""}
                                   onChange={(e) =>
@@ -406,30 +425,30 @@ export default function AdminJobEditPage() {
                     </Card>
 
                     {/* Banner */}
-                    <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
-                      <CardHeader className="bg-zinc-50/50 border-b border-zinc-100">
-                        <CardTitle className="text-xs font-black uppercase tracking-widest text-zinc-900 italic">
+                    <Card className="border border-[#E2EAF4] shadow-none rounded-2xl bg-white overflow-hidden">
+                      <CardHeader className="bg-[#F4F8FF] border-b border-[#E2EAF4]">
+                        <CardTitle className="text-xs font-bold uppercase tracking-widest text-[#0F2342]">
                           Banner Lowongan (Opsional)
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-6 space-y-4">
                         {/* Preview banner lama jika ada dan belum diganti */}
                         {existingBannerUrl && !form.watch("banner") && (
-                          <div className="relative rounded-[1.25rem] overflow-hidden border border-zinc-100">
+                          <div className="relative rounded-xl overflow-hidden border border-[#E2EAF4]">
                             <img
                               src={existingBannerUrl}
                               alt="Banner saat ini"
                               className="w-full h-32 object-cover"
                             />
                             <div className="absolute inset-0 bg-black/30 flex items-end p-3">
-                              <span className="text-[9px] font-black uppercase tracking-widest text-white bg-black/50 px-2 py-1 rounded-full">
+                              <span className="text-[9px] font-semibold uppercase tracking-widest text-white bg-black/50 px-2 py-1 rounded-full">
                                 Banner Saat Ini
                               </span>
                             </div>
                             <button
                               type="button"
                               onClick={() => setExistingBannerUrl(null)}
-                              className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors"
+                              className="absolute top-2 right-2 bg-rose-500 hover:bg-rose-600 text-white rounded-full p-1 transition-colors"
                             >
                               <Trash2 className="h-3 w-3" />
                             </button>
@@ -443,30 +462,30 @@ export default function AdminJobEditPage() {
                             <Field data-invalid={fieldState.invalid}>
                               <div
                                 className={cn(
-                                  "group relative flex cursor-pointer flex-col items-center justify-center rounded-[1.5rem] border-2 border-dashed transition-all p-8",
+                                  "group relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all p-8",
                                   field.value
-                                    ? "border-orange-500 bg-orange-50/10"
-                                    : "border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 hover:border-zinc-300",
+                                    ? "border-[#1D5FAD] bg-[#EEF4FF]"
+                                    : "border-[#C8D9EE] bg-[#F4F8FF] hover:bg-[#EEF4FF] hover:border-[#A5C0E4]",
                                 )}
                               >
                                 <div
                                   className={cn(
                                     "p-4 rounded-full mb-3 transition-transform group-hover:scale-110",
                                     field.value
-                                      ? "bg-orange-500 text-white"
-                                      : "bg-white text-zinc-400 shadow-sm",
+                                      ? "bg-[#1D5FAD] text-white"
+                                      : "bg-white text-slate-400 shadow-sm",
                                   )}
                                 >
                                   <ImageIcon className="h-6 w-6" />
                                 </div>
-                                <p className="text-[10px] font-black uppercase tracking-tighter text-center leading-tight text-zinc-500">
+                                <p className="text-[10px] font-semibold uppercase tracking-tight text-center leading-tight text-slate-500">
                                   {field.value
                                     ? (field.value as File).name
                                     : existingBannerUrl
                                       ? "Ganti Banner"
                                       : "Upload Banner"}
                                 </p>
-                                <p className="text-[9px] text-zinc-400 font-medium mt-1">
+                                <p className="text-[9px] text-slate-400 font-medium mt-1">
                                   JPG, JPEG, PNG — maks. 1MB
                                 </p>
                                 <input
@@ -494,16 +513,16 @@ export default function AdminJobEditPage() {
                         type="submit"
                         form="form-edit-job"
                         disabled={isPending}
-                        className="w-full bg-zinc-900 hover:bg-black text-white rounded-2xl h-14 shadow-xl shadow-zinc-200 transition-all active:scale-95 font-black uppercase text-xs tracking-[0.2em] italic"
+                        className="w-full bg-[#1D5FAD] hover:bg-[#174E8F] text-white rounded-xl h-14 shadow-lg shadow-[#1D5FAD]/20 transition-all active:scale-95 font-semibold text-sm"
                       >
                         {isPending ? (
                           <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             Menyimpan...
                           </div>
                         ) : (
                           <>
-                            <Save className="mr-2 h-4 w-4 text-orange-500" />
+                            <Save className="mr-2 h-4 w-4" />
                             Simpan Perubahan
                           </>
                         )}
@@ -511,7 +530,7 @@ export default function AdminJobEditPage() {
                       <Button
                         variant="ghost"
                         size="lg"
-                        className="w-full rounded-2xl h-14 font-black uppercase text-[10px] tracking-widest text-zinc-400 hover:text-red-500 transition-colors"
+                        className="w-full rounded-xl h-14 font-semibold text-xs tracking-wide text-slate-400 hover:text-rose-500 transition-colors"
                         asChild
                         disabled={isPending}
                       >
