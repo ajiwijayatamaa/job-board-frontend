@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -15,7 +16,6 @@ import {
 import { useState } from "react";
 import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import { Link, redirect } from "react-router";
-import { zodResolver } from "@hookform/resolvers/zod";
 import AdminSidebar from "~/components/admin/admin-sidebar";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";

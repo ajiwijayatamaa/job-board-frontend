@@ -1,18 +1,8 @@
-import { useState } from "react";
-import { parseAsInteger, useQueryState } from "nuqs";
-import { useDebounceValue } from "usehooks-ts";
 import { CalendarPlus, Eye, FileText, Users } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "~/components/ui/select";
+import { parseAsInteger, useQueryState } from "nuqs";
+import { useState } from "react";
+import { useDebounceValue } from "usehooks-ts";
+import PaginationSection from "~/components/pagination-section";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,18 +13,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import PaginationSection from "~/components/pagination-section";
+import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "~/components/ui/select";
+import useCreateInterview from "~/hooks/api/useCreateInterview";
 import useGetApplicants from "~/hooks/api/useGetApplicants";
 import useUpdateApplicantStatus from "~/hooks/api/useUpdateApplicantStatus";
-import useCreateInterview from "~/hooks/api/useCreateInterview";
-import type { Application, ApplicationStatus } from "~/types/application";
 import { cn } from "~/lib/utils";
+import type { Application, ApplicationStatus } from "~/types/application";
 import ApplicantDetailDialog from "./applicant-detail-dialog";
 
 const statusConfig: Record<
@@ -318,7 +318,11 @@ function ApplicantRow({
           variant="ghost"
           size="icon"
           className="h-8 w-8 flex-shrink-0"
-          onClick={() => window.open(applicant.cv.fileUrl, "_blank")}
+          onClick={() => {
+            const base =
+              import.meta.env.VITE_BASE_URL_API || "http://localhost:8000";
+            window.open(`${base}/cvs/${applicant.cv.id}/file`, "_blank");
+          }}
         >
           <FileText className="w-4 h-4" />
         </Button>

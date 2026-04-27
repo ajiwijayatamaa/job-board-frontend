@@ -15,16 +15,18 @@ export default function TestResultPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  const score: number = state?.score ?? 0;
-  const passingScore: number = state?.passingScore ?? 75;
-  const passed: boolean = state?.isPassed ?? false; // baca dari BE, bukan hitung sendiri
-  const displayScore = Math.round(score);
-
   // Kalau masuk langsung tanpa state, redirect ke jobs
   if (state === null) {
     navigate("/jobs", { replace: true });
     return null;
   }
+
+  const score: number = state?.score ?? 0;
+  const passingScore: number = state?.passingScore ?? 75;
+  const passed: boolean = state?.isPassed ?? false;
+  const testResultId: number | null = state?.testResultId ?? null; // baca testResultId
+  const jobId: number | null = state?.jobId ?? null; // baca jobId
+  const displayScore = Math.round(score);
 
   const circumference = 2 * Math.PI * 54;
   const offset = circumference - (displayScore / 100) * circumference;
@@ -38,14 +40,8 @@ export default function TestResultPage() {
         className="max-w-md w-full"
       >
         {/* Score Card */}
-        <div
-          className={cn(
-            "rounded-[2.5rem] overflow-hidden shadow-2xl mb-6",
-            passed ? "bg-zinc-900" : "bg-zinc-900",
-          )}
-        >
+        <div className="rounded-[2.5rem] overflow-hidden shadow-2xl mb-6 bg-zinc-900">
           <div className="relative p-10 text-center">
-            {/* Decorative circle */}
             <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/2" />
 
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 mb-8">
@@ -125,7 +121,7 @@ export default function TestResultPage() {
               className="text-sm text-zinc-400 font-medium leading-relaxed"
             >
               {passed
-                ? "Kamu memenuhi syarat minimum. Lamaranmu akan segera diproses oleh perusahaan."
+                ? "Kamu memenuhi syarat minimum. Lanjutkan lamaranmu sekarang!"
                 : `Skor minimum untuk lulus adalah ${passingScore}. Sayang sekali, kamu belum memenuhi syarat kali ini.`}
             </motion.p>
           </div>
@@ -154,6 +150,20 @@ export default function TestResultPage() {
           transition={{ delay: 1 }}
           className="flex flex-col gap-3"
         >
+          {/* ✅ Tombol lanjut lamar hanya muncul jika lulus dan testResultId tersedia */}
+          {passed && testResultId && jobId && (
+            <Button
+              onClick={() =>
+                navigate(`/jobs/${jobId}`, {
+                  state: { testResultId }, // ← diteruskan ke job-detail
+                })
+              }
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-2xl h-14 shadow-xl font-black uppercase text-xs tracking-[0.2em] italic"
+            >
+              Lanjut Lamar <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+
           <Button
             onClick={() => navigate("/jobs")}
             className="w-full bg-zinc-900 hover:bg-black text-white rounded-2xl h-14 shadow-xl shadow-zinc-200 font-black uppercase text-xs tracking-[0.2em] italic"
@@ -161,6 +171,7 @@ export default function TestResultPage() {
             Lihat Lowongan Lain{" "}
             <ArrowRight className="ml-2 h-4 w-4 text-orange-500" />
           </Button>
+
           <Button
             variant="ghost"
             onClick={() => navigate("/profile/applications")}

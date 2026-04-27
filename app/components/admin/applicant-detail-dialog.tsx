@@ -1,13 +1,12 @@
+import { ExternalLink } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { ExternalLink } from "lucide-react";
 import useGetApplicantById from "~/hooks/api/useGetApplicantById";
 
 export default function ApplicantDetailDialog({
@@ -105,7 +104,12 @@ export default function ApplicantDetailDialog({
 
             <Button
               className="w-full bg-zinc-900 hover:bg-black text-white rounded-2xl font-black uppercase text-xs tracking-widest"
-              onClick={() => window.open(applicant.cv.fileUrl, "_blank")}
+              onClick={() =>
+                window.open(
+                  `${import.meta.env.VITE_BASE_URL_API}/cvs/${applicant.cv.id}/file`,
+                  "_blank",
+                )
+              }
             >
               <ExternalLink className="w-4 h-4 mr-2 text-orange-500" />
               Lihat CV
