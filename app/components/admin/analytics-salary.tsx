@@ -10,8 +10,9 @@ import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import type { AnalyticsSalaryTrends } from "~/types/analytics";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
+// ── chart config — warna disesuaikan ──
 const salaryChartConfig = {
-  avgSalary: { label: "Rata-rata Gaji", color: "#18181b" },
+  avgSalary: { label: "Rata-rata Gaji", color: "#1D5FAD" },
 };
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export default function AnalyticsSalary({ data, isPending }: Props) {
+  // ── state & logic — identik ──
   const [salaryTab, setSalaryTab] = useState<"category" | "city">("category");
 
   const chartData =
@@ -28,19 +30,23 @@ export default function AnalyticsSalary({ data, isPending }: Props) {
   const xKey = salaryTab === "category" ? "category" : "city";
 
   return (
-    <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
-      <CardHeader className="border-b border-zinc-50 bg-zinc-50/30">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-3 text-zinc-900 font-black uppercase italic text-lg tracking-tight">
-            <TrendingUp className="h-5 w-5 text-orange-500" />
+    <Card className="border border-[#E2EAF4] shadow-none rounded-2xl bg-white overflow-hidden">
+      {/* ── Header ── */}
+      <CardHeader className="border-b border-[#E2EAF4] bg-[#F4F8FF]">
+        <div className="flex items-center justify-between gap-4">
+          <CardTitle className="flex items-center gap-3 text-[#0F2342] font-bold text-base">
+            <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center">
+              <TrendingUp className="h-4 w-4 text-[#1D5FAD]" />
+            </div>
             Tren Gaji
           </CardTitle>
+
+          {/* ── Tabs — logic identik, styling disesuaikan ── */}
           <Tabs
             value={salaryTab}
             onValueChange={(v) => setSalaryTab(v as "category" | "city")}
-            className="bg-zinc-100 p-1 rounded-xl"
           >
-            <TabsList className="bg-transparent h-8 gap-1">
+            <TabsList className="bg-[#E2EAF4] h-8 p-1 rounded-lg gap-0.5">
               {[
                 { value: "category", label: "Kategori" },
                 { value: "city", label: "Kota" },
@@ -48,7 +54,7 @@ export default function AnalyticsSalary({ data, isPending }: Props) {
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="rounded-lg text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-orange-600 data-[state=active]:shadow-sm"
+                  className="rounded-md text-[10px] font-semibold uppercase tracking-widest px-3 data-[state=active]:bg-white data-[state=active]:text-[#1D5FAD] data-[state=active]:shadow-sm text-slate-400"
                 >
                   {tab.label}
                 </TabsTrigger>
@@ -57,14 +63,18 @@ export default function AnalyticsSalary({ data, isPending }: Props) {
           </Tabs>
         </div>
       </CardHeader>
+
+      {/* ── Content ── */}
       <CardContent className="p-6">
         {isPending ? (
           <div className="h-64 flex items-center justify-center">
-            <div className="w-6 h-6 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-[#1D5FAD] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : !chartData.length ? (
-          <div className="h-64 flex items-center justify-center text-zinc-400 font-bold uppercase text-[10px] tracking-widest">
-            Belum ada data
+          <div className="h-64 flex items-center justify-center">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-300">
+              Belum ada data
+            </p>
           </div>
         ) : (
           <ChartContainer config={salaryChartConfig} className="h-64 w-full">
@@ -75,26 +85,26 @@ export default function AnalyticsSalary({ data, isPending }: Props) {
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="#f4f4f5"
+                stroke="#E2EAF4"
               />
               <XAxis
                 dataKey={xKey}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 9, fontWeight: 700, fill: "#a1a1aa" }}
+                tick={{ fontSize: 10, fontWeight: 600, fill: "#94A3B8" }}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 9, fontWeight: 700, fill: "#a1a1aa" }}
+                tick={{ fontSize: 10, fontWeight: 600, fill: "#94A3B8" }}
                 tickFormatter={(v) => `${(v / 1000000).toFixed(0)}jt`}
               />
               <ChartTooltip
-                cursor={{ fill: "#fafafa" }}
+                cursor={{ fill: "#F4F8FF" }}
                 content={
                   <ChartTooltipContent
                     formatter={(value) => (
-                      <span className="font-black text-orange-400">
+                      <span className="font-semibold text-[#1D5FAD]">
                         Rp {Number(value).toLocaleString("id-ID")}
                       </span>
                     )}
@@ -103,7 +113,7 @@ export default function AnalyticsSalary({ data, isPending }: Props) {
               />
               <Bar
                 dataKey="avgSalary"
-                fill="#18181b"
+                fill="#1D5FAD"
                 radius={[6, 6, 0, 0]}
                 barSize={32}
               />

@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { cn } from "~/lib/utils";
 
 interface Props {
@@ -14,27 +15,37 @@ export default function QuestionNavigator({
   onSelect,
 }: Props) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2.5">
       {Array.from({ length: total }).map((_, i) => {
         const isActive = i === current;
         const isAnswered = answeredMap[i];
 
         return (
-          <button
+          <motion.button
             key={i}
             type="button"
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(i)}
             className={cn(
-              "w-9 h-9 rounded-xl text-xs font-black transition-all border",
+              "relative w-10 h-10 rounded-xl text-[11px] font-black transition-all border-2 flex items-center justify-center",
+              // State: Active (Sedang dipilih)
               isActive
-                ? "bg-zinc-900 text-white border-zinc-900 shadow-md scale-105"
-                : isAnswered
-                  ? "bg-orange-500 text-white border-orange-500"
-                  : "bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400",
+                ? "bg-[#0F2342] text-white border-[#0F2342] shadow-lg shadow-[#0F2342]/20 z-10"
+                : // State: Answered (Sudah ada isinya)
+                  isAnswered
+                  ? "bg-[#F4F8FF] text-[#1D5FAD] border-[#1D5FAD] shadow-sm"
+                  : // State: Default (Kosong)
+                    "bg-white text-slate-300 border-[#E2EAF4] hover:border-[#1D5FAD] hover:text-[#1D5FAD]",
             )}
           >
-            {i + 1}
-          </button>
+            {/* Indikator titik kecil jika sudah terisi namun sedang tidak aktif */}
+            {isAnswered && !isActive && (
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#1D5FAD] rounded-full" />
+            )}
+
+            {String(i + 1).padStart(2, "0")}
+          </motion.button>
         );
       })}
     </div>

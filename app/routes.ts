@@ -1,4 +1,9 @@
-import { type RouteConfig, index, layout, route } from "@react-router/dev/routes";
+import {
+  type RouteConfig,
+  index,
+  layout,
+  route,
+} from "@react-router/dev/routes";
 
 export default [
   index("routes/home.tsx"),
@@ -44,7 +49,12 @@ export default [
     ),
     route(
       "/admin/pre-selection-tests/:testId/results",
-      "pages/admin/admin-test-results.tsx"),
+      "pages/admin/admin-test-results.tsx",
+    ),
+    route(
+      "/admin/pre-selection-tests/:testResultId/answers",
+      "pages/admin/admin-test-answer-detail.tsx",
+    ),
   ]),
 
   route("*", "pages/not-found.tsx"),
