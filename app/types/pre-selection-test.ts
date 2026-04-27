@@ -60,11 +60,15 @@ export interface TestResult {
 }
 
 export interface SubmitTestResponse {
-  id: number;
-  userId: number;
-  preSelectionTestId: number;
+  testResultId: number;
   score: number;
   isPassed: boolean;
-  createdAt: string;
+  passingScore: number;
+}
+
+export interface MyTestResultResponse {
+  testResultId: number;
+  score: number;
+  isPassed: boolean;
   passingScore: number;
 }

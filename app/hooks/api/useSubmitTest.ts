@@ -23,6 +23,8 @@ const useSubmitTest = (jobId: number) => {
           score: result.score,
           isPassed: result.isPassed,
           passingScore: result.passingScore,
+          testResultId: result.testResultId,
+          jobId,
         },
       });
     },
