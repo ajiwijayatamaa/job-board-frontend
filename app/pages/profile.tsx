@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Camera, Save, Loader2, KeyRound, Briefcase, Calendar } from "lucide-react";
+import { Camera, Save, Loader2, KeyRound, Briefcase, Calendar, Download } from "lucide-react";
 import { Link } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,14 +43,11 @@ interface AppliedJob {
     title: string;
     company: { companyName: string };
   };
-}
-
-interface Interview {
-  id: number;
-  interviewDate: string;
-  status: string;
-  notes: string;
-  application: { job: { title: string; company: { companyName: string } } };
+  interview?: {
+    id: number;
+    interviewDate: string;
+    locationLink?: string | null;
+  };
 }
 
 const Profile = () => {
@@ -217,25 +214,46 @@ const Profile = () => {
     },
   });
 
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Download failed");
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename.endsWith(".pdf") ? filename : `${filename}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      toast.error("Gagal mendownload file CV");
+    }
+  };
+
   // Fetch data Applied Jobs (Hanya untuk USER)
   const { data: appliedJobs, isLoading: isAppsLoading } = useQuery({
     queryKey: ["applied-jobs"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/applications");
+      const response = await axiosInstance.get("/applications/me", {
+        params: { take: 50, page: 1 },
+      });
       return response.data.data as AppliedJob[];
     },
     enabled: currentRole === "USER",
   });
 
-  // Fetch data Interview (Hanya untuk USER)
-  const { data: interviews, isLoading: isInterviewsLoading } = useQuery({
-    queryKey: ["interviews"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/interviews");
-      return response.data.data as Interview[];
-    },
-    enabled: currentRole === "USER",
-  });
+  // Derivasi data interview dari appliedJobs untuk sinkronisasi dengan BE
+  const interviews = appliedJobs?.filter(
+    (app) => 
+      app.interview && 
+      ["INTERVIEW", "ACCEPTED"].includes(app.status.toUpperCase())
+  ).map(app => ({
+    ...app.interview,
+    jobTitle: app.job.title,
+    companyName: app.job.company.companyName
+  }));
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -466,6 +484,15 @@ const Profile = () => {
                         type="button"
                         variant="outline"
                         size="sm"
+                        title="Download CV"
+                        onClick={() => handleDownload(cv.fileUrl, cv.cvName)}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
                         disabled={cv.isPrimary || setPrimaryCvMutation.isPending}
                         onClick={() => setPrimaryCvMutation.mutate(cv.id)}
                       >
@@ -532,7 +559,7 @@ const Profile = () => {
                 <Calendar className="h-5 w-5 text-primary" />
                 <h2 className="text-lg font-semibold text-foreground">Interview Invitations</h2>
               </div>
-              {isInterviewsLoading ? (
+              {isAppsLoading ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" /> Loading interviews...
                 </div>
@@ -541,28 +568,23 @@ const Profile = () => {
               ) : (
                 <div className="space-y-3">
                   {interviews.map((interview) => (
-                    <div key={interview.id} className="rounded-lg border border-border p-4 bg-background/50">
+                    <div key={interview?.id} className="rounded-lg border border-border p-4 bg-background/50">
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <h3 className="font-medium text-foreground">{interview.application?.job?.title}</h3>
-                          <p className="text-sm text-muted-foreground">{interview.application?.job?.company?.companyName}</p>
+                          <h3 className="font-medium text-foreground">{interview?.jobTitle}</h3>
+                          <p className="text-sm text-muted-foreground">{interview?.companyName}</p>
                         </div>
-                        <Badge>{interview.status}</Badge>
                       </div>
                       <div className="grid gap-1 text-sm">
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Calendar className="h-3 w-3" />
-                          {new Date(interview.interviewDate).toLocaleString()}
+                          {interview?.interviewDate ? new Date(interview.interviewDate).toLocaleString() : "-"}
                         </div>
-                        {interview.notes && (
-                          <div className="mt-2 p-2 rounded bg-muted/50 text-xs">
-                            <p className="font-semibold text-foreground mb-1">Notes:</p>
-                            {interview.notes}
-                          </div>
-                        )}
                       </div>
                       <div className="mt-4 flex gap-2">
-                        <Button size="sm" variant="outline" className="w-full">Detail</Button>
+                        <Link to="/dashboard" className="w-full">
+                          <Button size="sm" variant="outline" className="w-full">View in Dashboard</Button>
+                        </Link>
                       </div>
                     </div>
                   ))}

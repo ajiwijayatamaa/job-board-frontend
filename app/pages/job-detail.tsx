@@ -2,6 +2,21 @@ import { useParams, Link, useNavigate } from "react-router";
 import { MapPin, Clock, Briefcase, ArrowLeft, Building2, DollarSign, Share2, Twitter, Facebook, Linkedin, MessageCircle, Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +30,7 @@ import { axiosInstance } from "~/lib/axios";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useState, useMemo } from "react";
+import type { ApplicationCV } from "~/types/application";
 
 const JobDetail = () => {
   const { id } = useParams();
@@ -22,12 +38,19 @@ const JobDetail = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [isApplying, setIsApplying] = useState(false);
+  const [applyOpen, setApplyOpen] = useState(false);
+  const [cvOption, setCvOption] = useState<"primary" | "upload" | string>(
+    "primary",
+  );
+  const [cvName, setCvName] = useState("");
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [expectedSalary, setExpectedSalary] = useState("");
 
   const { data: job, isLoading, isError } = useQuery({
-    queryKey: ["job", id],
+    queryKey: ["public-job", id],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/jobs/${id}`);
-      return response.data.data;
+      const response = await axiosInstance.get(`/public/jobs/${id}`);
+      return response.data;
     },
     enabled: !!id,
     retry: false,
@@ -36,22 +59,31 @@ const JobDetail = () => {
   const { data: applications } = useQuery({
     queryKey: ["my-applications"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/applications", {
-        params: { take: 100 },
+      const response = await axiosInstance.get("/applications/me", {
+        params: { take: 100, page: 1 },
       });
       return response.data.data;
     },
     enabled: !!user && user.role === "USER",
   });
 
+  const { data: cvs, isLoading: isCvsLoading } = useQuery({
+    queryKey: ["cvs"],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/cvs");
+      return response.data.data as ApplicationCV[];
+    },
+    enabled: !!user && user.role === "USER" && applyOpen,
+  });
+
   const isApplied = useMemo(() => {
     if (!applications || !id) return false;
-    return applications.some((app: any) => app.jobId === Number(id));
+    return applications.some((app: any) => (app.jobId || app.job?.id) === Number(id));
   }, [applications, id]);
 
   const handleShare = (platform: string) => {
     const url = typeof window !== "undefined" ? window.location.href : "";
-    const text = `Check out this ${job?.title} position at ${job?.company}!`;
+    const text = `Check out this ${job?.title} position at ${job?.company?.companyName || job?.company}!`;
     const encodedUrl = encodeURIComponent(url);
     const encodedText = encodeURIComponent(text);
 
@@ -67,7 +99,7 @@ const JobDetail = () => {
     }
   };
 
-  const handleApply = async () => {
+  const handleOpenApply = () => {
     if (!user) {
       toast.error("Silakan masuk terlebih dahulu untuk melamar pekerjaan ini.");
       navigate("/login");
@@ -79,15 +111,74 @@ const JobDetail = () => {
       return;
     }
 
+    setApplyOpen(true);
+  };
+
+  const handleSubmitApply = async () => {
+    if (!user) {
+      toast.error("Silakan masuk terlebih dahulu untuk melamar pekerjaan ini.");
+      navigate("/login");
+      return;
+    }
+
+    if (user.role === "ADMIN") {
+      toast.error("Akun perusahaan tidak dapat melamar pekerjaan.");
+      return;
+    }
+
+    const parsedExpectedSalary = Number(expectedSalary);
+    if (!Number.isFinite(parsedExpectedSalary) || parsedExpectedSalary < 0) {
+      toast.error("Ekspektasi gaji harus berupa angka valid.");
+      return;
+    }
+
     setIsApplying(true);
     try {
-      // Endpoint backend biasanya menggunakan bentuk jamak '/applications'
-      // dan jobId dikirimkan sebagai path parameter sesuai dengan signature service:
-      // applyToJob(jobId, userId, body)
-      await axiosInstance.post(`/applications/job/${job?.id}`, {});
+      let cvIdToUse: number | undefined;
+
+      if (cvOption === "upload") {
+        if (!cvFile || !cvName.trim()) {
+          toast.error("Mohon isi nama CV dan upload file PDF.");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("cvName", cvName.trim());
+        formData.append("cv", cvFile);
+
+        const uploadResponse = await axiosInstance.post("/cvs", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        const uploadedCv = uploadResponse.data?.data as ApplicationCV | undefined;
+        if (!uploadedCv?.id) {
+          toast.error("Gagal mengunggah CV. Silakan coba lagi.");
+          return;
+        }
+        cvIdToUse = uploadedCv.id;
+      } else if (cvOption !== "primary") {
+        const parsedCvId = Number(cvOption);
+        if (Number.isFinite(parsedCvId) && parsedCvId > 0) {
+          cvIdToUse = parsedCvId;
+        }
+      }
+
+      await axiosInstance.post(`/applications/job/${job?.id}`, {
+        ...(cvIdToUse ? { cvId: cvIdToUse } : {}),
+        expectedSalary: parsedExpectedSalary,
+      });
       
       toast.success("Lamaran Anda berhasil dikirim!");
       queryClient.invalidateQueries({ queryKey: ["my-applications"] });
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
+      queryClient.invalidateQueries({ queryKey: ["applied-jobs"] });
+      queryClient.invalidateQueries({ queryKey: ["cvs"] });
+
+      setApplyOpen(false);
+      setCvOption("primary");
+      setCvName("");
+      setCvFile(null);
+      setExpectedSalary("");
     } catch (error: any) {
       const message = error.response?.data?.message;
       if (message?.includes("CV utama belum tersedia")) {
@@ -166,19 +257,109 @@ const JobDetail = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              {user?.role !== "ADMIN" && (
               <Button 
                 size="lg" 
                 className={isApplied ? "bg-secondary text-secondary-foreground" : "bg-card text-primary hover:bg-card/90"}
-                onClick={handleApply}
+                onClick={handleOpenApply}
                 disabled={isApplying || isApplied}
               >
                 {isApplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 {isApplied ? "Applied" : "Apply Now"}
               </Button>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      <Dialog open={applyOpen} onOpenChange={setApplyOpen}>
+        <DialogContent className="max-w-lg rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Apply Job</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="expectedSalary">Ekspektasi Gaji (IDR)</Label>
+              <Input
+                id="expectedSalary"
+                type="number"
+                min={0}
+                value={expectedSalary}
+                onChange={(e) => setExpectedSalary(e.target.value)}
+                placeholder="Contoh: 8000000"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>CV yang digunakan</Label>
+              <Select value={cvOption} onValueChange={(v) => setCvOption(v)}>
+                <SelectTrigger className="bg-card">
+                  <SelectValue placeholder="Pilih CV" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="primary">Gunakan CV primary</SelectItem>
+                  <SelectItem value="upload">Upload CV baru</SelectItem>
+                  {isCvsLoading ? (
+                    <SelectItem value="loading" disabled>
+                      Loading...
+                    </SelectItem>
+                  ) : (
+                    (cvs || []).map((cv) => (
+                      <SelectItem key={cv.id} value={String(cv.id)}>
+                        {cv.cvName}{cv.isPrimary ? " (Primary)" : ""}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {cvOption === "upload" && (
+              <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cvName">Nama CV</Label>
+                  <Input
+                    id="cvName"
+                    value={cvName}
+                    onChange={(e) => setCvName(e.target.value)}
+                    placeholder="e.g. CV - Backend Engineer"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cvFile">File CV (PDF)</Label>
+                  <Input
+                    id="cvFile"
+                    type="file"
+                    accept="application/pdf"
+                    onChange={(e) => setCvFile(e.target.files?.[0] ?? null)}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setApplyOpen(false)}
+                disabled={isApplying}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="w-full"
+                onClick={handleSubmitApply}
+                disabled={isApplying || isApplied}
+              >
+                {isApplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Submit Application
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="container py-8">
         <div className="grid gap-8 lg:grid-cols-3">
@@ -206,7 +387,7 @@ const JobDetail = () => {
               <h3 className="font-semibold text-foreground">Job Overview</h3>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-3 text-muted-foreground">
-                  <MapPin className="h-4 w-4 text-primary" /> {job.location}
+                  <MapPin className="h-4 w-4 text-primary" /> {job.city || job.location}
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground">
                   <Briefcase className="h-4 w-4 text-primary" /> {job.type}
@@ -224,16 +405,18 @@ const JobDetail = () => {
               <Badge>{job.category}</Badge>
             </div>
             <div className="space-y-2">
+              {user?.role !== "ADMIN" && (
               <Button 
                 className="w-full" 
                 size="lg"
                 variant={isApplied ? "secondary" : "default"}
-                onClick={handleApply}
+                onClick={handleOpenApply}
                 disabled={isApplying || isApplied}
               >
                 {isApplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 {isApplied ? "Applied" : "Apply Now"}
               </Button>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="w-full" size="lg">

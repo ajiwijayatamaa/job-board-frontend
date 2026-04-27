@@ -9,7 +9,7 @@ interface Job {
   id: number;
   title: string;
   type: string;
-  location: string;
+  city: string;
   salary: string;
   createdAt: string;
   company: {
@@ -21,15 +21,15 @@ interface Job {
 interface Company {
   id: number;
   companyName: string;
-  industry: string;
+  industry?: string;
   logo?: string;
   _count?: {
     jobs: number;
-  };
+  }; // Tambahkan properti ini untuk mencocokkan respons backend
 }
 
 const DiscoverySection = () => {
-  const { data: jobs, isLoading: isJobsLoading } = useQuery({
+  const { data: jobs, isLoading: isJobsLoading, isError: isJobsError } = useQuery({
     queryKey: ["featured-jobs"],
     queryFn: async () => {
       // Gunakan endpoint publik agar USER bisa akses dan hanya melihat yang PUBLISHED
@@ -38,10 +38,10 @@ const DiscoverySection = () => {
     },
   });
 
-  const { data: companies, isLoading: isCompaniesLoading } = useQuery({
+  const { data: companies, isLoading: isCompaniesLoading, isError: isCompaniesError } = useQuery({
     queryKey: ["top-companies"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/companies");
+      const response = await axiosInstance.get("/public/companies"); // Gunakan endpoint publik yang baru
       return response.data.data as Company[];
     },
   });
@@ -68,6 +68,8 @@ const DiscoverySection = () => {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {isJobsLoading ? (
               <div className="col-span-full flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+            ) : isJobsError ? (
+              <p className="col-span-full text-center text-muted-foreground py-10">Failed to load featured jobs.</p>
             ) : featuredJobs.length === 0 ? (
               <p className="col-span-full text-center text-muted-foreground py-10">No featured jobs found.</p>
             ) : featuredJobs.map((job) => (
@@ -96,7 +98,7 @@ const DiscoverySection = () => {
                 </p>
                 <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3" /> {job.location}
+                    <MapPin className="h-3 w-3" /> {job.city}
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" /> {new Date(job.createdAt).toLocaleDateString()}
@@ -124,6 +126,8 @@ const DiscoverySection = () => {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {isCompaniesLoading ? (
               <div className="col-span-full flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+            ) : isCompaniesError ? (
+              <p className="col-span-full text-center text-muted-foreground py-10">Failed to load companies.</p>
             ) : featuredCompanies.length === 0 ? (
               <p className="col-span-full text-center text-muted-foreground py-10">No companies found.</p>
             ) : featuredCompanies.map((company) => (
@@ -142,7 +146,7 @@ const DiscoverySection = () => {
                 <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                   {company.companyName}
                 </h3>
-                <p className="text-sm text-muted-foreground">{company.industry}</p>
+                <p className="text-sm text-muted-foreground">{company.industry || "-"}</p>
                 <p className="mt-2 text-sm font-medium text-primary">
                   {company._count?.jobs || 0} open positions
                 </p>

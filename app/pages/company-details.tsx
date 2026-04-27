@@ -11,14 +11,14 @@ import { axiosInstance } from "~/lib/axios";
 interface CompanyDetailData {
   id: number;
   companyName: string;
-  industry: string;
-  location: string;
-  size: string; // e.g., "100-300", "5000+"
+  industry?: string;
+  address?: string; // Changed from location to address to match backend
+  size?: string; // e.g., "100-300", "5000+"
   logo?: string;
-  description: string;
-  benefits: string[]; // Assuming an array of strings for benefits
-  founded: string; // Assuming year or date string
-  website: string;
+  description?: string;
+  benefits?: string[]; // Make optional, and handle if it's not an array
+  founded?: string; // Assuming year or date string
+  website?: string;
   _count?: {
     jobs: number;
   };
@@ -29,8 +29,9 @@ interface JobData {
   id: number;
   title: string;
   type: string;
-  location: string;
-  salary: string;
+  location?: string;
+  city?: string;
+  salary?: string;
   createdAt: string; // For job posting date
 }
 
@@ -41,7 +42,7 @@ const CompanyDetail = () => {
   const { data: company, isLoading: isCompanyLoading, error: companyError } = useQuery({
     queryKey: ["company-detail", companyId],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/companies/${companyId}`);
+      const response = await axiosInstance.get(`/public/companies/${companyId}`); // Use public endpoint
       return response.data.data as CompanyDetailData;
     },
     enabled: !!id, // Only fetch if id is available
@@ -50,7 +51,7 @@ const CompanyDetail = () => {
   const { data: companyJobs, isLoading: isJobsLoading, error: jobsError } = useQuery({
     queryKey: ["company-jobs", companyId],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/companies/${companyId}/jobs`);
+      const response = await axiosInstance.get(`/public/companies/${companyId}/jobs`); // Use public endpoint
       return response.data.data as JobData[];
     },
     enabled: !!id, // Only fetch if id is available
@@ -100,7 +101,7 @@ const CompanyDetail = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-primary-foreground md:text-3xl">{company.companyName}</h1>
-              <p className="text-primary-foreground/80">{company.industry}</p>
+              <p className="text-primary-foreground/80">{company.industry || "-"}</p>
             </div>
           </div>
         </div>
@@ -111,12 +112,12 @@ const CompanyDetail = () => {
           <div className="lg:col-span-2 space-y-8">
             <div className="rounded-xl border border-border bg-card p-6 card-shadow">
               <h2 className="mb-4 text-xl font-semibold text-foreground">About</h2>
-              <p className="text-muted-foreground leading-relaxed">{company.description}</p>
+              <p className="text-muted-foreground leading-relaxed">{company.description || "-"}</p>
             </div>
             <div className="rounded-xl border border-border bg-card p-6 card-shadow">
               <h2 className="mb-4 text-xl font-semibold text-foreground">Benefits</h2>
               {company.benefits && company.benefits.length > 0 ? (
-                <div className="flex flex-wrap gap-2">{company.benefits.map((b) => <Badge key={b} variant="secondary">{b}</Badge>)}</div>
+                <div className="flex flex-wrap gap-2">{company.benefits.map((b: string) => <Badge key={b} variant="secondary">{b}</Badge>)}</div>
               ) : (<p className="text-muted-foreground text-sm">No benefits listed.</p>)}
             </div>
             <div className="rounded-xl border border-border bg-card p-6 card-shadow">
@@ -132,11 +133,11 @@ const CompanyDetail = () => {
                       <div>
                         <h3 className="font-medium text-foreground hover:text-primary">{job.title}</h3>
                         <div className="flex gap-3 text-xs text-muted-foreground mt-1">
-                          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {job.location}</span>
+                          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {job.location || job.city || "-"}</span>
                           <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {job.type}</span>
                         </div>
                       </div>
-                      <span className="text-sm font-medium text-primary">{job.salary}</span>
+                      <span className="text-sm font-medium text-primary">{job.salary || "-"}</span>
                     </Link>
                   ))}
                 </div>
@@ -147,10 +148,17 @@ const CompanyDetail = () => {
           <div className="space-y-4">
             <div className="rounded-xl border border-border bg-card p-6 card-shadow space-y-3 text-sm">
               <h3 className="font-semibold text-foreground mb-2">Company Info</h3>
-              <div className="flex items-center gap-3 text-muted-foreground"><MapPin className="h-4 w-4 text-primary" /> {company.location}</div>
-              <div className="flex items-center gap-3 text-muted-foreground"><Users className="h-4 w-4 text-primary" /> {company.size} employees</div>
-              <div className="flex items-center gap-3 text-muted-foreground"><Calendar className="h-4 w-4 text-primary" /> Founded {company.founded}</div>
-              <div className="flex items-center gap-3 text-muted-foreground"><Globe className="h-4 w-4 text-primary" /> <a href={company.website} target="_blank" rel="noopener noreferrer" className="hover:underline">{company.website}</a></div>
+              <div className="flex items-center gap-3 text-muted-foreground"><MapPin className="h-4 w-4 text-primary" /> {company.address || "-"}</div>
+              <div className="flex items-center gap-3 text-muted-foreground"><Users className="h-4 w-4 text-primary" /> {(company.size || "-")} employees</div>
+              <div className="flex items-center gap-3 text-muted-foreground"><Calendar className="h-4 w-4 text-primary" /> Founded {company.founded || "-"}</div>
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <Globe className="h-4 w-4 text-primary" />
+                {company.website ? (
+                  <a href={company.website} target="_blank" rel="noopener noreferrer" className="hover:underline">{company.website}</a>
+                ) : (
+                  <span>-</span>
+                )}
+              </div>
             </div>
           </div>
         </div>

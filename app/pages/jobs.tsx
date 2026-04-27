@@ -40,12 +40,13 @@ interface Job {
   id: number;
   title: string;
   type: string; // e.g., "Full-time", "Part-time"
-  location: string;
-  salary: string;
+  location?: string;
+  city?: string;
+  salary?: string;
   createdAt: string;
-  category: string; // Assuming category name is directly on job object
+  category?: string; // Assuming category name is directly on job object
   distance?: number;
-  experience: string; // Assuming experience level name is directly on job object
+  experience?: string; // Assuming experience level name is directly on job object
   company: {
     companyName: string;
     logo?: string;
@@ -109,7 +110,7 @@ const Jobs = () => {
   };
 
   // Fetch all jobs
-  const { data: allJobs, isLoading: isJobsLoading } = useQuery({
+  const { data: allJobs, isLoading: isJobsLoading, isError: isJobsError } = useQuery({
     queryKey: ["all-jobs", latitude, longitude, radius],
     queryFn: async () => {
       const response = await axiosInstance.get("/public/jobs", {
@@ -153,6 +154,7 @@ const Jobs = () => {
     let result = allJobs || [];
 
     result = result.filter((job) => {
+      const jobLocation = (job.location || job.city || "").toLowerCase();
       const matchKeyword =
         !debouncedKeyword ||
         job.title?.toLowerCase().includes(debouncedKeyword.toLowerCase()) || 
@@ -162,7 +164,7 @@ const Jobs = () => {
 
       const matchLocation =
         !debouncedLocation ||
-        job.location?.toLowerCase().includes(debouncedLocation.toLowerCase());
+        jobLocation.includes(debouncedLocation.toLowerCase());
       const matchCategory = category === "all" || job.category?.toLowerCase() === category.toLowerCase();
       const matchType = jobType === "all" || job.type?.toLowerCase() === jobType.toLowerCase();
       const matchExp = experience === "all" || job.experience?.toLowerCase() === experience.toLowerCase();
@@ -338,6 +340,10 @@ const Jobs = () => {
           <div className="flex justify-center py-10">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
+        ) : isJobsError ? (
+          <div className="py-20 text-center text-muted-foreground">
+            Failed to load jobs.
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {paginatedItems.map((job) => (
@@ -366,7 +372,7 @@ const Jobs = () => {
                 </p>
                 <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3" /> {job.location}
+                    <MapPin className="h-3 w-3" /> {job.location || job.city || "-"}
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" /> {new Date(job.createdAt).toLocaleDateString()}

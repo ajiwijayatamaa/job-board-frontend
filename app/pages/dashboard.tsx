@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import { Link } from "react-router";
 import Navbar from "~/components/layout/navbar";
 import Footer from "~/components/layout/footer";
@@ -18,6 +18,7 @@ interface Application {
   createdAt: string;
   job: {
     title: string;
+    city?: string;
     company: {
       companyName: string;
     };
@@ -25,15 +26,12 @@ interface Application {
   interview?: {
     id: number;
     interviewDate: string;
-    status: string;
-    type?: string;
-    location?: string;
-    notes?: string;
-    // Properti tambahan untuk kompatibilitas UI lama
     date?: string;
     time?: string;
+    locationLink?: string | null;
   };
   jobTitle?: string; // Untuk kompatibilitas
+  rejectionReason?: string | null;
 }
 
 const Dashboard = () => {
@@ -43,7 +41,9 @@ const Dashboard = () => {
   const { data: applications = [], isLoading } = useQuery({
     queryKey: ["applications"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/applications");
+      const response = await axiosInstance.get("/applications/me", {
+        params: { take: 50, page: 1 },
+      });
       return (response.data.data as Application[]).map((a) => ({
         ...a,
         jobTitle: a.job?.title, // Mapping untuk compatibility
@@ -64,22 +64,25 @@ const Dashboard = () => {
   const upcomingInterviews = useMemo(() => {
     return applications.filter(
       (a) => a.interview && 
-             (a.status === "interview" || a.status === "accepted") && 
+             (String(a.status).toUpperCase() === "INTERVIEW" || String(a.status).toUpperCase() === "ACCEPTED") && 
              !dismissedReminders.includes(a.id)
     );
   }, [applications, dismissedReminders]);
 
   const stats = useMemo(() => ({
     total: applications.length,
-    interview: applications.filter((a) => a.status === "interview").length,
-    accepted: applications.filter((a) => a.status === "accepted").length,
-    rejected: applications.filter((a) => a.status === "rejected").length,
+    interview: applications.filter((a) => String(a.status).toUpperCase() === "INTERVIEW").length,
+    accepted: applications.filter((a) => String(a.status).toUpperCase() === "ACCEPTED").length,
+    rejected: applications.filter((a) => String(a.status).toUpperCase() === "REJECTED").length,
   }), [applications]);
 
   const filterByTab = (tab: string) => {
     switch(tab) {
-      case "interviews": return applications.filter((a) => a.status === "interview" || a.status === "accepted");
-      case "rejected": return applications.filter((a) => a.status === "rejected");
+      case "interviews": return applications.filter((a) => {
+        const s = String(a.status).toUpperCase();
+        return s === "INTERVIEW" || s === "ACCEPTED";
+      });
+      case "rejected": return applications.filter((a) => String(a.status).toUpperCase() === "REJECTED");
       default: return applications;
     }
   };
@@ -111,7 +114,7 @@ const Dashboard = () => {
                       Interview Reminder: {app.jobTitle}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {app.interview!.date} at {app.interview!.time} · {app.interview!.type || "General"} · {app.interview!.location || "TBA"}
+                      {app.interview!.date} at {app.interview!.time} Â· {app.interview!.locationLink || "TBA"}
                     </p>
                   </div>
                   <Button
@@ -181,3 +184,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
