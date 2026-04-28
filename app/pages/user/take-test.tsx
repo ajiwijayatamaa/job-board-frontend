@@ -90,24 +90,24 @@ export default function TakeTestPage() {
   const selectedAnswer = answers[question.id];
 
   return (
-    <div className="min-h-screen bg-zinc-50/50">
+    <div className="min-h-screen bg-background">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-20 bg-white border-b border-zinc-100 shadow-sm">
+      <div className="sticky top-0 z-20 bg-card border-b border-border shadow-sm">
         <div className="max-w-3xl mx-auto px-6 py-3 flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               Pre-Selection Test
             </p>
-            <p className="text-sm font-black text-zinc-900 truncate max-w-xs">
+            <p className="text-sm font-bold text-foreground truncate max-w-xs">
               {test.title}
             </p>
           </div>
           <div
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-2xl font-black text-lg tabular-nums transition-colors",
+              "flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-lg tabular-nums transition-colors",
               isWarning
-                ? "bg-red-50 text-red-600 animate-pulse"
-                : "bg-zinc-900 text-white",
+                ? "bg-destructive text-destructive-foreground animate-pulse"
+                : "bg-primary text-primary-foreground",
             )}
           >
             <Clock className="w-4 h-4" />
@@ -115,9 +115,9 @@ export default function TakeTestPage() {
           </div>
         </div>
         {/* Progress bar */}
-        <div className="h-1 bg-zinc-100">
+        <div className="h-1 bg-muted">
           <div
-            className="h-full bg-orange-500 transition-all duration-300"
+            className="h-full bg-primary transition-all duration-300"
             style={{ width: `${(answeredCount / 25) * 100}%` }}
           />
         </div>
@@ -132,12 +132,12 @@ export default function TakeTestPage() {
               type="button"
               onClick={() => setCurrentQ(i)}
               className={cn(
-                "w-8 h-8 rounded-lg text-[10px] font-black transition-all border",
+                "w-8 h-8 rounded-lg text-[10px] font-bold transition-all border",
                 i === currentQ
-                  ? "bg-zinc-900 text-white border-zinc-900"
+                  ? "bg-primary text-primary-foreground border-primary"
                   : answers[q.id]
-                    ? "bg-orange-500 text-white border-orange-500"
-                    : "bg-white text-zinc-400 border-zinc-200 hover:border-zinc-400",
+                    ? "bg-primary/20 text-primary border-primary/30"
+                    : "bg-card text-muted-foreground border-border hover:border-muted-foreground/50",
               )}
             >
               {i + 1}
@@ -154,12 +154,12 @@ export default function TakeTestPage() {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden mb-6">
-              <CardHeader className="bg-zinc-900 text-white px-8 py-6">
-                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">
+            <Card className="border border-border bg-card rounded-xl card-shadow overflow-hidden mb-6">
+              <CardHeader className="bg-primary text-primary-foreground px-8 py-6">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/80 mb-2">
                   Soal {currentQ + 1} dari 25
                 </p>
-                <CardTitle className="text-base font-bold leading-relaxed text-white">
+                <CardTitle className="text-base font-bold leading-relaxed">
                   {question.questionText}
                 </CardTitle>
               </CardHeader>
@@ -175,18 +175,18 @@ export default function TakeTestPage() {
                         selectAnswer(question.id, option.optionText)
                       }
                       className={cn(
-                        "w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all font-medium text-sm",
+                        "w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all font-medium text-sm",
                         isSelected
-                          ? "border-orange-500 bg-orange-50 text-orange-900"
-                          : "border-zinc-100 bg-zinc-50/50 text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50",
+                          ? "border-primary bg-primary/5 text-primary"
+                          : "border-border bg-muted/30 text-muted-foreground hover:border-primary/30 hover:bg-muted/50",
                       )}
                     >
                       <span
                         className={cn(
-                          "w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black flex-shrink-0",
+                          "w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold flex-shrink-0",
                           isSelected
-                            ? "bg-orange-500 text-white"
-                            : "bg-white text-zinc-400 border border-zinc-200",
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-card text-muted-foreground border border-border",
                         )}
                       >
                         {["A", "B", "C", "D", "E"][i]}
@@ -207,18 +207,18 @@ export default function TakeTestPage() {
             variant="ghost"
             onClick={() => setCurrentQ((p) => Math.max(0, p - 1))}
             disabled={currentQ === 0}
-            className="font-black uppercase text-[10px] tracking-widest"
+            className="font-bold uppercase text-[10px] tracking-widest"
           >
             <ChevronLeft className="w-4 h-4 mr-1" /> Sebelumnya
           </Button>
-          <span className="text-xs font-black text-zinc-400">
+          <span className="text-xs font-bold text-muted-foreground">
             {answeredCount}/25 dijawab
           </span>
           {currentQ < 24 ? (
             <Button
               type="button"
               onClick={() => setCurrentQ((p) => p + 1)}
-              className="bg-zinc-900 hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-xl"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-xl"
             >
               Selanjutnya <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
@@ -226,7 +226,7 @@ export default function TakeTestPage() {
             <Button
               type="button"
               onClick={() => setShowConfirm(true)}
-              className="bg-orange-500 hover:bg-orange-600 text-white font-black uppercase text-[10px] tracking-widest rounded-xl"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-xl shadow-md"
             >
               <Send className="w-4 h-4 mr-2" /> Kumpulkan
             </Button>
@@ -247,19 +247,19 @@ export default function TakeTestPage() {
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
-              className="bg-white rounded-[2rem] p-8 max-w-sm w-full shadow-2xl"
+              className="bg-card rounded-xl p-8 max-w-sm w-full shadow-2xl border border-border"
             >
-              <AlertTriangle className="w-10 h-10 text-orange-500 mb-4" />
-              <h2 className="text-xl font-black uppercase italic tracking-tight text-zinc-900 mb-2">
+              <AlertTriangle className="w-10 h-10 text-primary mb-4" />
+              <h2 className="text-xl font-bold uppercase italic tracking-tight text-foreground mb-2">
                 Kumpulkan Jawaban?
               </h2>
-              <p className="text-sm text-zinc-500 font-medium mb-2">
+              <p className="text-sm text-muted-foreground font-medium mb-2">
                 Kamu sudah menjawab{" "}
-                <strong className="text-zinc-900">{answeredCount}</strong> dari{" "}
-                <strong className="text-zinc-900">25</strong> soal.
+                <strong className="text-foreground">{answeredCount}</strong> dari{" "}
+                <strong className="text-foreground">25</strong> soal.
               </p>
               {answeredCount < 25 && (
-                <p className="text-xs text-orange-600 font-bold mb-6">
+                <p className="text-xs text-destructive font-bold mb-6">
                   ⚠ {25 - answeredCount} soal belum dijawab.
                 </p>
               )}
@@ -267,14 +267,14 @@ export default function TakeTestPage() {
                 <Button
                   variant="ghost"
                   onClick={() => setShowConfirm(false)}
-                  className="flex-1 rounded-2xl font-black uppercase text-[10px]"
+                  className="flex-1 rounded-xl font-bold uppercase text-[10px]"
                 >
                   Batal
                 </Button>
                 <Button
                   onClick={handleSubmit}
                   disabled={isPending}
-                  className="flex-1 bg-zinc-900 text-white rounded-2xl font-black uppercase text-[10px]"
+                  className="flex-1 bg-primary text-primary-foreground rounded-xl font-bold uppercase text-[10px]"
                 >
                   {isPending ? "Mengirim..." : "Ya, Kumpulkan"}
                 </Button>

@@ -32,7 +32,7 @@ export default function TestResultPage() {
   const offset = circumference - (displayScore / 100) * circumference;
 
   return (
-    <div className="min-h-screen bg-zinc-50/50 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -40,11 +40,11 @@ export default function TestResultPage() {
         className="max-w-md w-full"
       >
         {/* Score Card */}
-        <div className="rounded-[2.5rem] overflow-hidden shadow-2xl mb-6 bg-zinc-900">
+        <div className="rounded-xl overflow-hidden border border-border card-shadow mb-6 bg-card">
           <div className="relative p-10 text-center">
-            <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-primary/5 -translate-y-1/2 translate-x-1/2" />
 
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 mb-8">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-8">
               Hasil Pre-Selection Test
             </p>
 
@@ -61,7 +61,8 @@ export default function TestResultPage() {
                   cy="64"
                   r="54"
                   fill="none"
-                  stroke="rgba(255,255,255,0.1)"
+                  stroke="currentColor"
+                  className="text-muted"
                   strokeWidth="10"
                 />
                 <motion.circle
@@ -69,7 +70,7 @@ export default function TestResultPage() {
                   cy="64"
                   r="54"
                   fill="none"
-                  stroke={passed ? "#f97316" : "#ef4444"}
+                  stroke={passed ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
                   strokeWidth="10"
                   strokeLinecap="round"
                   strokeDasharray={circumference}
@@ -83,11 +84,11 @@ export default function TestResultPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="text-4xl font-black text-white"
+                  className="text-4xl font-bold text-foreground"
                 >
                   {displayScore}
                 </motion.span>
-                <span className="text-xs font-black text-zinc-400">/ 100</span>
+                <span className="text-xs font-bold text-muted-foreground">/ 100</span>
               </div>
             </div>
 
@@ -97,10 +98,10 @@ export default function TestResultPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
               className={cn(
-                "inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-black uppercase text-xs tracking-widest mb-4",
+                "inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold uppercase text-xs tracking-widest mb-4",
                 passed
-                  ? "bg-orange-500/20 text-orange-400"
-                  : "bg-red-500/20 text-red-400",
+                  ? "bg-primary/10 text-primary"
+                  : "bg-destructive/10 text-destructive",
               )}
             >
               {passed ? (
@@ -118,7 +119,7 @@ export default function TestResultPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.9 }}
-              className="text-sm text-zinc-400 font-medium leading-relaxed"
+              className="text-sm text-muted-foreground font-medium leading-relaxed"
             >
               {passed
                 ? "Kamu memenuhi syarat minimum. Lanjutkan lamaranmu sekarang!"
@@ -127,15 +128,15 @@ export default function TestResultPage() {
           </div>
 
           {/* Score breakdown */}
-          <div className="border-t border-white/10 px-10 py-5 flex justify-around">
+          <div className="border-t border-border px-10 py-5 flex justify-around bg-muted/30">
             {[
               { label: "Skor Kamu", value: `${displayScore}` },
               { label: "Minimum Lulus", value: `${passingScore}` },
               { label: "Status", value: passed ? "Lulus" : "Gagal" },
             ].map(({ label, value }) => (
               <div key={label} className="text-center">
-                <p className="text-lg font-black text-white">{value}</p>
-                <p className="text-[10px] font-black uppercase tracking-wider text-zinc-500">
+                <p className="text-lg font-bold text-foreground">{value}</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                   {label}
                 </p>
               </div>
@@ -158,7 +159,7 @@ export default function TestResultPage() {
                   state: { testResultId }, // ← diteruskan ke job-detail
                 })
               }
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-2xl h-14 shadow-xl font-black uppercase text-xs tracking-[0.2em] italic"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-14 shadow-md font-bold uppercase text-xs tracking-widest italic"
             >
               Lanjut Lamar <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -166,16 +167,16 @@ export default function TestResultPage() {
 
           <Button
             onClick={() => navigate("/jobs")}
-            className="w-full bg-zinc-900 hover:bg-black text-white rounded-2xl h-14 shadow-xl shadow-zinc-200 font-black uppercase text-xs tracking-[0.2em] italic"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-14 shadow-md font-bold uppercase text-xs tracking-widest italic"
           >
             Lihat Lowongan Lain{" "}
-            <ArrowRight className="ml-2 h-4 w-4 text-orange-500" />
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
 
           <Button
             variant="ghost"
             onClick={() => navigate("/profile/applications")}
-            className="w-full rounded-2xl h-12 font-black uppercase text-[10px] tracking-widest text-zinc-400 hover:text-zinc-900"
+            className="w-full rounded-xl h-12 font-bold uppercase text-[10px] tracking-widest text-muted-foreground hover:text-foreground"
           >
             Lihat Status Lamaran
           </Button>

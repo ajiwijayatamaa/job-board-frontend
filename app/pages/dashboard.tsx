@@ -91,16 +91,23 @@ const Dashboard = () => {
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
 
-      <main className="container flex-1 py-8">
-        <div className="mb-6 flex items-center gap-3">
-          <Link to="/profile">
-            <Button variant="ghost" size="icon"><ArrowLeft className="h-4 w-4" /></Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">My Applications</h1>
-            <p className="text-sm text-muted-foreground">Track your job applications and interview schedules</p>
+      <div className="hero-gradient py-10">
+        <div className="container">
+          <div className="flex items-center gap-3">
+            <Link to="/profile">
+              <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-primary-foreground italic uppercase tracking-tight">Lamaran Saya</h1>
+              <p className="text-sm text-primary-foreground/80">Pantau lamaran kerja dan jadwal interview Anda</p>
+            </div>
           </div>
         </div>
+      </div>
+
+      <main className="container flex-1 py-8">
 
         {/* Interview Reminders */}
         {upcomingInterviews.length > 0 && (
@@ -111,10 +118,10 @@ const Dashboard = () => {
                   <BellRing className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-foreground">
-                      Interview Reminder: {app.jobTitle}
+                      Pengingat Interview: {app.jobTitle}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {app.interview!.date} at {app.interview!.time} Â· {app.interview!.locationLink || "TBA"}
+                      {app.interview!.date} pukul {app.interview!.time} · {app.interview!.locationLink || "Akan diinformasikan"}
                     </p>
                   </div>
                   <Button
@@ -134,10 +141,10 @@ const Dashboard = () => {
         {/* Stats */}
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
           {[
-            { label: "Total Applied", value: stats.total, icon: <Briefcase className="h-5 w-5 text-primary" />, bg: "bg-primary/10" },
-            { label: "Interviews", value: stats.interview, icon: <CalendarDays className="h-5 w-5 text-accent-foreground" />, bg: "bg-accent/10" },
-            { label: "Accepted", value: stats.accepted, icon: <CheckCircle2 className="h-5 w-5 text-accent-foreground" />, bg: "bg-accent/10" },
-            { label: "Rejected", value: stats.rejected, icon: <XCircle className="h-5 w-5 text-destructive" />, bg: "bg-destructive/10" },
+            { label: "Total Melamar", value: stats.total, icon: <Briefcase className="h-5 w-5 text-primary" />, bg: "bg-primary/10" },
+            { label: "Interview", value: stats.interview, icon: <CalendarDays className="h-5 w-5 text-accent-foreground" />, bg: "bg-accent/10" },
+            { label: "Diterima", value: stats.accepted, icon: <CheckCircle2 className="h-5 w-5 text-accent-foreground" />, bg: "bg-accent/10" },
+            { label: "Ditolak", value: stats.rejected, icon: <XCircle className="h-5 w-5 text-destructive" />, bg: "bg-destructive/10" },
           ].map((s) => (
             <Card key={s.label}>
               <CardContent className="flex items-center gap-3 p-4">
@@ -154,9 +161,9 @@ const Dashboard = () => {
         {/* Tabs */}
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="mb-6 flex flex-col h-auto items-stretch w-full max-w-[200px] bg-muted/50 p-1">
-            <TabsTrigger value="all" className="justify-start px-4 py-2">All Applications</TabsTrigger>
-            <TabsTrigger value="interviews" className="justify-start px-4 py-2">Interviews</TabsTrigger>
-            <TabsTrigger value="rejected" className="justify-start px-4 py-2">Rejected</TabsTrigger>
+            <TabsTrigger value="all" className="justify-start px-4 py-2">Semua Lamaran</TabsTrigger>
+            <TabsTrigger value="interviews" className="justify-start px-4 py-2">Interview</TabsTrigger>
+            <TabsTrigger value="rejected" className="justify-start px-4 py-2">Ditolak</TabsTrigger>
           </TabsList>
 
           {["all", "interviews", "rejected"].map((t) => (
@@ -167,7 +174,7 @@ const Dashboard = () => {
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                     <Briefcase className="mb-2 h-10 w-10" />
-                    <p>No applications found in this category.</p>
+                    <p>Tidak ada lamaran ditemukan dalam kategori ini.</p>
                   </CardContent>
                 </Card>
               ) : (
@@ -184,4 +191,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

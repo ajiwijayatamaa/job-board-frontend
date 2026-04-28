@@ -48,7 +48,7 @@ const Register = () => {
       const res = await axiosInstance.post("/auth/register", payload);
 
       toast.success(
-        res.data.message || "Registration successful! Please check your email."
+        res.data.message || "Pendaftaran berhasil! Silakan cek email Anda."
       );
 
       navigate("/verify-email", { state: { email: payload.email } });
@@ -92,7 +92,7 @@ const Register = () => {
         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type={showPassword ? "text" : "password"}
-          placeholder="Min 8 characters"
+          placeholder="Minimal 8 karakter"
           className="pl-10 pr-10 w-full h-10 md:h-11"
           {...register("password")}
         />
@@ -122,10 +122,10 @@ const Register = () => {
           {/* HEADER */}
           <div className="text-center">
             <h1 className="text-xl md:text-2xl font-bold">
-              Create Account
+              Buat Akun
             </h1>
             <p className="mt-1 text-xs md:text-sm text-muted-foreground">
-              Join our community today
+              Bergabunglah dengan komunitas kami sekarang
             </p>
           </div>
 
@@ -139,8 +139,8 @@ const Register = () => {
           >
             {/* TAB SWITCH */}
             <TabsList className="grid grid-cols-2 w-full max-w-xs mx-auto mb-6 bg-muted/50 p-1 h-10 md:h-11 rounded-lg">
-              <TabsTrigger value="user">Job Seeker</TabsTrigger>
-              <TabsTrigger value="company">Company</TabsTrigger>
+              <TabsTrigger value="user">Pencari Kerja</TabsTrigger>
+              <TabsTrigger value="company">Perusahaan</TabsTrigger>
             </TabsList>
 
             {/* USER FORM */}
@@ -149,16 +149,16 @@ const Register = () => {
                 onSubmit={handleSubmit(onSubmit)}
                 className="w-full flex flex-col gap-4"
               >
-                {renderInput("Full Name", "fullName", "John Doe", User)}
-                {renderInput("Email", "email", "you@example.com", Mail, "email")}
-                {renderInput("Phone Number", "phone", "08123456789", Phone)}
+                {renderInput("Nama Lengkap", "fullName", "Budi Santoso", User)}
+                {renderInput("Email", "email", "anda@contoh.com", Mail, "email")}
+                {renderInput("Nomor Telepon", "phone", "08123456789", Phone)}
 
                 {renderPassword()}
 
                 {renderInput(
-                  "Confirm Password",
+                  "Konfirmasi Kata Sandi",
                   "confirmPassword",
-                  "Repeat password",
+                  "Ulangi kata sandi",
                   Lock,
                   "password"
                 )}
@@ -168,7 +168,7 @@ const Register = () => {
                   className="w-full h-10 md:h-11"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Creating Account..." : "Create Account"}
+                  {isSubmitting ? "Sedang Membuat Akun..." : "Buat Akun"}
                 </Button>
               </form>
             </TabsContent>
@@ -179,17 +179,17 @@ const Register = () => {
                 onSubmit={handleSubmit(onSubmit)}
                 className="w-full flex flex-col gap-4"
               >
-                {renderInput("Company Name", "companyName", "Acme Inc.", Building2)}
-                {renderInput("Admin Name", "fullName", "Admin Name", User)}
-                {renderInput("Email", "email", "hr@company.com", Mail, "email")}
-                {renderInput("Company Phone", "phone", "08123456789", Phone)}
+                {renderInput("Nama Perusahaan", "companyName", "PT Maju Jaya", Building2)}
+                {renderInput("Nama Admin", "fullName", "Nama Admin", User)}
+                {renderInput("Email", "email", "hr@perusahaan.com", Mail, "email")}
+                {renderInput("Telepon Perusahaan", "phone", "08123456789", Phone)}
 
                 {renderPassword()}
 
                 {renderInput(
-                  "Confirm Password",
+                  "Konfirmasi Kata Sandi",
                   "confirmPassword",
-                  "Repeat password",
+                  "Ulangi kata sandi",
                   Lock,
                   "password"
                 )}
@@ -199,7 +199,7 @@ const Register = () => {
                   className="w-full h-10 md:h-11"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Registering..." : "Register Company"}
+                  {isSubmitting ? "Sedang Mendaftar..." : "Daftar Perusahaan"}
                 </Button>
               </form>
             </TabsContent>
@@ -207,12 +207,12 @@ const Register = () => {
 
           {/* FOOTER */}
           <p className="mt-6 text-center text-xs md:text-sm text-muted-foreground">
-            Already have an account?{" "}
+            Sudah punya akun?{" "}
             <Link
               to="/login"
               className="font-medium text-primary hover:underline"
             >
-              Sign In
+              Masuk
             </Link>
           </p>
         </div>

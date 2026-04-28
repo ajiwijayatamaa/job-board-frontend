@@ -124,7 +124,7 @@ const Profile = () => {
     onSuccess: (updatedUser) => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       updateAuthStore({ ...(authUser as UserAuth), ...(updatedUser as UserAuth), token: authUser?.token } as UserAuth);
-      toast.success("Profile updated successfully!");
+      toast.success("Profil berhasil diperbarui!");
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to update profile");
@@ -145,7 +145,7 @@ const Profile = () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       // Update store global agar Navbar/Sidebar ikut berubah
       updateAuthStore({ ...(authUser as UserAuth), ...(updatedUser as UserAuth), token: authUser?.token } as UserAuth);
-      toast.success("Profile picture updated!");
+      toast.success("Foto profil berhasil diperbarui!");
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to upload photo");
@@ -180,7 +180,7 @@ const Profile = () => {
       setCvName("");
       setCvFile(null);
       if (cvFileInputRef.current) cvFileInputRef.current.value = "";
-      toast.success("CV uploaded!");
+      toast.success("CV berhasil diunggah!");
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to upload CV");
@@ -194,7 +194,7 @@ const Profile = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cvs"] });
-      toast.success("Primary CV updated!");
+      toast.success("CV Utama berhasil diperbarui!");
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to update primary CV");
@@ -207,7 +207,7 @@ const Profile = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cvs"] });
-      toast.success("CV deleted!");
+      toast.success("CV berhasil dihapus!");
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to delete CV");
@@ -271,10 +271,17 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container max-w-2xl py-10">
-        <h1 className="mb-8 text-2xl font-bold text-foreground">My Profile</h1>
+      
+      <div className="hero-gradient py-10">
+        <div className="container max-w-2xl">
+          <h1 className="text-3xl font-bold text-primary-foreground italic uppercase tracking-tight">
+            Profil Saya
+          </h1>
+        </div>
+      </div>
 
-        <div className="mb-8 flex items-center gap-6">
+      <div className="container max-w-2xl py-10">
+        <div className="mb-8 flex items-center gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
           <div className="relative">
             {profileData?.profilePhoto ? (
               <img src={profileData.profilePhoto} alt={watch("fullName")} className="h-24 w-24 rounded-full object-cover" />
@@ -312,7 +319,7 @@ const Profile = () => {
         <form onSubmit={handleSave} className="space-y-6 rounded-xl border border-border bg-card p-6 card-shadow">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Full Name</Label>
+              <Label>Nama Lengkap</Label>
               <Input {...register("fullName")} /> {/* Gunakan register */}
               {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
             </div>
@@ -325,12 +332,12 @@ const Profile = () => {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>City</Label>
+              <Label>Kota</Label>
               <Input {...register("city")} />
               {errors.city && <p className="text-xs text-destructive">{errors.city.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label>Date of Birth</Label>
+              <Label>Tanggal Lahir</Label>
               <Input type="date" {...register("dateOfBirth")} />
               {errors.dateOfBirth && <p className="text-xs text-destructive">{errors.dateOfBirth.message}</p>}
             </div>
@@ -340,12 +347,12 @@ const Profile = () => {
           {currentRole === "ADMIN" && (
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Company Name</Label>
+                <Label>Nama Perusahaan</Label>
                 <Input {...register("companyName")} />
                 {errors.companyName && <p className="text-xs text-destructive">{errors.companyName.message}</p>}
               </div>
               <div className="space-y-2">
-                <Label>Company Phone</Label>
+                <Label>Telepon Perusahaan</Label>
                 <Input {...register("phone")} />
                 {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
               </div>
@@ -363,33 +370,33 @@ const Profile = () => {
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Bagian Gender bisa ditambahkan ke BE jika diperlukan, sementara disesuaikan dengan field yang ada */}
             <div className="space-y-2">
-              <Label>Gender</Label>
+              <Label>Jenis Kelamin</Label>
               <Select 
                 value={watch("gender")} 
                 onValueChange={(v) => setValue("gender", v)}
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="male">Laki-laki</SelectItem>
+                  <SelectItem value="female">Perempuan</SelectItem>
+                  <SelectItem value="other">Lainnya</SelectItem>
                 </SelectContent>
               </Select>
               {errors.gender && <p className="text-xs text-destructive">{errors.gender.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label>Last Education</Label>
+              <Label>Pendidikan Terakhir</Label>
               <Select
                 value={watch("education") || ""} // Gunakan watch untuk mendapatkan nilai saat ini
                 onValueChange={(v) => setValue("education", v as UpdateProfileSchema["education"])} // Gunakan setValue untuk memperbarui
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="high_school">High School</SelectItem>
+                  <SelectItem value="high_school">SMA/SMK</SelectItem>
                   <SelectItem value="diploma">Diploma</SelectItem>
-                  <SelectItem value="bachelor">Bachelor's Degree</SelectItem>
-                  <SelectItem value="master">Master's Degree</SelectItem>
-                  <SelectItem value="doctorate">Doctorate</SelectItem>
+                  <SelectItem value="bachelor">Sarjana (S1)</SelectItem>
+                  <SelectItem value="master">Magister (S2)</SelectItem>
+                  <SelectItem value="doctorate">Doktor (S3)</SelectItem>
                 </SelectContent>
               </Select>
               {errors.education && <p className="text-xs text-destructive">{errors.education.message}</p>}
@@ -397,7 +404,7 @@ const Profile = () => {
           </div>
 
           <div className="space-y-2">
-            <Label>Latest Address</Label>
+            <Label>Alamat Terakhir</Label>
             <Textarea {...register("address")} rows={3} />
             {errors.address && <p className="text-xs text-destructive">{errors.address.message}</p>}
           </div>
@@ -416,25 +423,25 @@ const Profile = () => {
 
           <Button type="submit" className="gap-2" disabled={updateMutation.isPending || uploadPhotoMutation.isPending}>
             {updateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            {updateMutation.isPending ? "Saving..." : "Save Changes"}
+            {updateMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
           </Button>
         </form>
 
         <div className="mt-8 space-y-4 rounded-xl border border-border bg-card p-6 card-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">My CVs</h2>
+              <h2 className="text-lg font-semibold text-foreground">Daftar CV</h2>
               <p className="text-xs text-muted-foreground">Upload CV (PDF) dan pilih CV utama untuk melamar.</p>
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>CV Name</Label>
-              <Input value={cvName} onChange={(e) => setCvName(e.target.value)} placeholder="e.g. CV - Backend Engineer" />
+              <Label>Nama CV</Label>
+              <Input value={cvName} onChange={(e) => setCvName(e.target.value)} placeholder="Contoh: CV - Backend Engineer" />
             </div>
             <div className="space-y-2">
-              <Label>File (PDF)</Label>
+              <Label>Berkas (PDF)</Label>
               <Input
                 ref={cvFileInputRef}
                 type="file"
@@ -454,13 +461,13 @@ const Profile = () => {
             }}
           >
             {uploadCvMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {uploadCvMutation.isPending ? "Uploading..." : "Upload CV"}
+            {uploadCvMutation.isPending ? "Mengunggah..." : "Unggah CV"}
           </Button>
 
           <div className="pt-2 border-t border-border">
             {isCvsLoading ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" /> Loading CVs...
+                <Loader2 className="h-4 w-4 animate-spin" /> Memuat CV...
               </div>
             ) : !cvs || cvs.length === 0 ? (
               <p className="text-sm text-muted-foreground">Belum ada CV. Upload CV pertama kamu di atas.</p>
@@ -471,14 +478,14 @@ const Profile = () => {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="truncate font-medium text-foreground">{cv.cvName}</p>
-                        {cv.isPrimary ? <Badge>Primary</Badge> : null}
+                        {cv.isPrimary ? <Badge>Utama</Badge> : null}
                       </div>
                       <p className="truncate text-xs text-muted-foreground">{cv.fileUrl}</p>
                     </div>
 
                     <div className="flex shrink-0 items-center gap-2">
                       <Button type="button" variant="outline" size="sm" onClick={() => window.open(cv.fileUrl, "_blank")}>
-                        View
+                        Lihat
                       </Button>
                       <Button
                         type="button"
@@ -496,7 +503,7 @@ const Profile = () => {
                         disabled={cv.isPrimary || setPrimaryCvMutation.isPending}
                         onClick={() => setPrimaryCvMutation.mutate(cv.id)}
                       >
-                        {setPrimaryCvMutation.isPending ? "..." : "Set Primary"}
+                        {setPrimaryCvMutation.isPending ? "..." : "Jadikan Utama"}
                       </Button>
                       <Button
                         type="button"
@@ -505,7 +512,7 @@ const Profile = () => {
                         disabled={deleteCvMutation.isPending}
                         onClick={() => deleteCvMutation.mutate(cv.id)}
                       >
-                        {deleteCvMutation.isPending ? "..." : "Delete"}
+                        {deleteCvMutation.isPending ? "..." : "Hapus"}
                       </Button>
                     </div>
                   </div>
@@ -521,14 +528,14 @@ const Profile = () => {
             <div className="mt-8 space-y-4 rounded-xl border border-border bg-card p-6 card-shadow">
               <div className="flex items-center gap-2 mb-2">
                 <Briefcase className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Applied Jobs</h2>
+                <h2 className="text-lg font-semibold text-foreground">Lamaran Pekerjaan</h2>
               </div>
               {isAppsLoading ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" /> Loading applications...
+                  <Loader2 className="h-4 w-4 animate-spin" /> Memuat lamaran...
                 </div>
               ) : !appliedJobs || appliedJobs.length === 0 ? (
-                <p className="text-sm text-muted-foreground">You haven't applied to any jobs yet.</p>
+                <p className="text-sm text-muted-foreground">Anda belum melamar pekerjaan apa pun.</p>
               ) : (
                 <div className="space-y-3">
                   {appliedJobs.map((app) => (
@@ -537,14 +544,14 @@ const Profile = () => {
                         <h3 className="font-medium text-foreground">{app.job?.title}</h3>
                         <p className="text-sm text-muted-foreground">{app.job?.company?.companyName}</p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Applied on: {new Date(app.createdAt).toLocaleDateString()}
+                          Dilamar pada: {new Date(app.createdAt).toLocaleDateString("id-ID")}
                         </p>
                       </div>
                       <Badge variant={
                         app.status === "accepted" ? "default" : 
                         app.status === "rejected" ? "destructive" : 
                         "secondary"
-                      }>
+                      } className="uppercase text-[10px]">
                         {app.status}
                       </Badge>
                     </div>
@@ -557,14 +564,14 @@ const Profile = () => {
             <div className="mt-8 space-y-4 rounded-xl border border-border bg-card p-6 card-shadow">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Interview Invitations</h2>
+                <h2 className="text-lg font-semibold text-foreground">Undangan Interview</h2>
               </div>
               {isAppsLoading ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" /> Loading interviews...
+                  <Loader2 className="h-4 w-4 animate-spin" /> Memuat undangan...
                 </div>
               ) : !interviews || interviews.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No interview invitations at the moment.</p>
+                <p className="text-sm text-muted-foreground">Belum ada undangan interview saat ini.</p>
               ) : (
                 <div className="space-y-3">
                   {interviews.map((interview) => (
@@ -578,12 +585,12 @@ const Profile = () => {
                       <div className="grid gap-1 text-sm">
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Calendar className="h-3 w-3" />
-                          {interview?.interviewDate ? new Date(interview.interviewDate).toLocaleString() : "-"}
+                          {interview?.interviewDate ? new Date(interview.interviewDate).toLocaleString("id-ID") : "-"}
                         </div>
                       </div>
                       <div className="mt-4 flex gap-2">
                         <Link to="/dashboard" className="w-full">
-                          <Button size="sm" variant="outline" className="w-full">View in Dashboard</Button>
+                          <Button size="sm" variant="outline" className="w-full">Lihat di Dashboard</Button>
                         </Link>
                       </div>
                     </div>
