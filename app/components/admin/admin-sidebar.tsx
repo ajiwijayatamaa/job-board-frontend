@@ -8,6 +8,7 @@ import {
   User,
   ChevronRight,
   Sparkles,
+  Home,
 } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import {
@@ -197,6 +198,21 @@ const AdminSidebar = () => {
           borderTop: "1px solid rgba(255,255,255,0.05)",
         }}
       >
+        <Link
+          to="/"
+          className={cn(
+            "flex items-center gap-4 w-full px-4 py-3 rounded-xl transition-all duration-300 group hover:bg-white/5",
+            collapsed && "justify-center px-0",
+          )}
+          style={{ color: "#5C7596" }}
+        >
+          <Home className="w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:text-white" />
+          {!collapsed && (
+            <span className="text-xs font-bold tracking-widest uppercase group-hover:text-white transition-colors">
+              Back to Home
+            </span>
+          )}
+        </Link>
         <button
           onClick={logout}
           className={cn(

@@ -107,14 +107,14 @@ const Companies = () => {
       <Navbar />
       <div className="hero-gradient py-10">
         <div className="container">
-          <h1 className="mb-6 text-3xl font-bold text-primary-foreground">
-            Explore Companies
+          <h1 className="mb-6 text-3xl font-bold text-primary-foreground italic uppercase tracking-tight">
+            Eksplor Perusahaan
           </h1>
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Company name"
+                placeholder="Nama perusahaan"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 className="bg-card pl-10"
@@ -123,7 +123,7 @@ const Companies = () => {
             <div className="relative flex-1">
               <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Location"
+                placeholder="Lokasi (Kota)"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className="bg-card pl-10"
@@ -134,17 +134,17 @@ const Companies = () => {
               className="gap-2 bg-card"
               onClick={() => setShowFilters(!showFilters)}
             >
-              <SlidersHorizontal className="h-4 w-4" /> Filters
+              <SlidersHorizontal className="h-4 w-4" /> Filter
             </Button>
           </div>
           {showFilters && (
-            <div className="mt-3">
+            <div className="mt-4 flex flex-wrap gap-3 animate-in fade-in slide-in-from-top-2">
               <Select value={industry} onValueChange={setIndustry}>
                 <SelectTrigger className="w-[180px] bg-card">
-                  <SelectValue placeholder="Industry" />
+                  <SelectValue placeholder="Industri" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Industries</SelectItem>
+                  <SelectItem value="all">Semua Industri</SelectItem>
                   {industries.map((i) => (
                     <SelectItem key={i} value={i}>
                       {i}
@@ -154,10 +154,10 @@ const Companies = () => {
               </Select>
               <Select value={companySize} onValueChange={setCompanySize}>
                 <SelectTrigger className="w-[180px] bg-card">
-                  <SelectValue placeholder="Company Size" />
+                  <SelectValue placeholder="Ukuran Perusahaan" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Sizes</SelectItem>
+                  <SelectItem value="all">Semua Ukuran</SelectItem>
                   {sizes.map((s) => (
                     <SelectItem key={s} value={s}>
                       {s}
@@ -172,7 +172,7 @@ const Companies = () => {
 
       <div className="container py-8">
         <p className="mb-6 text-sm text-muted-foreground">
-          {filtered.length} companies found
+          {filtered.length} perusahaan ditemukan
         </p>
         {isCompaniesLoading ? (
           <div className="flex justify-center py-10">
@@ -180,7 +180,7 @@ const Companies = () => {
           </div>
         ) : isCompaniesError ? (
           <div className="py-20 text-center text-muted-foreground">
-            Failed to load companies.
+            Gagal memuat daftar perusahaan.
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -204,10 +204,10 @@ const Companies = () => {
                   {company.industry || "-"}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {(company.location || company.address || '-')} · {(company.size || '-')} employees
+                  {(company.location || company.address || '-')} · {(company.size || '-')} karyawan
                 </p>
                 <p className="mt-2 text-sm font-medium text-primary">
-                  {company._count?.jobs || 0} open positions
+                  {company._count?.jobs || 0} lowongan aktif
                 </p>
               </Link>
             ))}
@@ -215,7 +215,7 @@ const Companies = () => {
         )}
         {isCompaniesLoading === false && paginatedItems.length === 0 && (
           <div className="py-20 text-center text-muted-foreground">
-            No companies found.
+            Tidak ada perusahaan yang ditemukan.
           </div>
         )}
         {isCompaniesLoading === false && paginatedItems.length > 0 && (
@@ -235,4 +235,3 @@ const Companies = () => {
 };
 
 export default Companies;
-

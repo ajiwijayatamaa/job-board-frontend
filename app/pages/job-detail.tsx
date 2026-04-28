@@ -224,11 +224,11 @@ const JobDetail = () => {
 
   // ─── Loading ─────────────────────────────────────────────
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-zinc-50/50 flex flex-col">
+    return ( // Changed background color for consistency
+      <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-zinc-200 border-t-orange-500 rounded-full animate-spin" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </div>
     );
@@ -262,71 +262,68 @@ const JobDetail = () => {
 
   // ─── Render ──────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-zinc-50/50">
-      <Navbar />
+    <div className="min-h-screen bg-background">
+      <Navbar /> 
 
       {/* HERO */}
-      <div className="bg-white border-b border-zinc-100">
-        <div className="max-w-6xl mx-auto px-4 py-10">
-          <Button
-            variant="ghost"
-            asChild
-            className="mb-6 -ml-2 text-zinc-500 hover:text-zinc-900 font-bold uppercase text-[10px] tracking-widest"
+      <div className="hero-gradient py-8"> {/* Changed to hero-gradient */}
+        <div className="container"> {/* Changed max-w-6xl mx-auto px-4 to container */}
+          <Link
+            to="/jobs"
+            className="mb-4 inline-flex items-center gap-1 text-sm text-primary-foreground/80 hover:text-primary-foreground"
           >
-            <Link to="/jobs">
-              <ArrowLeft className="mr-2 h-3 w-3" /> Semua Lowongan
-            </Link>
-          </Button>
+            <ArrowLeft className="h-4 w-4" /> Kembali ke semua lowongan
+          </Link>
 
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="flex flex-col md:flex-row md:items-end justify-between gap-6"
+            className="flex flex-col gap-4 md:flex-row md:items-end justify-between" // Adjusted gap
           >
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-4 h-4 text-orange-500" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
+              <div className="flex items-center gap-2 mb-2"> {/* Adjusted mb */}
+                <Sparkles className="h-4 w-4 text-primary-foreground" /> {/* Changed color */}
+                <span className="text-xs font-semibold uppercase text-primary-foreground/80"> {/* Adjusted text style */}
                   {job.category}
                 </span>
               </div>
 
               <Link
                 to={`/companies/${job.companyId}`}
-                className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors"
+                className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-blue-400 hover:bg-blue-500 transition-colors"
               >
-                <div className="w-6 h-6 rounded-lg bg-white border border-zinc-200 flex items-center justify-center overflow-hidden">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-primary-foreground"> {/* Adjusted size and background */}
                   {job.banner ? (
                     <img
                       src={job.banner}
                       alt=""
-                      className="w-full h-full object-cover"
+                      className="h-full w-full rounded-lg object-cover"
                     />
                   ) : (
-                    <Building2 className="w-3 h-3 text-zinc-400" />
+                    <Building2 className="h-4 w-4" /> 
                   )}
                 </div>
-                <span className="text-xs font-bold text-zinc-600">
+                <span className="text-sm font-medium text-primary-foreground"> {/* Adjusted text style */}
                   {job.company?.companyName || job.company}
                 </span>
               </Link>
 
-              <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-zinc-900 uppercase italic mb-4">
+              <h1 className="text-2xl font-bold text-primary-foreground md:text-3xl mb-4"> {/* Adjusted text style */}
                 {job.title}
               </h1>
 
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="gap-1 font-bold text-xs">
-                  <MapPin className="w-3 h-3 text-orange-500" />
+                <Badge variant="secondary" className="gap-1 text-xs"> {/* Removed font-bold */}
+                  <MapPin className="h-3 w-3 text-primary" /> {/* Changed color */}
                   {job.city || job.location || "—"}
                 </Badge>
-                <Badge variant="secondary" className="gap-1 font-bold text-xs">
-                  <DollarSign className="w-3 h-3 text-orange-500" />
+                <Badge variant="secondary" className="gap-1 text-xs"> {/* Removed font-bold */}
+                  <DollarSign className="h-3 w-3 text-primary" /> {/* Changed color */}
                   {formatSalary(job.salary)}
                 </Badge>
-                <Badge variant="secondary" className="gap-1 font-bold text-xs">
-                  <Clock className="w-3 h-3 text-orange-500" />
+                <Badge variant="secondary" className="gap-1 text-xs"> {/* Removed font-bold */}
+                  <Clock className="h-3 w-3 text-primary" /> {/* Changed color */}
                   Deadline:{" "}
                   {new Date(job.deadline).toLocaleDateString("id-ID", {
                     day: "numeric",
@@ -335,14 +332,14 @@ const JobDetail = () => {
                   })}
                 </Badge>
                 {job.preTest && (
-                  <Badge className="gap-1 font-bold text-xs bg-orange-50 text-orange-600 border border-orange-200">
-                    <ClipboardList className="w-3 h-3" />
+                  <Badge variant="outline" className="gap-1 text-xs border-primary text-primary"> {/* Adjusted badge style */}
+                    <ClipboardList className="h-3 w-3" />
                     Ada Pre-Selection Test
                   </Badge>
                 )}
                 {deadline <= 7 && (
-                  <Badge className="gap-1 font-bold text-xs bg-red-50 text-red-500 border border-red-200">
-                    <AlertTriangle className="w-3 h-3" />
+                  <Badge variant="destructive" className="gap-1 text-xs"> {/* Adjusted badge style */}
+                    <AlertTriangle className="h-3 w-3" />
                     {deadline === 0
                       ? "Hari ini deadline!"
                       : `${deadline} hari lagi`}
@@ -353,11 +350,12 @@ const JobDetail = () => {
 
             {/* Actions */}
             <div className="flex flex-col items-end gap-3 min-w-[190px]">
-              <DropdownMenu>
+              <DropdownMenu> {/* Adjusted button style */}
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="rounded-xl font-bold uppercase text-[10px] tracking-widest gap-2"
+                    className="gap-2 w-full h-10 md:h-11 bg-primary hover:bg-primary/90 text-primary-foreground"
+                    size="lg"
                   >
                     <Share2 className="w-4 h-4" /> Bagikan
                   </Button>
@@ -404,17 +402,17 @@ const JobDetail = () => {
                 <Button
                   onClick={handleOpenApply}
                   disabled={isApplying || isApplied}
-                  className={cn(
-                    "w-full rounded-2xl h-12 font-black uppercase text-xs tracking-[0.2em] shadow-xl",
+                  className={cn( // Adjusted button style
+                    "w-full h-10 md:h-11",
                     isApplied
-                      ? "bg-zinc-100 text-zinc-400 shadow-none cursor-default hover:bg-zinc-100"
+                      ? "bg-muted text-muted-foreground cursor-default hover:bg-muted"
                       : needsPreTest
-                        ? "bg-orange-500 hover:bg-orange-600 shadow-orange-200 text-white"
-                        : "bg-zinc-900 hover:bg-black text-white shadow-zinc-200",
+                        ? "bg-primary hover:bg-primary/90 text-primary-foreground" // Use primary for pre-test action
+                        : "bg-primary hover:bg-primary/90 text-primary-foreground",
                   )}
                 >
                   {isApplying && (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   )}
                   {isApplied
                     ? "✓ Sudah Dilamar"
@@ -429,7 +427,7 @@ const JobDetail = () => {
       </div>
 
       {/* BODY */}
-      <div className="max-w-6xl mx-auto px-4 py-10">
+      <div className="container py-8"> {/* Changed max-w-6xl mx-auto px-4 py-10 to container py-8 */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
           {/* LEFT */}
           <div className="space-y-6">
@@ -438,11 +436,11 @@ const JobDetail = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05 }}
-                className="flex gap-3 p-4 rounded-2xl bg-orange-50 border border-orange-200"
+                className="flex gap-3 p-4 rounded-xl bg-yellow-50 border border-yellow-200" // Adjusted colors and rounded
               >
-                <ClipboardList className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                <ClipboardList className="h-5 w-5 flex-shrink-0 text-yellow-600 mt-0.5" /> {/* Adjusted color */}
                 <div>
-                  <p className="text-sm font-black text-orange-700 mb-1">
+                  <p className="mb-1 text-sm font-bold text-yellow-700"> {/* Adjusted text style */}
                     Lowongan ini mensyaratkan Pre-Selection Test
                   </p>
                   <p className="text-xs text-orange-600 leading-relaxed">
@@ -457,11 +455,11 @@ const JobDetail = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05 }}
-                className="flex gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200"
+                className="flex gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200" // Adjusted rounded
               >
-                <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                <p className="text-sm font-bold text-emerald-700">
-                  Pre-selection test sudah diselesaikan — kamu siap untuk
+                <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-emerald-500" />
+                <p className="text-sm font-semibold text-emerald-700"> {/* Adjusted text style */}
+                  Pre-selection test sudah diselesaikan — Kamu siap untuk
                   melamar!
                 </p>
               </motion.div>
@@ -472,12 +470,12 @@ const JobDetail = () => {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-[2rem] shadow-sm border-none p-8"
+              className="rounded-xl border border-border bg-card p-6 card-shadow" // Standard card style
             >
-              <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-4">
+              <h2 className="mb-4 text-xl font-semibold text-foreground"> {/* Standard heading style */}
                 Deskripsi Pekerjaan
               </h2>
-              <p className="text-sm leading-relaxed text-zinc-600 whitespace-pre-line">
+              <p className="text-muted-foreground leading-relaxed whitespace-pre-line"> {/* Standard text style */}
                 {job.description}
               </p>
             </motion.div>
@@ -488,13 +486,13 @@ const JobDetail = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="bg-white rounded-[2rem] shadow-sm p-8"
+              className="rounded-xl border border-border bg-card p-6 card-shadow" // Standard card style
               >
-                <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-4">
+              <h2 className="mb-4 text-xl font-semibold text-foreground"> {/* Standard heading style */}
                   Skills & Tags
                 </h2>
                 <div className="flex flex-wrap gap-2">
-                  {job.tags.map((tag: string, i: number) => (
+                  {job.tags.map((tag: string, i: number) => ( // Adjusted badge style
                     <Badge
                       key={i}
                       variant="secondary"
@@ -515,28 +513,28 @@ const JobDetail = () => {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-[2rem] shadow-sm p-6"
+              className="rounded-xl border border-border bg-card p-6 card-shadow space-y-3 text-sm" // Standard card style
             >
-              <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-4">
+              <h3 className="mb-2 font-semibold text-foreground"> {/* Standard heading style */}
                 Ringkasan Pekerjaan
-              </h2>
+              </h3>
               <div className="mb-4">
                 <div className="flex justify-between text-xs mb-1.5">
-                  <span className="text-zinc-400 font-bold">
+                  <span className="font-medium text-muted-foreground"> {/* Adjusted text style */}
                     Sisa pendaftaran
                   </span>
                   <span
                     className={cn(
-                      "font-black",
-                      deadline <= 3 ? "text-red-500" : "text-orange-500",
+                      "font-semibold", // Adjusted text style
+                      deadline <= 3 ? "text-blue-500" : "text-blue-500",
                     )}
                   >
                     {deadline} hari
                   </span>
                 </div>
                 <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full transition-all"
+                  <div // Adjusted gradient colors
+                    className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full transition-all"
                     style={{
                       width: `${Math.min(100, (deadline / 30) * 100)}%`,
                     }}
@@ -559,14 +557,14 @@ const JobDetail = () => {
                   {
                     Icon: Clock,
                     label: "Deadline",
-                    value: new Date(job.deadline).toLocaleDateString("id-ID"),
+                    value: new Date(job.deadline).toLocaleDateString("id-ID"), // Kept original date format
                   },
                 ].map(({ Icon, label, value }) => (
                   <div
-                    key={label}
+                    key={label} // Adjusted text styles
                     className="flex items-center gap-3 py-3 text-sm"
                   >
-                    <Icon className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                    <Icon className="w-4 h-4 text-blue-500 flex-shrink-0" />
                     <span className="flex-1 text-zinc-400 font-bold text-xs uppercase tracking-wide">
                       {label}
                     </span>
@@ -584,15 +582,15 @@ const JobDetail = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="bg-white rounded-[2rem] shadow-sm p-6 text-center"
+              className="rounded-xl border border-border bg-card p-6 card-shadow text-center" // Standard card style
               >
                 {isApplied ? (
                   <div className="flex flex-col items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
-                      <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50/20"> {/* Adjusted background */}
+                      <CheckCircle2 className="h-6 w-6 text-emerald-500" />
                     </div>
-                    <p className="text-sm font-black text-zinc-400 uppercase tracking-widest">
-                      Lamaran sudah dikirim
+                    <p className="text-sm font-semibold text-emerald-700"> {/* Adjusted text style */}
+                      Lamaran sudah dikirim!
                     </p>
                   </div>
                 ) : (
@@ -601,14 +599,14 @@ const JobDetail = () => {
                       onClick={handleOpenApply}
                       disabled={isApplying}
                       className={cn(
-                        "w-full rounded-2xl h-12 font-black uppercase text-xs tracking-[0.2em] shadow-xl",
+                        "w-full h-10 md:h-11", // Standard button style
                         needsPreTest
-                          ? "bg-orange-500 hover:bg-orange-600 shadow-orange-200 text-white"
-                          : "bg-zinc-900 hover:bg-black text-white shadow-zinc-200",
+                          ? "bg-primary hover:bg-primary/90 text-primary-foreground"
+                          : "bg-primary hover:bg-primary/90 text-primary-foreground",
                       )}
                     >
                       {isApplying && (
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       )}
                       {needsPreTest
                         ? "Ikuti Pre-Selection Test"
@@ -616,7 +614,7 @@ const JobDetail = () => {
                     </Button>
                     <p className="text-[10px] text-zinc-400 font-bold">
                       {needsPreTest
-                        ? "Selesaikan tes terlebih dahulu"
+                        ? "Selesaikan tes terlebih dahulu."
                         : "Proses cepat, kurang dari 2 menit"}
                     </p>
                   </div>
@@ -629,11 +627,11 @@ const JobDetail = () => {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-[2rem] shadow-sm p-6"
+              className="rounded-xl border border-border bg-card p-6 card-shadow" // Standard card style
             >
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-4">
+              <h3 className="mb-4 font-semibold text-foreground"> {/* Standard heading style */}
                 Bagikan Lowongan
-              </p>
+              </h3>
               <div className="grid grid-cols-4 gap-2">
                 {[
                   { key: "linkedin", Icon: Linkedin, color: "#0A66C2" },
@@ -644,7 +642,7 @@ const JobDetail = () => {
                   <button
                     key={key}
                     onClick={() => handleShare(key)}
-                    className="flex items-center justify-center p-3 rounded-xl border border-zinc-200 hover:bg-zinc-50 transition-colors"
+                    className="flex items-center justify-center rounded-lg border border-border p-3 transition-colors hover:bg-muted" // Adjusted styling
                   >
                     <Icon style={{ width: 16, height: 16, color }} />
                   </button>
@@ -657,12 +655,12 @@ const JobDetail = () => {
 
       {/* Apply Dialog */}
       <Dialog open={applyOpen} onOpenChange={setApplyOpen}>
-        <DialogContent className="max-w-lg rounded-[2rem]">
+        <DialogContent className="max-w-lg"> {/* Removed custom rounded */}
           <DialogHeader>
-            <DialogTitle className="font-black uppercase italic text-zinc-900">
+            <DialogTitle className="text-2xl font-bold text-foreground"> {/* Standard dialog title style */}
               Kirim Lamaran
             </DialogTitle>
-            <p className="text-xs text-zinc-400 font-bold">
+            <p className="text-sm text-muted-foreground"> {/* Standard text style */}
               {job.title} · {job.company?.companyName}
             </p>
           </DialogHeader>
@@ -670,14 +668,14 @@ const JobDetail = () => {
             <div>
               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">
                 Ekspektasi Gaji (IDR)
-              </label>
+              </label> {/* Adjusted input style */}
               <Input
                 type="number"
                 min={0}
                 value={expectedSalary}
                 onChange={(e) => setExpectedSalary(e.target.value)}
                 placeholder="Contoh: 8.000.000"
-                className="h-11 rounded-xl border-zinc-200 focus-visible:border-orange-500"
+                className="h-10 md:h-11"
               />
             </div>
             <div>
@@ -685,7 +683,7 @@ const JobDetail = () => {
                 CV yang Digunakan
               </label>
               <Select value={cvOption} onValueChange={setCvOption}>
-                <SelectTrigger className="h-11 rounded-xl border-zinc-200">
+                <SelectTrigger className="h-10 md:h-11"> {/* Adjusted select trigger style */}
                   <SelectValue placeholder="Pilih CV" />
                 </SelectTrigger>
                 <SelectContent>
@@ -707,7 +705,7 @@ const JobDetail = () => {
               </Select>
             </div>
             {cvOption === "upload" && (
-              <div className="bg-zinc-50 rounded-2xl p-4 space-y-4">
+              <div className="space-y-4 rounded-xl border border-border bg-card p-4 card-shadow"> {/* Standard card style */}
                 <div>
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">
                     Nama CV
@@ -715,27 +713,27 @@ const JobDetail = () => {
                   <Input
                     value={cvName}
                     onChange={(e) => setCvName(e.target.value)}
-                    placeholder="e.g. CV - Backend Engineer"
-                    className="h-11 rounded-xl border-zinc-200 focus-visible:border-orange-500"
+                    placeholder="Contoh: CV - Backend Engineer"
+                    className="h-10 md:h-11"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block"> {/* Adjusted input style */}
                     File CV (PDF)
                   </label>
                   <Input
                     type="file"
                     accept="application/pdf"
                     onChange={(e) => setCvFile(e.target.files?.[0] ?? null)}
-                    className="h-11 rounded-xl border-zinc-200"
+                    className="h-10 md:h-11"
                   />
                 </div>
               </div>
             )}
             <div className="flex gap-3 pt-2">
               <Button
-                variant="ghost"
-                className="flex-1 rounded-2xl font-black uppercase text-[10px]"
+                variant="outline" // Changed to outline
+                className="flex-1" // Removed custom styling
                 onClick={() => setApplyOpen(false)}
                 disabled={isApplying}
               >
@@ -744,10 +742,10 @@ const JobDetail = () => {
               <Button
                 onClick={handleSubmitApply}
                 disabled={isApplying || isApplied}
-                className="flex-1 bg-zinc-900 hover:bg-black text-white rounded-2xl font-black uppercase text-[10px] shadow-xl shadow-zinc-200"
+                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground" // Standard button style
               >
                 {isApplying && (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 )}
                 Kirim Lamaran
               </Button>
@@ -758,19 +756,19 @@ const JobDetail = () => {
 
       {/* Pre-Test Confirm Dialog */}
       <Dialog open={preTestConfirmOpen} onOpenChange={setPreTestConfirmOpen}>
-        <DialogContent className="max-w-md rounded-[2rem]">
+        <DialogContent className="max-w-md"> {/* Removed custom rounded */}
           <DialogHeader>
-            <DialogTitle className="font-black uppercase italic text-zinc-900">
+            <DialogTitle className="text-2xl font-bold text-foreground"> {/* Standard dialog title style */}
               Pre-Selection Test
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-5 pt-2">
             <div className="flex justify-center">
-              <div className="w-16 h-16 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-yellow-50 border border-yellow-200"> {/* Adjusted styling */}
                 <Timer className="w-8 h-8 text-orange-500" />
               </div>
             </div>
-            <div className="bg-zinc-50 rounded-2xl divide-y divide-zinc-100">
+            <div className="divide-y divide-border rounded-xl border border-border bg-card p-4 card-shadow"> {/* Standard card style */}
               {[
                 { label: "Jumlah soal", value: "25 pilihan ganda" },
                 { label: "Durasi", value: "30 menit" },
@@ -783,14 +781,14 @@ const JobDetail = () => {
               ].map(({ label, value }) => (
                 <div
                   key={label}
-                  className="flex justify-between items-center px-4 py-3 text-sm"
+                  className="flex items-center justify-between py-3 text-sm" // Adjusted padding
                 >
-                  <span className="text-zinc-400 font-bold">{label}</span>
-                  <span className="font-black text-zinc-900">{value}</span>
+                  <span className="font-medium text-muted-foreground">{label}</span> {/* Adjusted text style */}
+                  <span className="font-semibold text-foreground">{value}</span> {/* Adjusted text style */}
                 </div>
               ))}
             </div>
-            <p className="text-center text-xs text-zinc-400 font-medium leading-relaxed">
+            <p className="text-center text-xs text-muted-foreground leading-relaxed"> {/* Standard text style */}
               Pastikan koneksi internet stabil dan kamu punya cukup waktu
               sebelum memulai.
             </p>
@@ -798,7 +796,7 @@ const JobDetail = () => {
               <Button
                 variant="ghost"
                 className="flex-1 rounded-2xl font-black uppercase text-[10px]"
-                onClick={() => setPreTestConfirmOpen(false)}
+                onClick={() => setPreTestConfirmOpen(false)} // Removed custom styling
               >
                 Belum Siap
               </Button>
@@ -807,7 +805,7 @@ const JobDetail = () => {
                   setPreTestConfirmOpen(false);
                   navigate(`/jobs/${job?.id}/take-test`);
                 }}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black uppercase text-[10px] shadow-xl shadow-orange-200"
+                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground" // Standard button style
               >
                 Mulai Tes →
               </Button>

@@ -42,6 +42,7 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-fade-in: fade-in 0.5s ease-out forwards;
+  --animate-typing: typing 2s steps(20, end) forwards;
 
   @keyframes accordion-down {
     from { height: 0; }
@@ -54,6 +55,14 @@
   @keyframes fade-in {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 0; }
   }
 }
 

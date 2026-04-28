@@ -17,31 +17,31 @@ const Footer = () => (
           </p>
         </div>
         <div>
-          <h4 className="mb-3 font-semibold text-foreground">For Job Seekers</h4>
+          <h4 className="mb-3 font-semibold text-foreground">Untuk Pencari Kerja</h4>
           <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-            <Link to="/jobs" className="hover:text-primary">Browse Jobs</Link>
-            <Link to="/companies" className="hover:text-primary">Companies</Link>
-            <Link to="/register" className="hover:text-primary">Create Account</Link>
+            <Link to="/jobs" className="hover:text-primary">Lihat Daftar Pekerjaan</Link>
+            <Link to="/companies" className="hover:text-primary">Lihat Daftar Perusahaan</Link>
+            <Link to="/register" className="hover:text-primary">Buat Akun</Link>
           </div>
         </div>
         <div>
-          <h4 className="mb-3 font-semibold text-foreground">For Employers</h4>
+          <h4 className="mb-3 font-semibold text-foreground">Untuk Perusahaan</h4>
           <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-            <Link to="/register" className="hover:text-primary">Post a Job</Link>
-            <Link to="/register" className="hover:text-primary">Company Registration</Link>
+            <Link to="/register" className="hover:text-primary">Buat Lamaran</Link>
+            <Link to="/register" className="hover:text-primary">Buat Akun Perusahaan</Link>
           </div>
         </div>
         <div>
-          <h4 className="mb-3 font-semibold text-foreground">Support</h4>
+          <h4 className="mb-3 font-semibold text-foreground">Dukungan</h4>
           <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-            <span className="cursor-pointer hover:text-primary">Help Center</span>
-            <span className="cursor-pointer hover:text-primary">Privacy Policy</span>
-            <span className="cursor-pointer hover:text-primary">Terms of Service</span>
+            <span className="cursor-pointer hover:text-primary">Pusat Bantuan</span>
+            <span className="cursor-pointer hover:text-primary">Kebijakan Privasi</span>
+            <span className="cursor-pointer hover:text-primary">Syarat dan Ketentuan</span>
           </div>
         </div>
       </div>
       <div className="mt-8 border-t border-border pt-6 text-center text-sm text-muted-foreground">
-        © 2026 JobBoard. All rights reserved.
+        © 2026 JobBoard
       </div>
     </div>
   </footer>

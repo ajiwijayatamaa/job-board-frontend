@@ -56,12 +56,12 @@ const DiscoverySection = () => {
         <div className="mb-16">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-foreground md:text-3xl">Featured Jobs</h2>
-              <p className="text-muted-foreground">Latest opportunities from top companies</p>
+              <h2 className="text-2xl font-bold text-foreground md:text-3xl">Lowongan Unggulan</h2>
+              <p className="text-muted-foreground">Peluang terbaru dari perusahaan ternama</p>
             </div>
             <Link to="/jobs">
               <Button variant="outline" className="gap-2">
-                View All <ArrowRight className="h-4 w-4" />
+                Lihat Semua <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -69,9 +69,9 @@ const DiscoverySection = () => {
             {isJobsLoading ? (
               <div className="col-span-full flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             ) : isJobsError ? (
-              <p className="col-span-full text-center text-muted-foreground py-10">Failed to load featured jobs.</p>
+              <p className="col-span-full text-center text-muted-foreground py-10">Gagal memuat lowongan unggulan.</p>
             ) : featuredJobs.length === 0 ? (
-              <p className="col-span-full text-center text-muted-foreground py-10">No featured jobs found.</p>
+              <p className="col-span-full text-center text-muted-foreground py-10">Tidak ada lowongan unggulan ditemukan.</p>
             ) : featuredJobs.map((job) => (
               <Link
                 key={job.id}
@@ -101,7 +101,7 @@ const DiscoverySection = () => {
                     <MapPin className="h-3 w-3" /> {job.city}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" /> {new Date(job.createdAt).toLocaleDateString()}
+                    <Clock className="h-3 w-3" /> {new Date(job.createdAt).toLocaleDateString("id-ID")}
                   </span>
                 </div>
                 <div className="mt-3 text-sm font-medium text-primary">{job.salary}</div>
@@ -114,12 +114,12 @@ const DiscoverySection = () => {
         <div>
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-foreground md:text-3xl">Top Companies</h2>
-              <p className="text-muted-foreground">Companies actively hiring right now</p>
+              <h2 className="text-2xl font-bold text-foreground md:text-3xl">Perusahaan Teratas</h2>
+              <p className="text-muted-foreground">Perusahaan yang sedang aktif merekrut saat ini</p>
             </div>
             <Link to="/companies">
               <Button variant="outline" className="gap-2">
-                View All <ArrowRight className="h-4 w-4" />
+                Lihat Semua <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -127,9 +127,9 @@ const DiscoverySection = () => {
             {isCompaniesLoading ? (
               <div className="col-span-full flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             ) : isCompaniesError ? (
-              <p className="col-span-full text-center text-muted-foreground py-10">Failed to load companies.</p>
+              <p className="col-span-full text-center text-muted-foreground py-10">Gagal memuat daftar perusahaan.</p>
             ) : featuredCompanies.length === 0 ? (
-              <p className="col-span-full text-center text-muted-foreground py-10">No companies found.</p>
+              <p className="col-span-full text-center text-muted-foreground py-10">Tidak ada perusahaan ditemukan.</p>
             ) : featuredCompanies.map((company) => (
               <Link
                 key={company.id}
@@ -148,7 +148,7 @@ const DiscoverySection = () => {
                 </h3>
                 <p className="text-sm text-muted-foreground">{company.industry || "-"}</p>
                 <p className="mt-2 text-sm font-medium text-primary">
-                  {company._count?.jobs || 0} open positions
+                  {company._count?.jobs || 0} lowongan aktif
                 </p>
               </Link>
             ))}

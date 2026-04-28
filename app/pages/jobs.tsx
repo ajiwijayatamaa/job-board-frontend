@@ -9,6 +9,7 @@ import {
   Calendar,
   Navigation, 
   Loader2,
+  ClipboardList,
   Building2
 } from "lucide-react";
 import { Input } from "~/components/ui/input";
@@ -47,6 +48,8 @@ interface Job {
   category?: string; // Assuming category name is directly on job object
   distance?: number;
   experience?: string; // Assuming experience level name is directly on job object
+  deadline: string;
+  preTest?: boolean;
   company: {
     companyName: string;
     logo?: string;
@@ -79,6 +82,7 @@ const Jobs = () => {
   const [experience, setExperience] = useState("all");
   const [postedWithin, setPostedWithin] = useState("all");
   const [sortOrder, setSortOrder] = useState("newest");
+  const [preTestFilter, setPreTestFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
 
   // Nearest location states
@@ -183,8 +187,11 @@ const Jobs = () => {
         }
       }
 
-      return matchKeyword && matchLocation && matchCategory && matchType && matchExp && matchTime;
-    });
+      const matchPreTest = preTestFilter === "all" || 
+        (preTestFilter === "yes" ? !!job.preTest : !job.preTest);
+
+      return matchKeyword && matchLocation && matchCategory && matchType && matchExp && matchTime && matchPreTest;
+    }, [debouncedKeyword, debouncedLocation, category, jobType, experience, postedWithin, preTestFilter]);
 
     // Sorting Logic
     if (sortOrder === "nearest" && latitude && longitude) {
@@ -197,7 +204,7 @@ const Jobs = () => {
     }
 
     return result;
-  }, [allJobs, debouncedKeyword, debouncedLocation, category, jobType, experience, postedWithin, sortOrder, latitude, longitude]);
+  }, [allJobs, debouncedKeyword, debouncedLocation, category, jobType, experience, postedWithin, sortOrder, latitude, longitude, preTestFilter]);
 
   const { paginatedItems, currentPage, totalPages, goToPage, resetPage } =
     usePagination(filteredJobs, 6);
@@ -211,14 +218,14 @@ const Jobs = () => {
       <Navbar />
       <div className="hero-gradient py-10">
         <div className="container">
-          <h1 className="mb-6 text-3xl font-bold text-primary-foreground">
-            Find Jobs
+          <h1 className="mb-6 text-3xl font-bold text-primary-foreground italic uppercase tracking-tight">
+            Cari Lowongan
           </h1>
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Job title or keyword"
+                placeholder="Judul pekerjaan atau kata kunci"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 className="bg-card pl-10"
@@ -227,7 +234,7 @@ const Jobs = () => {
             <div className="relative flex-1">
               <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Location"
+                placeholder="Lokasi (Kota)"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className="bg-card pl-10"
@@ -240,19 +247,19 @@ const Jobs = () => {
               disabled={isLocating}
             >
               {isLocating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Navigation className="h-4 w-4" />}
-              {latitude && longitude ? "Near Me Active" : "Near Me"}
+              {latitude && longitude ? "Terdekat Aktif" : "Terdekat"}
             </Button>
             <Button
               variant="outline"
               className="gap-2 bg-card"
               onClick={() => setShowFilters(!showFilters)}
             >
-              <SlidersHorizontal className="h-4 w-4" /> Filters
+              <SlidersHorizontal className="h-4 w-4" /> Filter
             </Button>
             <Select value={sortOrder} onValueChange={setSortOrder}>
               <SelectTrigger className="w-40 bg-card">
                 <ArrowUpDown className="mr-2 h-4 w-4 text-muted-foreground" />
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder="Urutkan" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="newest">Terbaru</SelectItem>
@@ -290,10 +297,10 @@ const Jobs = () => {
               )}
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="w-40 bg-card">
-                  <SelectValue placeholder="Category" />
+                  <SelectValue placeholder="Kategori" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="all">Semua Kategori</SelectItem>
                   {categoriesData?.map((c) => (
                     <SelectItem key={c.id} value={c.name}>
                       {c.name}
@@ -303,10 +310,10 @@ const Jobs = () => {
               </Select>
               <Select value={jobType} onValueChange={setJobType}>
                 <SelectTrigger className="w-40 bg-card">
-                  <SelectValue placeholder="Type" />
+                  <SelectValue placeholder="Tipe Kerja" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="all">Semua Tipe</SelectItem>
                   {jobTypesData?.map((t) => (
                     <SelectItem key={t.id} value={t.name}>
                       {t.name}
@@ -316,10 +323,10 @@ const Jobs = () => {
               </Select>
               <Select value={experience} onValueChange={setExperience}>
                 <SelectTrigger className="w-40 bg-card">
-                  <SelectValue placeholder="Experience" />
+                  <SelectValue placeholder="Pengalaman" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="all">Semua Level</SelectItem>
                   {experienceLevelsData?.map((e) => (
                     <SelectItem key={e.id} value={e.name}>
                       {e.name}
@@ -334,7 +341,7 @@ const Jobs = () => {
 
       <div className="container py-8">
         <p className="mb-6 text-sm text-muted-foreground">
-          {filteredJobs.length} jobs found
+          {filteredJobs.length} lowongan ditemukan
         </p>
         {isJobsLoading ? (
           <div className="flex justify-center py-10">
@@ -342,7 +349,7 @@ const Jobs = () => {
           </div>
         ) : isJobsError ? (
           <div className="py-20 text-center text-muted-foreground">
-            Failed to load jobs.
+            Gagal memuat lowongan.
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -360,7 +367,15 @@ const Jobs = () => {
                       <Building2 className="h-6 w-6" />
                     </div>
                   )}
-                  <Badge variant="secondary">{job.type}</Badge>
+                  <div className="flex flex-col items-end gap-1">
+                    <Badge variant="secondary">{job.type}</Badge>
+                    {job.preTest && (
+                      <Badge variant="outline" className="gap-1 text-[10px] border-primary text-primary py-0 h-5">
+                        <ClipboardList className="h-3 w-3" />
+                        Ada Pre-Test
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <h3 className="mb-1 font-semibold text-foreground group-hover:text-primary transition-colors">
                   {job.title}
@@ -368,7 +383,7 @@ const Jobs = () => {
                 <p className="mb-3 text-sm text-muted-foreground">
                   {job.company && typeof job.company === "object"
                     ? job.company?.companyName
-                    : (job.company || "Unknown Company")}
+                    : (job.company || "Perusahaan Tidak Diketahui")}
                 </p>
                 <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
@@ -392,7 +407,7 @@ const Jobs = () => {
         )}
         {isJobsLoading === false && paginatedItems.length === 0 && (
           <div className="py-20 text-center text-muted-foreground">
-            No jobs found matching your criteria.
+            Tidak ada lowongan yang ditemukan.
           </div>
         )}
         {isJobsLoading === false && paginatedItems.length > 0 && (
