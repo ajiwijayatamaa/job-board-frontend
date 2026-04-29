@@ -28,8 +28,8 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
 
     if (
-      error.response?.status === 401 && 
-      !originalRequest._retry && 
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
       !originalRequest.url?.includes("/auth/logout")
     ) {
       // Jika tidak ada user di state, langsung lempar ke login tanpa refresh
@@ -37,7 +37,7 @@ axiosInstance.interceptors.response.use(
       // Jika user memang guest, biarkan komponen yang menangani errornya
       const isAuthenticated = !!useAuth.getState().user;
       if (!isAuthenticated) {
-        return Promise.reject(error); 
+        return Promise.reject(error);
       }
 
       if (isRefreshing) return Promise.reject(error);
@@ -45,7 +45,7 @@ axiosInstance.interceptors.response.use(
       try {
         isRefreshing = true;
         originalRequest._retry = true;
-        
+
         const refreshResponse = await refreshInstance.post("/auth/refresh");
         const refreshedUser = refreshResponse.data?.data;
 
@@ -61,7 +61,7 @@ axiosInstance.interceptors.response.use(
         // Redirect to login page after a failed refresh and logout
         // This ensures the application state is fully reset and prevents further authenticated requests.
         // Adjust '/login' to your actual login route.
-        window.location.href = '/login';
+        window.location.href = "/login";
         return Promise.reject(error);
       } finally {
         isRefreshing = false;

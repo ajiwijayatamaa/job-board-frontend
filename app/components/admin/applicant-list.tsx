@@ -35,6 +35,7 @@ import useUpdateApplicantStatus from "~/hooks/api/useUpdateApplicantStatus";
 import { cn } from "~/lib/utils";
 import type { Application, ApplicationStatus } from "~/types/application";
 import ApplicantDetailDialog from "./applicant-detail-dialog";
+import { axiosInstance } from "@/lib/axios";
 
 const statusConfig: Record<
   ApplicationStatus,
@@ -453,9 +454,8 @@ function ApplicantRow({
           size="icon"
           className="h-8 w-8 flex-shrink-0 rounded-xl hover:bg-teal-50 hover:text-teal-600 text-slate-400 transition-colors"
           onClick={() => {
-            const base =
-              import.meta.env.VITE_BASE_URL_API || "http://localhost:8000";
-            window.open(`${base}/cvs/${applicant.cv.id}/file`, "_blank");
+            const baseUrl = axiosInstance.defaults.baseURL;
+            window.open(`${baseUrl}/cvs/${applicant.cv.id}/file`, "_blank");
           }}
         >
           <FileText className="w-3.5 h-3.5" />
