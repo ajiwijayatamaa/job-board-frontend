@@ -12,7 +12,7 @@ export const createJobSchema = z.object({
   salary: z.number().min(0, "Salary tidak boleh negatif").optional(),
   banner: z
     .instanceof(File)
-    .refine((f) => f.size <= 1024 * 1024, "Banner maksimal 1MB")
+    .refine((f) => f.size <= 2 * 1024 * 1024, "Banner maksimal 2MB")
     .refine(
       (f) => ["image/jpeg", "image/png", "image/jpg"].includes(f.type),
       "Format hanya .jpg, .jpeg, .png",

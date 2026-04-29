@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { redirect, useParams } from "react-router";
 import {
@@ -33,10 +33,28 @@ export default function TakeTestPage() {
   const [currentQ, setCurrentQ] = useState(0);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  const handleSubmitRef = useRef<() => void>(() => {});
+
+  const {
+    answers,
+    minutes,
+    seconds,
+    isWarning,
+    answeredCount,
+    selectAnswer,
+    clearSession,
+    hasSubmitted,
+  } = useTestSession({
+    jobId: numericJobId,
+    isTestReady: !!test,
+    onTimeUp: () => {
+      if (!hasSubmitted.current) handleSubmitRef.current();
+    },
+  });
+
   const handleSubmit = () => {
     if (!test) return;
 
-    // cek soal mana yang belum dijawab
     const unanswered = test.questions
       .map((q, i) => ({ index: i + 1, id: q.id }))
       .filter((q) => !answers[q.id]);
@@ -53,28 +71,11 @@ export default function TakeTestPage() {
       jobId: numericJobId,
       answers: test.questions.map((q) => ({
         questionId: q.id,
-        selectedAnswer: answers[q.id],
+        selectedAnswer: answers[q.id], // ✅ kirim option.id langsung (sudah string)
       })),
     });
   };
-
-  const {
-    answers,
-    minutes,
-    seconds,
-    isWarning,
-    answeredCount,
-    selectAnswer,
-    clearSession,
-    hasSubmitted,
-  } = useTestSession({
-    jobId: numericJobId,
-    isTestReady: !!test,
-    // saat waktu habis → langsung submit tanpa konfirmasi
-    onTimeUp: () => {
-      if (!hasSubmitted.current) handleSubmit();
-    },
-  });
+  handleSubmitRef.current = handleSubmit;
 
   if (isLoading) {
     return (
@@ -114,7 +115,6 @@ export default function TakeTestPage() {
             {minutes}:{seconds}
           </div>
         </div>
-        {/* Progress bar */}
         <div className="h-1 bg-muted">
           <div
             className="h-full bg-primary transition-all duration-300"
@@ -165,14 +165,15 @@ export default function TakeTestPage() {
               </CardHeader>
               <CardContent className="p-6 space-y-3">
                 {question.options.map((option, i) => {
-                  const isSelected = selectedAnswer === option.optionText;
+                  // ✅ FIX: pakai option.id bukan optionText untuk tracking pilihan
+                  const isSelected = selectedAnswer === String(option.id);
                   return (
                     <button
                       key={option.id}
                       type="button"
-                      // pakai selectAnswer dari hook, bukan setAnswers langsung
+                      // ✅ FIX: simpan option.id bukan optionText
                       onClick={() =>
-                        selectAnswer(question.id, option.optionText)
+                        selectAnswer(question.id, String(option.id))
                       }
                       className={cn(
                         "w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all font-medium text-sm",
@@ -255,8 +256,8 @@ export default function TakeTestPage() {
               </h2>
               <p className="text-sm text-muted-foreground font-medium mb-2">
                 Kamu sudah menjawab{" "}
-                <strong className="text-foreground">{answeredCount}</strong> dari{" "}
-                <strong className="text-foreground">25</strong> soal.
+                <strong className="text-foreground">{answeredCount}</strong>{" "}
+                dari <strong className="text-foreground">25</strong> soal.
               </p>
               {answeredCount < 25 && (
                 <p className="text-xs text-destructive font-bold mb-6">

@@ -109,6 +109,18 @@ export default function QuestionCard({ questionIndex }: Props) {
                   <Input
                     {...register(
                       `questions.${questionIndex}.options.${optionIndex}.optionText`,
+                      {
+                        onChange: (e) => {
+                          // ✅ jika opsi ini adalah jawaban benar, sync correctAnswer
+                          if (isCorrect) {
+                            setValue(
+                              `questions.${questionIndex}.correctAnswer`,
+                              e.target.value,
+                              { shouldValidate: true },
+                            );
+                          }
+                        },
+                      },
                     )}
                     placeholder={`Ketik opsi ${OPTION_LABELS[optionIndex]}...`}
                     className={cn(
@@ -118,7 +130,6 @@ export default function QuestionCard({ questionIndex }: Props) {
                         : "focus-visible:border-[#1D5FAD] focus-visible:ring-[#1D5FAD]/5",
                     )}
                   />
-
                   {/* Delete Button inside Input for cleanliness */}
                   {fields.length > 2 && (
                     <button
