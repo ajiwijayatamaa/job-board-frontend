@@ -486,7 +486,7 @@ export default function AdminJobEditPage() {
                                       : "Upload Banner"}
                                 </p>
                                 <p className="text-[9px] text-slate-400 font-medium mt-1">
-                                  JPG, JPEG, PNG — maks. 1MB
+                                  JPG, JPEG, PNG — maks. 2MB
                                 </p>
                                 <input
                                   type="file"

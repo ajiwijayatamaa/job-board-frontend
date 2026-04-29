@@ -70,7 +70,9 @@ export default function TestResultPage() {
                   cy="64"
                   r="54"
                   fill="none"
-                  stroke={passed ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
+                  stroke={
+                    passed ? "hsl(var(--primary))" : "hsl(var(--destructive))"
+                  }
                   strokeWidth="10"
                   strokeLinecap="round"
                   strokeDasharray={circumference}
@@ -88,7 +90,9 @@ export default function TestResultPage() {
                 >
                   {displayScore}
                 </motion.span>
-                <span className="text-xs font-bold text-muted-foreground">/ 100</span>
+                <span className="text-xs font-bold text-muted-foreground">
+                  / 100
+                </span>
               </div>
             </div>
 
@@ -169,8 +173,7 @@ export default function TestResultPage() {
             onClick={() => navigate("/jobs")}
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-14 shadow-md font-bold uppercase text-xs tracking-widest italic"
           >
-            Lihat Lowongan Lain{" "}
-            <ArrowRight className="ml-2 h-4 w-4" />
+            Lihat Lowongan Lain <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
 
           <Button

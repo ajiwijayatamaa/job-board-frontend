@@ -1,11 +1,4 @@
-import {
-  CalendarPlus,
-  Eye,
-  FileText,
-  Search,
-  SlidersHorizontal,
-  Users,
-} from "lucide-react";
+import { CalendarPlus, Eye, FileText, Users } from "lucide-react";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
@@ -22,7 +15,6 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +27,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "~/components/ui/select";
 import useCreateInterview from "~/hooks/api/useCreateInterview";
 import useGetApplicants from "~/hooks/api/useGetApplicants";
@@ -43,39 +36,37 @@ import { cn } from "~/lib/utils";
 import type { Application, ApplicationStatus } from "~/types/application";
 import ApplicantDetailDialog from "./applicant-detail-dialog";
 
-// ── Status config ── logic identik, hanya styling beda
 const statusConfig: Record<
   ApplicationStatus,
-  { label: string; dot: string; badge: string }
+  { label: string; class: string; dot: string }
 > = {
   PENDING: {
     label: "Pending",
+    class: "bg-slate-100 text-slate-500 ring-1 ring-slate-200",
     dot: "bg-slate-400",
-    badge: "bg-slate-100 text-slate-600 ring-1 ring-slate-200",
   },
   PROCESSED: {
     label: "Diproses",
+    class: "bg-blue-50 text-blue-600 ring-1 ring-blue-200",
     dot: "bg-blue-400",
-    badge: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
   },
   INTERVIEW: {
     label: "Interview",
+    class: "bg-amber-50 text-amber-600 ring-1 ring-amber-200",
     dot: "bg-amber-400",
-    badge: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
   },
   ACCEPTED: {
     label: "Diterima",
-    dot: "bg-emerald-400",
-    badge: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+    class: "bg-teal-50 text-teal-700 ring-1 ring-teal-200",
+    dot: "bg-teal-400",
   },
   REJECTED: {
     label: "Ditolak",
+    class: "bg-rose-50 text-rose-600 ring-1 ring-rose-200",
     dot: "bg-rose-400",
-    badge: "bg-rose-50 text-rose-600 ring-1 ring-rose-200",
   },
 };
 
-// ── allowedTransitions — identik ──
 const allowedTransitions: Record<
   ApplicationStatus,
   { value: string; label: string }[]
@@ -93,11 +84,7 @@ const allowedTransitions: Record<
   REJECTED: [],
 };
 
-// ════════════════════════════════════════════════
-// ApplicantList
-// ════════════════════════════════════════════════
 export default function ApplicantList({ jobId }: { jobId: number }) {
-  // ── state & hooks — identik ──
   const [page, setPage] = useQueryState(
     "applicantPage",
     parseAsInteger.withDefault(1),
@@ -106,7 +93,16 @@ export default function ApplicantList({ jobId }: { jobId: number }) {
   const [education, setEducation] = useQueryState("education", {
     defaultValue: "",
   });
+  const [minAge, setMinAge] = useQueryState("minAge", parseAsInteger);
+  const [maxAge, setMaxAge] = useQueryState("maxAge", parseAsInteger);
+  const [minSalary, setMinSalary] = useQueryState("minSalary", parseAsInteger);
+  const [maxSalary, setMaxSalary] = useQueryState("maxSalary", parseAsInteger);
+
   const [debouncedSearch] = useDebounceValue(search, 500);
+  const [debouncedMinAge] = useDebounceValue(minAge, 500);
+  const [debouncedMaxAge] = useDebounceValue(maxAge, 500);
+  const [debouncedMinSalary] = useDebounceValue(minSalary, 500);
+  const [debouncedMaxSalary] = useDebounceValue(maxSalary, 500);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const { data, isPending } = useGetApplicants(jobId, {
@@ -114,112 +110,160 @@ export default function ApplicantList({ jobId }: { jobId: number }) {
     take: 10,
     search: debouncedSearch,
     education: education || undefined,
+    minAge: debouncedMinAge || undefined,
+    maxAge: debouncedMaxAge || undefined,
+    minExpectedSalary: debouncedMinSalary || undefined,
+    maxExpectedSalary: debouncedMaxSalary || undefined,
     sortBy: "appliedAt",
     sortOrder: "asc",
   });
 
   return (
-    <Card className="border border-[#E2EAF4] shadow-none rounded-2xl bg-white overflow-hidden">
-      {/* ── Header ── */}
-      <CardHeader className="px-6 py-5 border-b border-[#E2EAF4] bg-[#F4F8FF]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center">
-              <Users className="w-4 h-4 text-[#1D5FAD]" />
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                Manajemen Pelamar
-              </p>
-              <h2 className="text-sm font-bold text-[#0F2342]">
-                Daftar Pelamar
-              </h2>
-            </div>
+    <div className="bg-white border border-[#E2EAF4] rounded-2xl overflow-hidden">
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-[#E2EAF4] bg-[#F4F8FF] flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-[#1D5FAD] flex items-center justify-center flex-shrink-0">
+            <Users className="w-3.5 h-3.5 text-white" />
           </div>
-          {data?.meta.total !== undefined && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-[#E2EAF4]">
-              <span className="text-lg font-bold text-[#0F2342]">
-                {data.meta.total}
-              </span>
-              <span className="text-[11px] text-slate-400 font-medium">
-                pelamar
-              </span>
-            </div>
-          )}
+          <span className="text-sm font-bold text-[#0F2342]">
+            Daftar Pelamar
+          </span>
         </div>
-      </CardHeader>
+        {data?.meta.total !== undefined && (
+          <span className="text-xs font-semibold text-slate-400 bg-white border border-[#E2EAF4] px-3 py-1 rounded-full">
+            {data.meta.total} pelamar
+          </span>
+        )}
+      </div>
 
-      {/* ── Filters ── */}
-      <div className="px-6 py-4 flex flex-wrap gap-3 border-b border-[#E2EAF4] bg-white">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-          <Input
-            placeholder="Cari nama pelamar..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9 rounded-xl border-[#D1DFF0] text-sm bg-[#F4F8FF] focus-visible:ring-[#1D5FAD]/20 focus-visible:border-[#1D5FAD]"
-          />
-        </div>
-        <div className="relative">
-          <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
+      {/* Filters */}
+      {/* Filters Section */}
+      <div className="px-6 py-4 flex flex-col gap-4 border-b border-[#E2EAF4] bg-white">
+        {/* Baris 1: Pencarian & Pendidikan */}
+        <div className="flex flex-wrap gap-3">
+          <div className="flex-1 min-w-[200px]">
+            <Input
+              placeholder="Cari nama pelamar..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-10 rounded-xl border-[#D1DFF0] text-sm focus-visible:ring-[#1D5FAD]/20 focus-visible:border-[#1D5FAD]"
+            />
+          </div>
+
           <Select
             value={education || "all"}
             onValueChange={(v) => setEducation(v === "all" ? "" : v)}
           >
-            <SelectTrigger className="h-9 w-44 pl-9 rounded-xl border-[#D1DFF0] text-sm bg-[#F4F8FF] focus:ring-[#1D5FAD]/20">
-              <span className="text-sm text-slate-600">
-                {education || "Semua Pendidikan"}
-              </span>
+            <SelectTrigger className="h-10 w-[180px] rounded-xl border-[#D1DFF0] text-sm">
+              <SelectValue placeholder="Semua Pendidikan" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Semua Pendidikan</SelectItem>
-              <SelectItem value="SMA">SMA</SelectItem>
+              <SelectItem value="SMA">SMA/SMK</SelectItem>
               <SelectItem value="D3">D3</SelectItem>
               <SelectItem value="S1">S1</SelectItem>
               <SelectItem value="S2">S2</SelectItem>
             </SelectContent>
           </Select>
         </div>
-      </div>
 
-      {/* ── Table Head ── */}
-      <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_auto] gap-4 px-6 py-2.5 bg-slate-50 border-b border-[#E2EAF4]">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-          Pelamar
-        </p>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-          Skor Tes
-        </p>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-          Status
-        </p>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-          Aksi
-        </p>
-      </div>
+        {/* Baris 2: Usia & Gaji */}
+        <div className="flex flex-wrap items-center gap-6 pt-3 border-t border-dashed border-slate-100">
+          {/* Filter Usia */}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Usia:
+            </span>
+            <div className="flex items-center gap-1.5">
+              <Input
+                type="number"
+                placeholder="Min"
+                value={minAge ?? ""}
+                onChange={(e) =>
+                  setMinAge(e.target.value ? parseInt(e.target.value) : null)
+                }
+                className="h-8 w-16 rounded-lg border-[#D1DFF0] text-xs px-2"
+              />
+              <span className="text-slate-300">-</span>
+              <Input
+                type="number"
+                placeholder="Max"
+                value={maxAge ?? ""}
+                onChange={(e) =>
+                  setMaxAge(e.target.value ? parseInt(e.target.value) : null)
+                }
+                className="h-8 w-16 rounded-lg border-[#D1DFF0] text-xs px-2"
+              />
+            </div>
+          </div>
 
-      <CardContent className="p-0">
-        {/* Loading */}
+          {/* Filter Gaji */}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Gaji (IDR):
+            </span>
+            <div className="flex items-center gap-1.5">
+              <Input
+                type="number"
+                placeholder="Gaji Min"
+                value={minSalary ?? ""}
+                onChange={(e) =>
+                  setMinSalary(e.target.value ? parseInt(e.target.value) : null)
+                }
+                className="h-8 w-28 rounded-lg border-[#D1DFF0] text-xs px-2"
+              />
+              <span className="text-slate-300">to</span>
+              <Input
+                type="number"
+                placeholder="Gaji Max"
+                value={maxSalary ?? ""}
+                onChange={(e) =>
+                  setMaxSalary(e.target.value ? parseInt(e.target.value) : null)
+                }
+                className="h-8 w-28 rounded-lg border-[#D1DFF0] text-xs px-2"
+              />
+            </div>
+          </div>
+
+          {/* Reset Button */}
+          {(minAge || maxAge || minSalary || maxSalary || education) && (
+            <Button
+              variant="ghost"
+              className="h-8 text-[10px] font-bold text-rose-500 hover:text-rose-600 hover:bg-rose-50 px-2 ml-auto"
+              onClick={() => {
+                setMinAge(null);
+                setMaxAge(null);
+                setMinSalary(null);
+                setMaxSalary(null);
+                setEducation(null);
+              }}
+            >
+              RESET FILTER
+            </Button>
+          )}
+        </div>
+      </div>
+      {/* End of Filters */}
+
+      {/* Content */}
+      <div>
         {isPending && (
-          <div className="py-16 flex flex-col items-center gap-3 text-slate-400">
+          <div className="py-12 flex flex-col items-center gap-3 text-slate-400">
             <div className="w-6 h-6 border-2 border-[#1D5FAD] border-t-transparent rounded-full animate-spin" />
             <p className="text-xs font-medium">Memuat pelamar...</p>
           </div>
         )}
-
-        {/* Empty */}
         {!isPending && data?.data.length === 0 && (
-          <div className="py-16 flex flex-col items-center gap-3 text-slate-400">
-            <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center">
-              <Users className="w-6 h-6 text-slate-300" />
+          <div className="py-14 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
+              <Users className="w-5 h-5 text-slate-300" />
             </div>
-            <p className="text-sm font-semibold text-slate-400">
+            <p className="text-slate-400 text-sm font-medium">
               Belum ada pelamar.
             </p>
           </div>
         )}
-
-        {/* Rows */}
         <div className="divide-y divide-[#F0F5FB]">
           {data?.data.map((applicant) => (
             <ApplicantRow
@@ -230,19 +274,16 @@ export default function ApplicantList({ jobId }: { jobId: number }) {
             />
           ))}
         </div>
-
-        {/* Pagination */}
         {!!data?.meta && (
-          <div className="px-6 py-2 border-t border-[#E2EAF4]">
+          <div className="px-6">
             <PaginationSection
               meta={data.meta}
               onChangePage={(p) => setPage(p)}
             />
           </div>
         )}
-      </CardContent>
+      </div>
 
-      {/* Detail Dialog */}
       {selectedId && (
         <ApplicantDetailDialog
           applicationId={selectedId}
@@ -251,13 +292,10 @@ export default function ApplicantList({ jobId }: { jobId: number }) {
           onClose={() => setSelectedId(null)}
         />
       )}
-    </Card>
+    </div>
   );
 }
 
-// ════════════════════════════════════════════════
-// ApplicantRow
-// ════════════════════════════════════════════════
 function ApplicantRow({
   applicant,
   jobId,
@@ -267,7 +305,6 @@ function ApplicantRow({
   jobId: number;
   onViewDetail: () => void;
 }) {
-  // ── hooks — identik ──
   const { mutate: updateStatus, isPending } = useUpdateApplicantStatus(
     applicant.id,
     jobId,
@@ -275,17 +312,13 @@ function ApplicantRow({
   const { mutate: createInterview, isPending: isCreatingInterview } =
     useCreateInterview(jobId);
 
-  // ── state — identik ──
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [interviewDate, setInterviewDate] = useState("");
   const [locationLink, setLocationLink] = useState("");
 
-  // ── logic — identik ──
   const nextStatuses = allowedTransitions[applicant.status];
-  const canSchedule = applicant.status === "INTERVIEW";
-  const cfg = statusConfig[applicant.status];
 
   const handleStatusChange = (v: string) => {
     if (v === "REJECTED") {
@@ -314,146 +347,141 @@ function ApplicantRow({
     setLocationLink("");
   };
 
+  const canSchedule = applicant.status === "INTERVIEW";
+
   return (
     <>
-      <div className="group flex items-center gap-4 px-6 py-4 hover:bg-[#F8FAFD] transition-colors">
-        {/* Avatar */}
-        <Avatar className="w-9 h-9 flex-shrink-0 ring-2 ring-white shadow-sm">
+      <div className="flex items-center gap-4 px-6 py-4 hover:bg-[#F4F8FF] transition-colors group">
+        <Avatar className="w-9 h-9 flex-shrink-0 ring-2 ring-[#E2EAF4]">
           <AvatarImage src={applicant.user.profilePhoto ?? undefined} />
-          <AvatarFallback className="bg-[#EFF6FF] text-[#1D5FAD] font-bold text-xs">
+          <AvatarFallback className="bg-[#1D5FAD]/10 text-[#1D5FAD] font-bold text-xs">
             {applicant.user.fullName?.[0] ??
               applicant.user.email[0].toUpperCase()}
           </AvatarFallback>
         </Avatar>
 
-        {/* Name + email */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-[#0F2342] truncate leading-snug">
+          <p className="text-sm font-semibold text-[#0F2342] truncate">
             {applicant.user.fullName ?? "—"}
           </p>
-          <p className="text-[11px] text-slate-400 truncate mt-0.5">
+          <p className="text-[11px] text-slate-400 truncate">
             {applicant.user.email}
           </p>
         </div>
 
-        {/* Test score */}
-        <div className="hidden sm:flex flex-col items-center w-20 flex-shrink-0">
-          {applicant.testResult ? (
-            <>
-              <span className="text-base font-bold text-[#0F2342]">
-                {Number(applicant.testResult.score).toFixed(0)}
-              </span>
-              <span className="text-[10px] text-slate-400 font-medium">
-                skor
-              </span>
-            </>
-          ) : (
-            <span className="text-[11px] text-slate-300 font-medium">—</span>
-          )}
-        </div>
+        {applicant.testResult && (
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 border border-indigo-200 rounded-lg">
+            <span className="text-[10px] font-semibold text-indigo-500">
+              Skor
+            </span>
+            <span className="text-[11px] font-bold text-indigo-700">
+              {Number(applicant.testResult.score).toFixed(0)}
+            </span>
+          </div>
+        )}
 
-        {/* Status select or badge */}
-        <div className="flex-shrink-0 w-32">
-          {nextStatuses.length > 0 ? (
-            <Select
-              value={applicant.status}
-              onValueChange={handleStatusChange}
-              disabled={isPending}
-            >
-              <SelectTrigger className="h-8 w-full rounded-lg border-[#D1DFF0] bg-white text-xs focus:ring-[#1D5FAD]/20 gap-2">
-                <div className="flex items-center gap-1.5">
-                  <span
-                    className={cn(
-                      "w-1.5 h-1.5 rounded-full flex-shrink-0",
-                      cfg.dot,
-                    )}
-                  />
-                  <span className="font-semibold text-[#0F2342]">
-                    {cfg.label}
-                  </span>
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                {nextStatuses.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {s.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
+        {/* Status Select atau Badge */}
+        {nextStatuses.length > 0 ? (
+          <Select
+            value={applicant.status}
+            onValueChange={handleStatusChange}
+            disabled={isPending}
+          >
+            <SelectTrigger className="h-8 w-[130px] rounded-xl border-[#D1DFF0] bg-white">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={cn(
+                    "w-1.5 h-1.5 rounded-full flex-shrink-0",
+                    statusConfig[applicant.status].dot,
+                  )}
+                />
+                <span className="text-[10px] font-semibold text-slate-600">
+                  {statusConfig[applicant.status].label}
+                </span>
+              </div>
+            </SelectTrigger>
+            <SelectContent position="popper">
+              {nextStatuses.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <div
+            className={cn(
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-semibold",
+              statusConfig[applicant.status].class,
+            )}
+          >
             <span
               className={cn(
-                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold",
-                cfg.badge,
+                "w-1.5 h-1.5 rounded-full",
+                statusConfig[applicant.status].dot,
               )}
-            >
-              <span className={cn("w-1.5 h-1.5 rounded-full", cfg.dot)} />
-              {cfg.label}
-            </span>
-          )}
-        </div>
+            />
+            {statusConfig[applicant.status].label}
+          </div>
+        )}
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-1 flex-shrink-0">
-          {canSchedule && (
-            <Button
-              variant="ghost"
-              size="icon"
-              title="Jadwalkan Interview"
-              disabled={isCreatingInterview}
-              onClick={() => setShowScheduleDialog(true)}
-              className="h-8 w-8 rounded-lg text-amber-500 hover:text-amber-600 hover:bg-amber-50"
-            >
-              <CalendarPlus className="w-3.5 h-3.5" />
-            </Button>
-          )}
+        {/* Tombol Jadwalkan Interview */}
+        {canSchedule && (
           <Button
             variant="ghost"
             size="icon"
-            title="Lihat Detail"
-            onClick={onViewDetail}
-            className="h-8 w-8 rounded-lg text-slate-400 hover:text-[#1D5FAD] hover:bg-[#EFF6FF]"
+            className="h-8 w-8 flex-shrink-0 rounded-xl text-amber-500 hover:text-amber-600 hover:bg-amber-50 border border-amber-200"
+            title="Jadwalkan Interview"
+            disabled={isCreatingInterview}
+            onClick={() => setShowScheduleDialog(true)}
           >
-            <Eye className="w-3.5 h-3.5" />
+            <CalendarPlus className="w-3.5 h-3.5" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            title="Lihat CV"
-            onClick={() => {
-              const base =
-                import.meta.env.VITE_BASE_URL_API || "http://localhost:8000";
-              window.open(`${base}/cvs/${applicant.cv.id}/file`, "_blank");
-            }}
-            className="h-8 w-8 rounded-lg text-slate-400 hover:text-[#1D5FAD] hover:bg-[#EFF6FF]"
-          >
-            <FileText className="w-3.5 h-3.5" />
-          </Button>
-        </div>
+        )}
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 flex-shrink-0 rounded-xl hover:bg-[#EEF4FF] hover:text-[#1D5FAD] text-slate-400 transition-colors"
+          onClick={onViewDetail}
+        >
+          <Eye className="w-3.5 h-3.5" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 flex-shrink-0 rounded-xl hover:bg-teal-50 hover:text-teal-600 text-slate-400 transition-colors"
+          onClick={() => {
+            const base =
+              import.meta.env.VITE_BASE_URL_API || "http://localhost:8000";
+            window.open(`${base}/cvs/${applicant.cv.id}/file`, "_blank");
+          }}
+        >
+          <FileText className="w-3.5 h-3.5" />
+        </Button>
       </div>
 
-      {/* ── Rejection Dialog — logic identik ── */}
+      {/* Rejection Reason Dialog */}
       <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <AlertDialogContent className="rounded-2xl max-w-md">
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-bold text-[#0F2342]">
               Tolak Pelamar?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-500 text-sm">
-              Masukkan alasan penolakan untuk pelamar ini. Alasan akan
-              dikirimkan kepada pelamar.
+            <AlertDialogDescription>
+              Masukkan alasan penolakan untuk pelamar ini.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <textarea
             value={rejectionReason}
             onChange={(e) => setRejectionReason(e.target.value)}
             placeholder="Contoh: Kualifikasi tidak sesuai dengan kebutuhan posisi..."
-            className="w-full h-24 rounded-xl border border-[#D1DFF0] bg-[#F4F8FF] p-3 text-sm resize-none focus:outline-none focus:border-[#1D5FAD] focus:ring-2 focus:ring-[#1D5FAD]/10 transition-colors"
+            className="w-full h-24 rounded-xl border border-[#D1DFF0] p-3 text-sm resize-none focus:outline-none focus:border-[#1D5FAD]"
           />
           <AlertDialogFooter>
             <AlertDialogCancel
-              className="rounded-xl text-xs font-semibold border-[#D1DFF0]"
+              className="rounded-xl text-xs font-semibold"
               onClick={() => {
                 setRejectionReason("");
                 setShowRejectDialog(false);
@@ -464,7 +492,7 @@ function ApplicantRow({
             <AlertDialogAction
               onClick={handleRejectConfirm}
               disabled={!rejectionReason.trim()}
-              className="bg-rose-500 hover:bg-rose-600 rounded-xl text-xs font-semibold disabled:opacity-50"
+              className="bg-rose-500 hover:bg-rose-600 rounded-xl text-xs font-semibold"
             >
               Ya, Tolak
             </AlertDialogAction>
@@ -472,52 +500,44 @@ function ApplicantRow({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* ── Schedule Interview Dialog — logic identik ── */}
+      {/* Schedule Interview Dialog */}
       <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
         <DialogContent
           className="rounded-2xl max-w-sm"
           aria-describedby={undefined}
         >
           <DialogHeader>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-                <CalendarPlus className="w-4 h-4 text-amber-500" />
-              </div>
-              <DialogTitle className="font-bold text-[#0F2342]">
-                Jadwalkan Interview
-              </DialogTitle>
-            </div>
+            <DialogTitle className="font-bold text-[#0F2342]">
+              Jadwalkan Interview
+            </DialogTitle>
           </DialogHeader>
-
-          <div className="space-y-4 pt-1">
+          <div className="space-y-4">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1.5">
-                Tanggal & Waktu <span className="text-rose-400">*</span>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
+                Tanggal & Waktu *
               </p>
               <input
                 type="datetime-local"
                 value={interviewDate}
                 onChange={(e) => setInterviewDate(e.target.value)}
-                className="w-full h-10 rounded-xl border border-[#D1DFF0] bg-[#F4F8FF] px-3 text-sm font-medium text-[#0F2342] focus:outline-none focus:border-[#1D5FAD] focus:ring-2 focus:ring-[#1D5FAD]/10 transition-colors"
+                className="w-full h-10 rounded-xl border border-[#D1DFF0] px-3 text-sm focus:outline-none focus:border-[#1D5FAD]"
               />
             </div>
-
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1.5">
-                Link / Lokasi <span className="text-slate-300">(opsional)</span>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
+                Link / Lokasi (opsional)
               </p>
               <Input
                 value={locationLink}
                 onChange={(e) => setLocationLink(e.target.value)}
                 placeholder="https://meet.google.com/... atau nama gedung"
-                className="h-10 rounded-xl border-[#D1DFF0] bg-[#F4F8FF] text-sm focus-visible:ring-[#1D5FAD]/20 focus-visible:border-[#1D5FAD]"
+                className="h-10 rounded-xl border-[#D1DFF0] text-sm focus-visible:border-[#1D5FAD]"
               />
             </div>
-
-            <div className="flex gap-2 pt-1">
+            <div className="flex gap-3 pt-2">
               <Button
                 variant="outline"
-                className="flex-1 rounded-xl text-xs font-semibold border-[#D1DFF0] text-slate-500 hover:bg-[#F4F8FF]"
+                className="flex-1 rounded-xl text-xs font-semibold border-[#D1DFF0]"
                 onClick={() => setShowScheduleDialog(false)}
               >
                 Batal
@@ -525,16 +545,9 @@ function ApplicantRow({
               <Button
                 onClick={handleScheduleConfirm}
                 disabled={!interviewDate || isCreatingInterview}
-                className="flex-1 bg-[#1D5FAD] hover:bg-[#174E8F] text-white rounded-xl text-xs font-semibold disabled:opacity-50"
+                className="flex-1 bg-[#1D5FAD] hover:bg-[#174E8F] text-white rounded-xl text-xs font-semibold"
               >
-                {isCreatingInterview ? (
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Menyimpan...
-                  </span>
-                ) : (
-                  "Simpan Jadwal"
-                )}
+                {isCreatingInterview ? "Menyimpan..." : "Simpan"}
               </Button>
             </div>
           </div>

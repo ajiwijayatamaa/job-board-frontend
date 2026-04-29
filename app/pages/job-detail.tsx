@@ -224,7 +224,8 @@ const JobDetail = () => {
 
   // ─── Loading ─────────────────────────────────────────────
   if (isLoading) {
-    return ( // Changed background color for consistency
+    return (
+      // Changed background color for consistency
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
@@ -263,18 +264,21 @@ const JobDetail = () => {
   // ─── Render ──────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-background">
-      <Navbar /> 
+      <Navbar />
 
       {/* HERO */}
-      <div className="hero-gradient py-8"> {/* Changed to hero-gradient */}
-        <div className="container"> {/* Changed max-w-6xl mx-auto px-4 to container */}
+      <div className="hero-gradient py-8">
+        {" "}
+        {/* Changed to hero-gradient */}
+        <div className="container">
+          {" "}
+          {/* Changed max-w-6xl mx-auto px-4 to container */}
           <Link
             to="/jobs"
             className="mb-4 inline-flex items-center gap-1 text-sm text-primary-foreground/80 hover:text-primary-foreground"
           >
             <ArrowLeft className="h-4 w-4" /> Kembali ke semua lowongan
           </Link>
-
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -282,9 +286,14 @@ const JobDetail = () => {
             className="flex flex-col gap-4 md:flex-row md:items-end justify-between" // Adjusted gap
           >
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2"> {/* Adjusted mb */}
-                <Sparkles className="h-4 w-4 text-primary-foreground" /> {/* Changed color */}
-                <span className="text-xs font-semibold uppercase text-primary-foreground/80"> {/* Adjusted text style */}
+              <div className="flex items-center gap-2 mb-2">
+                {" "}
+                {/* Adjusted mb */}
+                <Sparkles className="h-4 w-4 text-primary-foreground" />{" "}
+                {/* Changed color */}
+                <span className="text-xs font-semibold uppercase text-primary-foreground/80">
+                  {" "}
+                  {/* Adjusted text style */}
                   {job.category}
                 </span>
               </div>
@@ -293,7 +302,9 @@ const JobDetail = () => {
                 to={`/companies/${job.companyId}`}
                 className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-blue-400 hover:bg-blue-500 transition-colors"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-primary-foreground"> {/* Adjusted size and background */}
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-primary-foreground">
+                  {" "}
+                  {/* Adjusted size and background */}
                   {job.banner ? (
                     <img
                       src={job.banner}
@@ -301,29 +312,42 @@ const JobDetail = () => {
                       className="h-full w-full rounded-lg object-cover"
                     />
                   ) : (
-                    <Building2 className="h-4 w-4" /> 
+                    <Building2 className="h-4 w-4" />
                   )}
                 </div>
-                <span className="text-sm font-medium text-primary-foreground"> {/* Adjusted text style */}
+                <span className="text-sm font-medium text-primary-foreground">
+                  {" "}
+                  {/* Adjusted text style */}
                   {job.company?.companyName || job.company}
                 </span>
               </Link>
 
-              <h1 className="text-2xl font-bold text-primary-foreground md:text-3xl mb-4"> {/* Adjusted text style */}
+              <h1 className="text-2xl font-bold text-primary-foreground md:text-3xl mb-4">
+                {" "}
+                {/* Adjusted text style */}
                 {job.title}
               </h1>
 
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="gap-1 text-xs"> {/* Removed font-bold */}
-                  <MapPin className="h-3 w-3 text-primary" /> {/* Changed color */}
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  {" "}
+                  {/* Removed font-bold */}
+                  <MapPin className="h-3 w-3 text-primary" />{" "}
+                  {/* Changed color */}
                   {job.city || job.location || "—"}
                 </Badge>
-                <Badge variant="secondary" className="gap-1 text-xs"> {/* Removed font-bold */}
-                  <DollarSign className="h-3 w-3 text-primary" /> {/* Changed color */}
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  {" "}
+                  {/* Removed font-bold */}
+                  <DollarSign className="h-3 w-3 text-primary" />{" "}
+                  {/* Changed color */}
                   {formatSalary(job.salary)}
                 </Badge>
-                <Badge variant="secondary" className="gap-1 text-xs"> {/* Removed font-bold */}
-                  <Clock className="h-3 w-3 text-primary" /> {/* Changed color */}
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  {" "}
+                  {/* Removed font-bold */}
+                  <Clock className="h-3 w-3 text-primary" />{" "}
+                  {/* Changed color */}
                   Deadline:{" "}
                   {new Date(job.deadline).toLocaleDateString("id-ID", {
                     day: "numeric",
@@ -332,13 +356,20 @@ const JobDetail = () => {
                   })}
                 </Badge>
                 {job.preTest && (
-                  <Badge variant="outline" className="gap-1 text-xs border-primary text-primary"> {/* Adjusted badge style */}
+                  <Badge
+                    variant="outline"
+                    className="gap-1 text-xs border-primary text-primary"
+                  >
+                    {" "}
+                    {/* Adjusted badge style */}
                     <ClipboardList className="h-3 w-3" />
                     Ada Pre-Selection Test
                   </Badge>
                 )}
                 {deadline <= 7 && (
-                  <Badge variant="destructive" className="gap-1 text-xs"> {/* Adjusted badge style */}
+                  <Badge variant="destructive" className="gap-1 text-xs">
+                    {" "}
+                    {/* Adjusted badge style */}
                     <AlertTriangle className="h-3 w-3" />
                     {deadline === 0
                       ? "Hari ini deadline!"
@@ -350,7 +381,9 @@ const JobDetail = () => {
 
             {/* Actions */}
             <div className="flex flex-col items-end gap-3 min-w-[190px]">
-              <DropdownMenu> {/* Adjusted button style */}
+              <DropdownMenu>
+                {" "}
+                {/* Adjusted button style */}
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
@@ -402,7 +435,8 @@ const JobDetail = () => {
                 <Button
                   onClick={handleOpenApply}
                   disabled={isApplying || isApplied}
-                  className={cn( // Adjusted button style
+                  className={cn(
+                    // Adjusted button style
                     "w-full h-10 md:h-11",
                     isApplied
                       ? "bg-muted text-muted-foreground cursor-default hover:bg-muted"
@@ -427,7 +461,9 @@ const JobDetail = () => {
       </div>
 
       {/* BODY */}
-      <div className="container py-8"> {/* Changed max-w-6xl mx-auto px-4 py-10 to container py-8 */}
+      <div className="container py-8">
+        {" "}
+        {/* Changed max-w-6xl mx-auto px-4 py-10 to container py-8 */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
           {/* LEFT */}
           <div className="space-y-6">
@@ -438,9 +474,12 @@ const JobDetail = () => {
                 transition={{ delay: 0.05 }}
                 className="flex gap-3 p-4 rounded-xl bg-yellow-50 border border-yellow-200" // Adjusted colors and rounded
               >
-                <ClipboardList className="h-5 w-5 flex-shrink-0 text-yellow-600 mt-0.5" /> {/* Adjusted color */}
+                <ClipboardList className="h-5 w-5 flex-shrink-0 text-yellow-600 mt-0.5" />{" "}
+                {/* Adjusted color */}
                 <div>
-                  <p className="mb-1 text-sm font-bold text-yellow-700"> {/* Adjusted text style */}
+                  <p className="mb-1 text-sm font-bold text-yellow-700">
+                    {" "}
+                    {/* Adjusted text style */}
                     Lowongan ini mensyaratkan Pre-Selection Test
                   </p>
                   <p className="text-xs text-orange-600 leading-relaxed">
@@ -458,7 +497,9 @@ const JobDetail = () => {
                 className="flex gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200" // Adjusted rounded
               >
                 <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-emerald-500" />
-                <p className="text-sm font-semibold text-emerald-700"> {/* Adjusted text style */}
+                <p className="text-sm font-semibold text-emerald-700">
+                  {" "}
+                  {/* Adjusted text style */}
                   Pre-selection test sudah diselesaikan — Kamu siap untuk
                   melamar!
                 </p>
@@ -472,10 +513,14 @@ const JobDetail = () => {
               transition={{ delay: 0.1 }}
               className="rounded-xl border border-border bg-card p-6 card-shadow" // Standard card style
             >
-              <h2 className="mb-4 text-xl font-semibold text-foreground"> {/* Standard heading style */}
+              <h2 className="mb-4 text-xl font-semibold text-foreground">
+                {" "}
+                {/* Standard heading style */}
                 Deskripsi Pekerjaan
               </h2>
-              <p className="text-muted-foreground leading-relaxed whitespace-pre-line"> {/* Standard text style */}
+              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                {" "}
+                {/* Standard text style */}
                 {job.description}
               </p>
             </motion.div>
@@ -486,21 +531,28 @@ const JobDetail = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-              className="rounded-xl border border-border bg-card p-6 card-shadow" // Standard card style
+                className="rounded-xl border border-border bg-card p-6 card-shadow" // Standard card style
               >
-              <h2 className="mb-4 text-xl font-semibold text-foreground"> {/* Standard heading style */}
+                <h2 className="mb-4 text-xl font-semibold text-foreground">
+                  {" "}
+                  {/* Standard heading style */}
                   Skills & Tags
                 </h2>
                 <div className="flex flex-wrap gap-2">
-                  {job.tags.map((tag: string, i: number) => ( // Adjusted badge style
-                    <Badge
-                      key={i}
-                      variant="secondary"
-                      className="text-xs font-bold px-3 py-1.5"
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
+                  {job.tags.map(
+                    (
+                      tag: string,
+                      i: number, // Adjusted badge style
+                    ) => (
+                      <Badge
+                        key={i}
+                        variant="secondary"
+                        className="text-xs font-bold px-3 py-1.5"
+                      >
+                        {tag}
+                      </Badge>
+                    ),
+                  )}
                 </div>
               </motion.div>
             )}
@@ -515,12 +567,16 @@ const JobDetail = () => {
               transition={{ delay: 0.1 }}
               className="rounded-xl border border-border bg-card p-6 card-shadow space-y-3 text-sm" // Standard card style
             >
-              <h3 className="mb-2 font-semibold text-foreground"> {/* Standard heading style */}
+              <h3 className="mb-2 font-semibold text-foreground">
+                {" "}
+                {/* Standard heading style */}
                 Ringkasan Pekerjaan
               </h3>
               <div className="mb-4">
                 <div className="flex justify-between text-xs mb-1.5">
-                  <span className="font-medium text-muted-foreground"> {/* Adjusted text style */}
+                  <span className="font-medium text-muted-foreground">
+                    {" "}
+                    {/* Adjusted text style */}
                     Sisa pendaftaran
                   </span>
                   <span
@@ -582,14 +638,18 @@ const JobDetail = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-              className="rounded-xl border border-border bg-card p-6 card-shadow text-center" // Standard card style
+                className="rounded-xl border border-border bg-card p-6 card-shadow text-center" // Standard card style
               >
                 {isApplied ? (
                   <div className="flex flex-col items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50/20"> {/* Adjusted background */}
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50/20">
+                      {" "}
+                      {/* Adjusted background */}
                       <CheckCircle2 className="h-6 w-6 text-emerald-500" />
                     </div>
-                    <p className="text-sm font-semibold text-emerald-700"> {/* Adjusted text style */}
+                    <p className="text-sm font-semibold text-emerald-700">
+                      {" "}
+                      {/* Adjusted text style */}
                       Lamaran sudah dikirim!
                     </p>
                   </div>
@@ -629,7 +689,9 @@ const JobDetail = () => {
               transition={{ delay: 0.2 }}
               className="rounded-xl border border-border bg-card p-6 card-shadow" // Standard card style
             >
-              <h3 className="mb-4 font-semibold text-foreground"> {/* Standard heading style */}
+              <h3 className="mb-4 font-semibold text-foreground">
+                {" "}
+                {/* Standard heading style */}
                 Bagikan Lowongan
               </h3>
               <div className="grid grid-cols-4 gap-2">
@@ -655,12 +717,18 @@ const JobDetail = () => {
 
       {/* Apply Dialog */}
       <Dialog open={applyOpen} onOpenChange={setApplyOpen}>
-        <DialogContent className="max-w-lg"> {/* Removed custom rounded */}
+        <DialogContent className="max-w-lg">
+          {" "}
+          {/* Removed custom rounded */}
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-foreground"> {/* Standard dialog title style */}
+            <DialogTitle className="text-2xl font-bold text-foreground">
+              {" "}
+              {/* Standard dialog title style */}
               Kirim Lamaran
             </DialogTitle>
-            <p className="text-sm text-muted-foreground"> {/* Standard text style */}
+            <p className="text-sm text-muted-foreground">
+              {" "}
+              {/* Standard text style */}
               {job.title} · {job.company?.companyName}
             </p>
           </DialogHeader>
@@ -668,7 +736,8 @@ const JobDetail = () => {
             <div>
               <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">
                 Ekspektasi Gaji (IDR)
-              </label> {/* Adjusted input style */}
+              </label>{" "}
+              {/* Adjusted input style */}
               <Input
                 type="number"
                 min={0}
@@ -683,7 +752,9 @@ const JobDetail = () => {
                 CV yang Digunakan
               </label>
               <Select value={cvOption} onValueChange={setCvOption}>
-                <SelectTrigger className="h-10 md:h-11"> {/* Adjusted select trigger style */}
+                <SelectTrigger className="h-10 md:h-11">
+                  {" "}
+                  {/* Adjusted select trigger style */}
                   <SelectValue placeholder="Pilih CV" />
                 </SelectTrigger>
                 <SelectContent>
@@ -705,7 +776,9 @@ const JobDetail = () => {
               </Select>
             </div>
             {cvOption === "upload" && (
-              <div className="space-y-4 rounded-xl border border-border bg-card p-4 card-shadow"> {/* Standard card style */}
+              <div className="space-y-4 rounded-xl border border-border bg-card p-4 card-shadow">
+                {" "}
+                {/* Standard card style */}
                 <div>
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">
                     Nama CV
@@ -718,7 +791,9 @@ const JobDetail = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block"> {/* Adjusted input style */}
+                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">
+                    {" "}
+                    {/* Adjusted input style */}
                     File CV (PDF)
                   </label>
                   <Input
@@ -756,19 +831,27 @@ const JobDetail = () => {
 
       {/* Pre-Test Confirm Dialog */}
       <Dialog open={preTestConfirmOpen} onOpenChange={setPreTestConfirmOpen}>
-        <DialogContent className="max-w-md"> {/* Removed custom rounded */}
+        <DialogContent className="max-w-md">
+          {" "}
+          {/* Removed custom rounded */}
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-foreground"> {/* Standard dialog title style */}
+            <DialogTitle className="text-2xl font-bold text-foreground">
+              {" "}
+              {/* Standard dialog title style */}
               Pre-Selection Test
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-5 pt-2">
             <div className="flex justify-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-yellow-50 border border-yellow-200"> {/* Adjusted styling */}
+              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-yellow-50 border border-yellow-200">
+                {" "}
+                {/* Adjusted styling */}
                 <Timer className="w-8 h-8 text-orange-500" />
               </div>
             </div>
-            <div className="divide-y divide-border rounded-xl border border-border bg-card p-4 card-shadow"> {/* Standard card style */}
+            <div className="divide-y divide-border rounded-xl border border-border bg-card p-4 card-shadow">
+              {" "}
+              {/* Standard card style */}
               {[
                 { label: "Jumlah soal", value: "25 pilihan ganda" },
                 { label: "Durasi", value: "30 menit" },
@@ -777,18 +860,25 @@ const JobDetail = () => {
                   value: "Tetap berjalan walau browser ditutup",
                 },
                 { label: "Pengerjaan", value: "Hanya bisa 1 kali" },
-                { label: "Nilai minimum lulus", value: "75 / 100" },
               ].map(({ label, value }) => (
                 <div
                   key={label}
                   className="flex items-center justify-between py-3 text-sm" // Adjusted padding
                 >
-                  <span className="font-medium text-muted-foreground">{label}</span> {/* Adjusted text style */}
-                  <span className="font-semibold text-foreground">{value}</span> {/* Adjusted text style */}
+                  <span className="font-medium text-muted-foreground">
+                    {label}
+                  </span>{" "}
+                  {/* Adjusted text style */}
+                  <span className="font-semibold text-foreground">
+                    {value}
+                  </span>{" "}
+                  {/* Adjusted text style */}
                 </div>
               ))}
             </div>
-            <p className="text-center text-xs text-muted-foreground leading-relaxed"> {/* Standard text style */}
+            <p className="text-center text-xs text-muted-foreground leading-relaxed">
+              {" "}
+              {/* Standard text style */}
               Pastikan koneksi internet stabil dan kamu punya cukup waktu
               sebelum memulai.
             </p>

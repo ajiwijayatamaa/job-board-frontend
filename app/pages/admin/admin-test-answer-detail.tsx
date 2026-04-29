@@ -43,11 +43,15 @@ export default function AdminTestAnswerDetailPage() {
   }
 
   if (!data) return null;
+  console.log(data.answers);
 
   const score = Number(data.score);
-  const correctCount = data.answers.filter(
-    (a) => a.selectedAnswer === a.question.correctAnswer,
-  ).length;
+  const correctCount = data.answers.filter((a) => {
+    const selectedOpt = a.question.options.find(
+      (opt) => String(opt.id) === String(a.selectedAnswer),
+    );
+    return selectedOpt?.isCorrect === true;
+  }).length;
 
   return (
     <SidebarProvider>
@@ -195,8 +199,10 @@ export default function AdminTestAnswerDetailPage() {
               </div>
 
               {data.answers.map((answer, i) => {
-                const isCorrect =
-                  answer.selectedAnswer === answer.question.correctAnswer;
+                const selectedOption = answer.question.options.find(
+                  (opt) => String(opt.id) === String(answer.selectedAnswer),
+                );
+                const isCorrect = selectedOption?.isCorrect === true;
                 return (
                   <motion.div
                     key={answer.id}
@@ -239,7 +245,7 @@ export default function AdminTestAnswerDetailPage() {
                     <div className="grid grid-cols-1 gap-2 ml-12">
                       {answer.question.options.map((opt) => {
                         const isSelected =
-                          opt.optionText === answer.selectedAnswer;
+                          String(opt.id) === String(answer.selectedAnswer);
                         const isCorrectOpt = opt.isCorrect;
 
                         return (
