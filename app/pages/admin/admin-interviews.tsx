@@ -67,7 +67,6 @@ export default function AdminInterviewsPage() {
 
   const openEdit = (interview: Interview) => {
     setEditingInterview(interview);
-    // konversi ISO string ke format datetime-local (yyyy-MM-ddTHH:mm)
     const dt = new Date(interview.interviewDate);
     const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
       .toISOString()
@@ -102,50 +101,51 @@ export default function AdminInterviewsPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-zinc-50/50 w-full">
+      <div className="flex min-h-screen bg-[#F8FAFC] w-full">
         <AdminSidebar />
         <main className="flex-1 p-6 lg:p-10">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="max-w-4xl mx-auto space-y-6"
+            className="max-w-4xl mx-auto space-y-8"
           >
             {/* Back */}
             <Button
               variant="ghost"
               asChild
-              className="mb-2 -ml-2 text-zinc-500 hover:text-zinc-900 font-bold uppercase text-[10px] tracking-widest"
+              className="-ml-2 text-slate-400 hover:text-[#0F2342] hover:bg-slate-200/50 font-bold uppercase text-[10px] tracking-widest transition-all"
             >
               <Link to={`/admin/jobs/${id}`}>
-                <ArrowLeft className="mr-2 h-3 w-3" /> Kembali ke Detail Job
+                <ArrowLeft className="mr-2 h-3.5 w-3.5" /> Kembali ke Detail Job
               </Link>
             </Button>
 
             {/* Header */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <CalendarClock className="w-4 h-4 text-orange-500" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-[#1D5FAD]/10 rounded-xl">
+                <CalendarClock className="w-5 h-5 text-[#1D5FAD]" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                   Jadwal Wawancara
                 </span>
+                <h1 className="text-3xl font-black text-[#0F2342] uppercase italic tracking-tighter">
+                  Interview <span className="text-[#1D5FAD]">Schedule</span>
+                </h1>
               </div>
-              <h1 className="text-4xl font-black tracking-tighter text-zinc-900 uppercase italic">
-                Interview <span className="text-orange-500">Schedule</span>
-              </h1>
-              <p className="text-zinc-500 text-sm font-medium mt-1">
-                Kelola jadwal wawancara untuk pelamar yang lolos seleksi.
-              </p>
             </div>
 
-            {/* List */}
-            <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
-              <CardHeader className="border-b border-zinc-50 bg-zinc-50/30">
-                <CardTitle className="flex items-center gap-2 text-sm font-black uppercase italic tracking-tight text-zinc-900">
-                  <CalendarDays className="w-4 h-4 text-orange-500" />
-                  Daftar Jadwal
+            {/* List Card */}
+            <Card className="border border-[#E2EAF4] shadow-none rounded-[2rem] bg-white overflow-hidden">
+              <CardHeader className="border-b border-[#F4F8FF] bg-[#F4F8FF]/50 px-8 py-6">
+                <CardTitle className="flex items-center gap-3">
+                  <CalendarDays className="w-4 h-4 text-[#1D5FAD]" />
+                  <span className="text-xs font-black uppercase tracking-[0.1em] text-[#0F2342]">
+                    Daftar Jadwal
+                  </span>
                   {interviews.length > 0 && (
-                    <span className="ml-auto text-xs font-bold text-zinc-400">
+                    <span className="ml-auto text-[10px] font-bold text-slate-400">
                       {interviews.length} jadwal
                     </span>
                   )}
@@ -155,19 +155,24 @@ export default function AdminInterviewsPage() {
               <CardContent className="p-0">
                 {/* Loading */}
                 {isLoading && (
-                  <div className="py-12 flex justify-center">
-                    <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                  <div className="py-16 flex flex-col items-center justify-center gap-3">
+                    <div className="w-8 h-8 border-2 border-[#1D5FAD]/10 border-t-[#1D5FAD] rounded-full animate-spin" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                      Memuat Jadwal...
+                    </p>
                   </div>
                 )}
 
                 {/* Empty */}
                 {!isLoading && interviews.length === 0 && (
-                  <div className="py-16 text-center">
-                    <CalendarDays className="w-10 h-10 mx-auto mb-3 text-zinc-200" />
-                    <p className="text-sm font-bold text-zinc-400">
-                      Belum ada jadwal interview.
+                  <div className="py-20 text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-[#F4F8FF] flex items-center justify-center mx-auto mb-4">
+                      <CalendarDays className="w-6 h-6 text-[#1D5FAD]/40" />
+                    </div>
+                    <p className="text-sm font-black text-[#0F2342] uppercase italic">
+                      Belum ada jadwal
                     </p>
-                    <p className="text-xs text-zinc-300 mt-1">
+                    <p className="text-xs text-slate-400 font-medium mt-1">
                       Jadwalkan interview dari daftar pelamar di halaman detail
                       job.
                     </p>
@@ -175,7 +180,7 @@ export default function AdminInterviewsPage() {
                 )}
 
                 {/* Interview list */}
-                <div className="divide-y divide-zinc-50">
+                <div className="divide-y divide-[#F4F8FF]">
                   {interviews.map((interview) => (
                     <InterviewRow
                       key={interview.id}
@@ -197,17 +202,17 @@ export default function AdminInterviewsPage() {
         onOpenChange={() => setEditingInterview(null)}
       >
         <DialogContent
-          className="rounded-[2rem] max-w-sm"
+          className="rounded-[2rem] max-w-sm border border-[#E2EAF4] shadow-xl"
           aria-describedby={undefined}
         >
           <DialogHeader>
-            <DialogTitle className="font-black uppercase italic text-zinc-900">
+            <DialogTitle className="font-black uppercase italic text-[#0F2342] tracking-tighter">
               Edit Jadwal Interview
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 pt-2">
             <div>
-              <p className="text-[10px] font-black uppercase text-zinc-400 mb-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
                 Tanggal & Waktu *
               </p>
               <input
@@ -215,24 +220,24 @@ export default function AdminInterviewsPage() {
                 value={interviewDate}
                 onChange={(e) => setInterviewDate(e.target.value)}
                 min={new Date().toISOString().slice(0, 16)}
-                className="w-full h-10 rounded-xl border border-zinc-200 px-3 text-sm font-medium focus:outline-none focus:border-orange-500"
+                className="w-full h-11 rounded-xl border border-[#D1DFF0] px-3 text-sm font-medium text-[#0F2342] focus:outline-none focus:border-[#1D5FAD] focus:ring-4 focus:ring-[#1D5FAD]/5 transition-all"
               />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase text-zinc-400 mb-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
                 Link / Lokasi (opsional)
               </p>
               <Input
                 value={locationLink}
                 onChange={(e) => setLocationLink(e.target.value)}
                 placeholder="https://meet.google.com/... atau nama gedung"
-                className="h-10 rounded-xl border-zinc-200 text-sm"
+                className="h-11 rounded-xl border-[#D1DFF0] text-sm focus-visible:border-[#1D5FAD] focus-visible:ring-[#1D5FAD]/5 font-medium"
               />
             </div>
             <div className="flex gap-3 pt-2">
               <Button
                 variant="ghost"
-                className="flex-1 rounded-2xl font-black uppercase text-[10px]"
+                className="flex-1 rounded-xl font-black uppercase text-[10px] tracking-widest text-slate-500 hover:bg-slate-100"
                 onClick={() => setEditingInterview(null)}
               >
                 Batal
@@ -240,7 +245,7 @@ export default function AdminInterviewsPage() {
               <Button
                 onClick={handleUpdateConfirm}
                 disabled={!interviewDate || isUpdating}
-                className="flex-1 bg-zinc-900 hover:bg-black text-white rounded-2xl font-black uppercase text-[10px]"
+                className="flex-1 bg-[#1D5FAD] hover:bg-[#0F2342] text-white rounded-xl font-black uppercase text-[10px] tracking-widest transition-all"
               >
                 {isUpdating ? "Menyimpan..." : "Simpan"}
               </Button>
@@ -251,24 +256,24 @@ export default function AdminInterviewsPage() {
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent className="rounded-[2rem]">
+        <AlertDialogContent className="rounded-[2rem] border border-[#E2EAF4]">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-black uppercase italic">
+            <AlertDialogTitle className="font-black uppercase italic text-[#0F2342] tracking-tighter">
               Hapus Jadwal Interview?
             </AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-slate-500 text-sm">
               Jadwal interview ini akan dihapus permanen dan pelamar tidak akan
               mendapat notifikasi pembatalan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl font-black uppercase text-[10px]">
+            <AlertDialogCancel className="rounded-xl font-black uppercase text-[10px] tracking-widest border-[#E2EAF4]">
               Batal
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               disabled={isDeleting}
-              className="bg-red-500 hover:bg-red-600 rounded-xl font-black uppercase text-[10px]"
+              className="bg-rose-500 hover:bg-rose-600 rounded-xl font-black uppercase text-[10px] tracking-widest"
             >
               Ya, Hapus
             </AlertDialogAction>
@@ -294,30 +299,30 @@ function InterviewRow({
   const date = new Date(interview.interviewDate);
 
   return (
-    <div className="flex items-center gap-4 px-6 py-4 hover:bg-zinc-50/50 transition-colors">
+    <div className="flex items-center gap-4 px-8 py-5 hover:bg-[#F4F8FF]/50 transition-colors">
       {/* Avatar */}
-      <Avatar className="w-10 h-10 flex-shrink-0">
+      <Avatar className="w-10 h-10 flex-shrink-0 rounded-xl">
         <AvatarImage src={user.profilePhoto ?? undefined} />
-        <AvatarFallback className="bg-orange-100 text-orange-600 font-black text-xs">
+        <AvatarFallback className="bg-[#1D5FAD]/10 text-[#1D5FAD] font-black text-xs rounded-xl">
           {user.fullName?.[0] ?? user.email[0].toUpperCase()}
         </AvatarFallback>
       </Avatar>
 
       {/* Info pelamar */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-black text-zinc-900 truncate">
+        <p className="text-sm font-black text-[#0F2342] truncate">
           {user.fullName ?? "—"}
         </p>
-        <p className="text-[10px] text-zinc-400 font-medium truncate">
+        <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
           {user.email}
         </p>
       </div>
 
       {/* Info jadwal */}
-      <div className="hidden sm:flex flex-col items-end gap-1">
-        <div className="flex items-center gap-1.5 text-zinc-500">
-          <CalendarDays className="w-3.5 h-3.5 text-orange-500" />
-          <span className="text-xs font-bold">
+      <div className="hidden sm:flex flex-col items-end gap-1.5">
+        <div className="flex items-center gap-1.5">
+          <CalendarDays className="w-3.5 h-3.5 text-[#1D5FAD]" />
+          <span className="text-xs font-bold text-[#0F2342]">
             {date.toLocaleDateString("id-ID", {
               weekday: "short",
               day: "numeric",
@@ -326,7 +331,7 @@ function InterviewRow({
             })}
           </span>
         </div>
-        <div className="flex items-center gap-1.5 text-zinc-400">
+        <div className="flex items-center gap-1.5 text-slate-400">
           <Clock className="w-3.5 h-3.5" />
           <span className="text-[11px] font-medium">
             {date.toLocaleTimeString("id-ID", {
@@ -337,7 +342,7 @@ function InterviewRow({
           </span>
         </div>
         {interview.locationLink && (
-          <div className="flex items-center gap-1.5 text-zinc-400">
+          <div className="flex items-center gap-1.5 text-slate-400">
             <MapPin className="w-3.5 h-3.5" />
             <span className="text-[11px] font-medium max-w-[160px] truncate">
               {interview.locationLink}
@@ -351,7 +356,7 @@ function InterviewRow({
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100"
+          className="h-8 w-8 text-slate-400 hover:text-[#1D5FAD] hover:bg-[#1D5FAD]/5 rounded-lg transition-all"
           onClick={onEdit}
           title="Edit jadwal"
         >
@@ -360,7 +365,7 @@ function InterviewRow({
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-zinc-400 hover:text-red-500 hover:bg-red-50"
+          className="h-8 w-8 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
           onClick={onDelete}
           title="Hapus jadwal"
         >
