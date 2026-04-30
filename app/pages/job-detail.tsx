@@ -61,6 +61,29 @@ const daysUntilDeadline = (deadline: string) => {
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 };
 
+const resolvePublicImageUrl = (url: string | null | undefined) => {
+  if (!url) return null;
+  const trimmed = String(url).trim();
+  if (!trimmed) return null;
+
+  // Absolute (Cloudinary/S3/etc.) or browser object URLs
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("data:") ||
+    trimmed.startsWith("blob:")
+  ) {
+    return trimmed;
+  }
+
+  // Relative path served by backend (e.g. /uploads/...)
+  const base = (import.meta.env.VITE_BASE_URL_API || "http://localhost:8000")
+    .toString()
+    .replace(/\/$/, "");
+  const needsSlash = !trimmed.startsWith("/");
+  return `${base}${needsSlash ? "/" : ""}${trimmed}`;
+};
+
 // ─── Main Component ────────────────────────────────────────
 const JobDetail = () => {
   const { id } = useParams();
@@ -260,6 +283,7 @@ const JobDetail = () => {
   }
 
   const deadline = daysUntilDeadline(job.deadline);
+  const bannerSrc = resolvePublicImageUrl(job.banner);
 
   // ─── Render ──────────────────────────────────────────────
   return (
@@ -279,6 +303,18 @@ const JobDetail = () => {
           >
             <ArrowLeft className="h-4 w-4" /> Kembali ke semua lowongan
           </Link>
+
+          {bannerSrc && (
+            <div className="mb-6 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+              <img
+                src={bannerSrc}
+                alt={job.title}
+                className="h-44 w-full object-cover md:h-60"
+                loading="lazy"
+              />
+            </div>
+          )}
+
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -305,15 +341,7 @@ const JobDetail = () => {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-primary-foreground">
                   {" "}
                   {/* Adjusted size and background */}
-                  {job.banner ? (
-                    <img
-                      src={job.banner}
-                      alt=""
-                      className="h-full w-full rounded-lg object-cover"
-                    />
-                  ) : (
-                    <Building2 className="h-4 w-4" />
-                  )}
+                  <Building2 className="h-4 w-4" />
                 </div>
                 <span className="text-sm font-medium text-primary-foreground">
                   {" "}
