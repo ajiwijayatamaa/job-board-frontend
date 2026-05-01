@@ -40,14 +40,19 @@ export const clientLoader = () => {
 interface Job {
   id: number;
   title: string;
-  type: string; // e.g., "Full-time", "Part-time"
+  type?: string; // e.g., "Full-time", "Part-time" (can be enum-like from API)
   location?: string;
   city?: string;
   salary?: string;
   createdAt: string;
-  category?: string; // Assuming category name is directly on job object
+  categoryId?: number;
+  category?: { id: number; name: string } | string;
   distance?: number;
-  experience?: string; // Assuming experience level name is directly on job object
+  jobTypeId?: number;
+  jobType?: { id: number; name: string } | string;
+  experienceLevelId?: number;
+  experienceLevel?: { id: number; name: string } | string;
+  experience?: string;
   deadline: string;
   preTest?: boolean;
   company: {
@@ -70,6 +75,20 @@ interface ExperienceLevel {
   id: number;
   name: string;
 }
+
+const normalizeText = (value: unknown) => {
+  if (!value) return "";
+  return String(value).trim().toLowerCase();
+};
+
+const getNameOrSelf = (value: unknown) => {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "object" && value && "name" in value) {
+    return String((value as any).name ?? "");
+  }
+  return "";
+};
 
 const Jobs = () => {
   const [searchParams] = useSearchParams();
@@ -113,16 +132,57 @@ const Jobs = () => {
     );
   };
 
-  // Fetch all jobs
-  const { data: allJobs, isLoading: isJobsLoading, isError: isJobsError } = useQuery({
-    queryKey: ["all-jobs", latitude, longitude, radius],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/public/jobs", {
-        params: { latitude, longitude, radius, take: 100 }
-      });
-      return response.data.data as Job[];
-    },
-  });
+  const debouncedKeyword = useDebounce(keyword);
+  const debouncedLocation = useDebounce(location);
+
+  const startDateParam = useMemo(() => {
+    if (postedWithin === "7d") return new Date(Date.now() - 7 * 864e5);
+    if (postedWithin === "30d") return new Date(Date.now() - 30 * 864e5);
+    return undefined;
+  }, [postedWithin]);
+
+  // Fetch jobs (server-side filters align with BE GetPublicJobsDTO)
+  const { data: allJobs, isLoading: isJobsLoading, isError: isJobsError } =
+    useQuery({
+      queryKey: [
+        "all-jobs",
+        debouncedKeyword,
+        debouncedLocation,
+        category,
+        startDateParam?.toISOString(),
+        latitude,
+        longitude,
+        radius,
+      ],
+      queryFn: async () => {
+        const response = await axiosInstance.get("/public/jobs", {
+          params: {
+            take: 100,
+            search: debouncedKeyword || undefined,
+            city: debouncedLocation || undefined,
+            category: category === "all" ? undefined : category,
+            startDate: startDateParam ? startDateParam.toISOString() : undefined,
+            latitude,
+            longitude,
+            radius,
+          },
+        });
+        return response.data.data as Job[];
+      },
+    });
+
+  const availableCategories = useMemo(() => {
+    const byNormalized = new Map<string, string>();
+    for (const job of allJobs || []) {
+      const label = getNameOrSelf((job as any).category);
+      const normalized = normalizeText(label);
+      if (!normalized) continue;
+      if (!byNormalized.has(normalized)) byNormalized.set(normalized, label);
+    }
+    return Array.from(byNormalized.values()).sort((a, b) =>
+      a.localeCompare(b, "id-ID"),
+    );
+  }, [allJobs]);
 
   // Fetch categories
   const { data: categoriesData } = useQuery({
@@ -151,11 +211,18 @@ const Jobs = () => {
     },
   });
 
-  const debouncedKeyword = useDebounce(keyword);
-  const debouncedLocation = useDebounce(location);
-
   const filteredJobs = useMemo(() => {
     let result = allJobs || [];
+
+    const selectedCategory = categoriesData?.find(
+      (c) => normalizeText(c.name) === normalizeText(category),
+    );
+    const selectedJobType = jobTypesData?.find(
+      (t) => normalizeText(t.name) === normalizeText(jobType),
+    );
+    const selectedExperience = experienceLevelsData?.find(
+      (e) => normalizeText(e.name) === normalizeText(experience),
+    );
 
     result = result.filter((job) => {
       const jobLocation = (job.location || job.city || "").toLowerCase();
@@ -169,9 +236,31 @@ const Jobs = () => {
       const matchLocation =
         !debouncedLocation ||
         jobLocation.includes(debouncedLocation.toLowerCase());
-      const matchCategory = category === "all" || job.category?.toLowerCase() === category.toLowerCase();
-      const matchType = jobType === "all" || job.type?.toLowerCase() === jobType.toLowerCase();
-      const matchExp = experience === "all" || job.experience?.toLowerCase() === experience.toLowerCase();
+
+      const jobCategoryName = getNameOrSelf(job.category);
+      const matchCategory =
+        category === "all" ||
+        normalizeText(jobCategoryName) === normalizeText(category) ||
+        (!!selectedCategory &&
+          typeof job.categoryId === "number" &&
+          job.categoryId === selectedCategory.id);
+
+      const jobTypeName = getNameOrSelf(job.jobType) || job.type || "";
+      const matchType =
+        jobType === "all" ||
+        normalizeText(jobTypeName) === normalizeText(jobType) ||
+        (!!selectedJobType &&
+          typeof job.jobTypeId === "number" &&
+          job.jobTypeId === selectedJobType.id);
+
+      const jobExperienceName =
+        getNameOrSelf(job.experienceLevel) || job.experience || "";
+      const matchExp =
+        experience === "all" ||
+        normalizeText(jobExperienceName) === normalizeText(experience) ||
+        (!!selectedExperience &&
+          typeof job.experienceLevelId === "number" &&
+          job.experienceLevelId === selectedExperience.id);
 
       let matchTime = true;
       if (postedWithin !== "all") {
@@ -191,7 +280,7 @@ const Jobs = () => {
         (preTestFilter === "yes" ? !!job.preTest : !job.preTest);
 
       return matchKeyword && matchLocation && matchCategory && matchType && matchExp && matchTime && matchPreTest;
-    }, [debouncedKeyword, debouncedLocation, category, jobType, experience, postedWithin, preTestFilter]);
+    });
 
     // Sorting Logic
     if (sortOrder === "nearest" && latitude && longitude) {
@@ -204,14 +293,41 @@ const Jobs = () => {
     }
 
     return result;
-  }, [allJobs, debouncedKeyword, debouncedLocation, category, jobType, experience, postedWithin, sortOrder, latitude, longitude, preTestFilter]);
+  }, [
+    allJobs,
+    categoriesData,
+    jobTypesData,
+    experienceLevelsData,
+    debouncedKeyword,
+    debouncedLocation,
+    category,
+    jobType,
+    experience,
+    postedWithin,
+    sortOrder,
+    latitude,
+    longitude,
+    preTestFilter,
+  ]);
 
   const { paginatedItems, currentPage, totalPages, goToPage, resetPage } =
     usePagination(filteredJobs, 6);
 
   useEffect(() => {
     resetPage();
-  }, [debouncedKeyword, debouncedLocation, category, jobType, experience, postedWithin, sortOrder]);
+  }, [
+    debouncedKeyword,
+    debouncedLocation,
+    category,
+    jobType,
+    experience,
+    postedWithin,
+    sortOrder,
+    preTestFilter,
+    radius,
+    latitude,
+    longitude,
+  ]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -301,11 +417,17 @@ const Jobs = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Semua Kategori</SelectItem>
-                  {categoriesData?.map((c) => (
-                    <SelectItem key={c.id} value={c.name}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
+                  {availableCategories.length > 0
+                    ? availableCategories.map((name) => (
+                        <SelectItem key={name} value={name}>
+                          {name}
+                        </SelectItem>
+                      ))
+                    : categoriesData?.map((c) => (
+                        <SelectItem key={c.id} value={c.name}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
                 </SelectContent>
               </Select>
               <Select value={jobType} onValueChange={setJobType}>

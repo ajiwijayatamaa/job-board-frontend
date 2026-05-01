@@ -127,23 +127,23 @@ const Register = () => {
             {/* Tabs */}
             <Tabs
               defaultValue="user"
-              className="w-full"
+              className="w-full flex flex-col"
               onValueChange={(v) =>
                 setValue("role", v === "user" ? "USER" : "ADMIN")
               }
             >
               {/* Tab Header */}
-              <div className="border-b border-[#E2EAF4] bg-[#F4F8FF] px-6 pt-5 pb-0">
-                <TabsList className="grid grid-cols-2 w-full bg-white border border-[#E2EAF4] rounded-xl p-1 h-10 mb-0">
+              <div className="border-b border-[#E2EAF4] bg-[#F4F8FF] px-4 py-4 pt-4 pb-4">
+                <TabsList className="grid grid-cols-2 w-full bg-white border border-[#E2EAF4] rounded-xl p-1 gap-1 h-auto">
                   <TabsTrigger
                     value="user"
-                    className="rounded-lg text-xs font-semibold data-[state=active]:bg-[#1D5FAD] data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-500 transition-all"
+                    className="h-8 rounded-lg text-sm font-semibold data-[state=active]:bg-[#1D5FAD] data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-500 transition-all"
                   >
                     Pencari Kerja
                   </TabsTrigger>
                   <TabsTrigger
                     value="company"
-                    className="rounded-lg text-xs font-semibold data-[state=active]:bg-[#1D5FAD] data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-500 transition-all"
+                    className="h-8 rounded-lg text-sm font-semibold data-[state=active]:bg-[#1D5FAD] data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-500 transition-all"
                   >
                     Perusahaan
                   </TabsTrigger>

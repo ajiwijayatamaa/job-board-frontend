@@ -7,8 +7,8 @@ import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Job Board" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "Pencari Kerja" },
+    { name: "description", content: "Selamat Datang di Pencari Kerja!" },
   ];
 }
 
