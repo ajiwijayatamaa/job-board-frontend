@@ -281,7 +281,7 @@ export default function AdminJobListPage() {
     isError,
   } = useGetAdminJobs({
     page,
-    take: 10,
+    take: 2,
     search: debouncedSearch,
     category: debouncedCategory,
     sortBy: "createdAt",

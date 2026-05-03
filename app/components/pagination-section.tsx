@@ -7,7 +7,7 @@ import {
   PaginationPrevious,
 } from "~/components/ui/pagination";
 import type { PaginationMeta } from "~/types/pagination";
-import { cn } from "~/lib/utils"; // Import cn untuk helper class
+import { cn } from "~/lib/utils";
 
 interface PaginationSectionProps {
   meta: PaginationMeta;
@@ -24,48 +24,43 @@ const PaginationSection = (props: PaginationSectionProps) => {
   };
 
   const handleNext = () => {
-    const totalPages = Math.ceil(props.meta.total / props.meta.take);
     if (props.meta.page < totalPages) {
       props.onChangePage(props.meta.page + 1);
     }
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 py-10">
+    <div className="flex flex-col items-center gap-3 py-8">
       <Pagination>
-        <PaginationContent className="gap-2">
-          {/* Tombol Previous */}
+        <PaginationContent className="gap-1.5">
           <PaginationItem>
             <PaginationPrevious
               onClick={handlePrev}
               className={cn(
-                "cursor-pointer transition-all hover:bg-blue-50 hover:text-blue-600 border border-transparent",
+                "cursor-pointer h-9 rounded-xl border border-[#D1DFF0] bg-white text-slate-500 text-xs font-semibold hover:bg-[#F4F8FF] hover:text-[#1D5FAD] hover:border-[#A5C0E4] transition-all",
                 props.meta.page <= 1 && "pointer-events-none opacity-40",
               )}
             />
           </PaginationItem>
 
-          {/* Angka Halaman Utama */}
           <PaginationItem>
             <PaginationLink
               isActive
-              className="bg-blue-600 text-white hover:bg-blue-700 hover:text-white border-none shadow-md min-w-[40px] h-10 transition-all scale-110"
+              className="h-9 min-w-[36px] rounded-xl bg-[#1D5FAD] text-white text-xs font-bold border-none shadow-sm hover:bg-[#174E8F] hover:text-white transition-all"
             >
               {props.meta.page}
             </PaginationLink>
           </PaginationItem>
 
-          {/* Info Total Halaman (Visual Saja) */}
-          <div className="flex items-center px-2 text-sm text-muted-foreground font-medium">
+          <div className="flex items-center px-2 text-xs text-slate-400 font-semibold">
             dari {totalPages}
           </div>
 
-          {/* Tombol Next */}
           <PaginationItem>
             <PaginationNext
               onClick={handleNext}
               className={cn(
-                "cursor-pointer transition-all hover:bg-blue-50 hover:text-blue-600 border border-transparent",
+                "cursor-pointer h-9 rounded-xl border border-[#D1DFF0] bg-white text-slate-500 text-xs font-semibold hover:bg-[#F4F8FF] hover:text-[#1D5FAD] hover:border-[#A5C0E4] transition-all",
                 props.meta.page >= totalPages &&
                   "pointer-events-none opacity-40",
               )}
@@ -74,10 +69,13 @@ const PaginationSection = (props: PaginationSectionProps) => {
         </PaginationContent>
       </Pagination>
 
-      {/* Footer info tambahan */}
-      <span className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold">
-        Menampilkan {props.meta.take} dari {props.meta.total} acara
-      </span>
+      <div className="flex items-center gap-2">
+        <div className="h-px w-12 bg-[#E2EAF4]" />
+        <span className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-semibold">
+          {props.meta.take} dari {props.meta.total} data
+        </span>
+        <div className="h-px w-12 bg-[#E2EAF4]" />
+      </div>
     </div>
   );
 };
