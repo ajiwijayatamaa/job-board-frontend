@@ -15,7 +15,16 @@ interface PaginationSectionProps {
 }
 
 const PaginationSection = (props: PaginationSectionProps) => {
-  const totalPages = Math.ceil(props.meta.total / props.meta.take);
+  // Hitung total halaman
+  const totalPages = Math.ceil(props.meta.total / props.meta.take) || 1;
+
+  // LOGIKA BARU: Menghitung rentang data yang sedang ditampilkan
+  // 'from' adalah urutan data pertama di halaman aktif
+  const from =
+    props.meta.total === 0 ? 0 : (props.meta.page - 1) * props.meta.take + 1;
+
+  // 'to' adalah urutan data terakhir di halaman aktif (tidak boleh melebihi total data)
+  const to = Math.min(props.meta.page * props.meta.take, props.meta.total);
 
   const handlePrev = () => {
     if (props.meta.page > 1) {
@@ -72,7 +81,8 @@ const PaginationSection = (props: PaginationSectionProps) => {
       <div className="flex items-center gap-2">
         <div className="h-px w-12 bg-[#E2EAF4]" />
         <span className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-semibold">
-          {props.meta.take} dari {props.meta.total} data
+          {/* SEKARANG SUDAH LOGIS: misal "1 - 10 dari 25 data" */}
+          {from} - {to} dari {props.meta.total} data
         </span>
         <div className="h-px w-12 bg-[#E2EAF4]" />
       </div>
