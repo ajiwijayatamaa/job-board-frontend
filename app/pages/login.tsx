@@ -191,26 +191,26 @@ const Login = () => {
           <div className="bg-white border border-[#E2EAF4] rounded-2xl overflow-hidden shadow-sm">
             <Tabs
               defaultValue="user"
-              className="w-full"
+              className="flex flex-col w-full"
               onValueChange={(value) =>
                 setRole(value === "company" ? "ADMIN" : "USER")
               }
             >
               {/* TAB HEADER */}
-              <div className="border-b border-[#E2EAF4] bg-[#F4F8FF] px-6 pt-5 pb-5">
-                <TabsList className="grid grid-cols-1 w-full bg-white border border-[#E2EAF4] rounded-xl p-1 gap-1 h-auto">
+              <div className="border-b border-[#E2EAF4] bg-[#F4F8FF] px-4 py-4 pt-4 pb-4">
+                <TabsList className="grid grid-cols-2 w-full bg-white border border-[#E2EAF4] rounded-xl p-1 gap-1 h-auto">
                   <TabsTrigger
                     value="user"
-                    className="h-11 rounded-lg text-sm font-semibold justify-center data-[state=active]:bg-[#1D5FAD] data-[state=active]:text-white text-slate-500"
+                    className="h-8 rounded-lg text-sm font-semibold justify-center data-[state=active]:bg-[#1D5FAD] data-[state=active]:text-white text-slate-500"
                   >
-                    PENCARI KERJA
+                    Pencari Kerja
                   </TabsTrigger>
 
                   <TabsTrigger
                     value="company"
-                    className="h-11 rounded-lg text-sm font-semibold justify-center data-[state=active]:bg-[#1D5FAD] data-[state=active]:text-white text-slate-500"
+                    className="h-8 rounded-lg text-sm font-semibold justify-center data-[state=active]:bg-[#1D5FAD] data-[state=active]:text-white text-slate-500"
                   >
-                    PERUSAHAAN
+                    Perusahaan
                   </TabsTrigger>
                 </TabsList>
               </div>

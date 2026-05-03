@@ -10,10 +10,10 @@ const Footer = () => (
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <Briefcase className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold text-foreground">JobBoard</span>
+            <span className="text-lg font-bold text-foreground">Pencari Kerja</span>
           </Link>
           <p className="mt-3 text-sm text-muted-foreground">
-            Find your dream job or the perfect candidate. Connecting talent with opportunity across Indonesia.
+            Temukan ribuan peluang kerja dari perusahaan ternama di seluruh Indonesia
           </p>
         </div>
         <div>
@@ -41,7 +41,7 @@ const Footer = () => (
         </div>
       </div>
       <div className="mt-8 border-t border-border pt-6 text-center text-sm text-muted-foreground">
-        © 2026 JobBoard
+        © 2026 Pencari Kerja
       </div>
     </div>
   </footer>

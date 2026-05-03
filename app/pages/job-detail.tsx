@@ -291,43 +291,41 @@ const JobDetail = () => {
       <Navbar />
 
       {/* HERO */}
-      <div className="hero-gradient py-8">
+      <div
+        className={cn(
+          "py-28",
+          bannerSrc ? "relative bg-cover bg-center" : "hero-gradient",
+        )}
+        style={bannerSrc ? { backgroundImage: `url(${bannerSrc})` } : undefined}
+      >
+        {bannerSrc && (
+          <div className="absolute inset-0 bg-blue-950/65 backdrop-blur-[2px]" />
+        )}
         {" "}
         {/* Changed to hero-gradient */}
-        <div className="container">
+        <div className="container relative z-10">
           {" "}
           {/* Changed max-w-6xl mx-auto px-4 to container */}
           <Link
             to="/jobs"
-            className="mb-4 inline-flex items-center gap-1 text-sm text-primary-foreground/80 hover:text-primary-foreground"
+            className="mb-8 inline-flex items-center gap-2 text-base text-primary-foreground/80 hover:text-primary-foreground md:text-lg"
           >
-            <ArrowLeft className="h-4 w-4" /> Kembali ke semua lowongan
+            <ArrowLeft className="h-5 w-5" /> Kembali ke semua lowongan
           </Link>
-
-          {bannerSrc && (
-            <div className="mb-6 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-              <img
-                src={bannerSrc}
-                alt={job.title}
-                className="h-44 w-full object-cover md:h-60"
-                loading="lazy"
-              />
-            </div>
-          )}
 
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="flex flex-col gap-4 md:flex-row md:items-end justify-between" // Adjusted gap
+            className="flex flex-col gap-6 md:flex-row md:items-end justify-between" // Adjusted gap
           >
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-3">
                 {" "}
                 {/* Adjusted mb */}
-                <Sparkles className="h-4 w-4 text-primary-foreground" />{" "}
+                <Sparkles className="h-5 w-5 text-primary-foreground" />{" "}
                 {/* Changed color */}
-                <span className="text-xs font-semibold uppercase text-primary-foreground/80">
+                <span className="text-sm font-semibold uppercase tracking-wide text-primary-foreground/80">
                   {" "}
                   {/* Adjusted text style */}
                   {job.category}
@@ -336,45 +334,45 @@ const JobDetail = () => {
 
               <Link
                 to={`/companies/${job.companyId}`}
-                className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-blue-400 hover:bg-blue-500 transition-colors"
+                className="inline-flex items-center gap-3 mb-6 px-4 py-2 rounded-full bg-blue-400 hover:bg-blue-500 transition-colors"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-primary-foreground">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-primary-foreground">
                   {" "}
                   {/* Adjusted size and background */}
-                  <Building2 className="h-4 w-4" />
+                  <Building2 className="h-5 w-5" />
                 </div>
-                <span className="text-sm font-medium text-primary-foreground">
+                <span className="text-base font-medium text-primary-foreground">
                   {" "}
                   {/* Adjusted text style */}
                   {job.company?.companyName || job.company}
                 </span>
               </Link>
 
-              <h1 className="text-2xl font-bold text-primary-foreground md:text-3xl mb-4">
+              <h1 className="text-3xl font-bold text-primary-foreground md:text-5xl mb-6 leading-tight">
                 {" "}
                 {/* Adjusted text style */}
                 {job.title}
               </h1>
 
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="gap-1 text-xs">
+                <Badge variant="secondary" className="gap-2 text-sm">
                   {" "}
                   {/* Removed font-bold */}
-                  <MapPin className="h-3 w-3 text-primary" />{" "}
+                  <MapPin className="h-4 w-4 text-primary" />{" "}
                   {/* Changed color */}
                   {job.city || job.location || "—"}
                 </Badge>
-                <Badge variant="secondary" className="gap-1 text-xs">
+                <Badge variant="secondary" className="gap-2 text-sm">
                   {" "}
                   {/* Removed font-bold */}
-                  <DollarSign className="h-3 w-3 text-primary" />{" "}
+                  <DollarSign className="h-4 w-4 text-primary" />{" "}
                   {/* Changed color */}
                   {formatSalary(job.salary)}
                 </Badge>
-                <Badge variant="secondary" className="gap-1 text-xs">
+                <Badge variant="secondary" className="gap-2 text-sm">
                   {" "}
                   {/* Removed font-bold */}
-                  <Clock className="h-3 w-3 text-primary" />{" "}
+                  <Clock className="h-4 w-4 text-primary" />{" "}
                   {/* Changed color */}
                   Deadline:{" "}
                   {new Date(job.deadline).toLocaleDateString("id-ID", {
@@ -386,19 +384,19 @@ const JobDetail = () => {
                 {job.preTest && (
                   <Badge
                     variant="outline"
-                    className="gap-1 text-xs border-primary text-primary"
+                    className="gap-2 text-sm border-primary text-primary"
                   >
                     {" "}
                     {/* Adjusted badge style */}
-                    <ClipboardList className="h-3 w-3" />
+                    <ClipboardList className="h-4 w-4" />
                     Ada Pre-Selection Test
                   </Badge>
                 )}
                 {deadline <= 7 && (
-                  <Badge variant="destructive" className="gap-1 text-xs">
+                  <Badge variant="destructive" className="gap-2 text-sm">
                     {" "}
                     {/* Adjusted badge style */}
-                    <AlertTriangle className="h-3 w-3" />
+                    <AlertTriangle className="h-4 w-4" />
                     {deadline === 0
                       ? "Hari ini deadline!"
                       : `${deadline} hari lagi`}
@@ -408,17 +406,17 @@ const JobDetail = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col items-end gap-3 min-w-[190px]">
+            <div className="flex flex-col items-end gap-4 min-w-[220px]">
               <DropdownMenu>
                 {" "}
                 {/* Adjusted button style */}
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="gap-2 w-full h-10 md:h-11 bg-primary hover:bg-primary/90 text-primary-foreground"
+                    className="gap-2 w-full h-12 md:h-14 bg-primary hover:bg-primary/90 text-primary-foreground text-base"
                     size="lg"
                   >
-                    <Share2 className="w-4 h-4" /> Bagikan
+                    <Share2 className="w-5 h-5" /> Bagikan
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -465,7 +463,7 @@ const JobDetail = () => {
                   disabled={isApplying || isApplied}
                   className={cn(
                     // Adjusted button style
-                    "w-full h-10 md:h-11",
+                    "w-full h-12 md:h-14 text-base",
                     isApplied
                       ? "bg-muted text-muted-foreground cursor-default hover:bg-muted"
                       : needsPreTest
@@ -474,7 +472,7 @@ const JobDetail = () => {
                   )}
                 >
                   {isApplying && (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
                   )}
                   {isApplied
                     ? "✓ Sudah Dilamar"
